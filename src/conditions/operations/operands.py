@@ -321,7 +321,7 @@ class Set(Constant):
         return items
     
     def equals(self, value, **helpers):
-        """Force ``value`` to be a set and check if it equals this constant."""
+        """Check if all the items in ``value`` are the same of this set."""
         value = set(value)
         return value == self.to_python(**helpers)
     
