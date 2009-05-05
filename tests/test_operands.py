@@ -210,10 +210,11 @@ class TestSet(object):
     
     def test_operations(self):
         """
-        Set constants must only support equality and membership operations.
+        Constant sets must only support equality, inequality and membership
+        operations.
         
         """
-        eq_(Set.operations, set(["equality", "membership"]))
+        eq_(Set.operations, set(["equality", "inequality", "membership"]))
     
     def test_python_value(self):
         op = Set(Number(10), Number(1), String("paola"))
@@ -241,6 +242,24 @@ class TestSet(object):
         assert_false(op.equals(set2))
         assert_false(op.equals(set3))
         assert_false(op.equals(set4))
+    
+    def test_less_than(self):
+        op = Set(String("carla"), String("andreina"), String("liliana"))
+        ok_(op.less_than(4))
+        ok_(op.less_than("4"))
+        assert_false(op.less_than(2))
+        assert_false(op.less_than(1))
+        assert_raises(InvalidOperationError, op.less_than, "some string")
+        assert_raises(InvalidOperationError, op.less_than, 3.10)
+    
+    def test_greater_than(self):
+        op = Set(String("carla"), String("andreina"), String("liliana"))
+        ok_(op.greater_than(2))
+        ok_(op.greater_than("2"))
+        assert_false(op.greater_than(3))
+        assert_false(op.greater_than(4))
+        assert_raises(InvalidOperationError, op.greater_than, "some string")
+        assert_raises(InvalidOperationError, op.greater_than, 2.60)
     
     def test_contains(self):
         op = Set(String("arepa"), Number(4))

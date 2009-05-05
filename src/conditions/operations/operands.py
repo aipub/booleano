@@ -293,7 +293,7 @@ class Set(Constant):
     
     """
     
-    operations = Constant.operations | set(['membership'])
+    operations = Constant.operations | set(["inequality", "membership"])
     
     def __init__(self, *items):
         """
@@ -324,6 +324,42 @@ class Set(Constant):
         """Check if all the items in ``value`` are the same of this set."""
         value = set(value)
         return value == self.to_python(**helpers)
+    
+    def less_than(self, value, **helpers):
+        """
+        Check if this set has less items than the number represented in 
+        ``value``.
+        
+        :raises InvalidOperationError: If ``value`` is not an integer.
+        
+        """
+        try:
+            value = float(value)
+            if not value.is_integer():
+                raise ValueError
+        except ValueError:
+            raise InvalidOperationError('To compare the amount of items in a '
+                                        'set, the operand "%s" has to be an '
+                                        'integer')
+        return len(self.constant_value) < value
+    
+    def greater_than(self, value, **helpers):
+        """
+        Check if this set has more items than the number represented in 
+        ``value``.
+        
+        :raises InvalidOperationError: If ``value`` is not an integer.
+        
+        """
+        try:
+            value = float(value)
+            if not value.is_integer():
+                raise ValueError
+        except ValueError:
+            raise InvalidOperationError('To compare the amount of items in a '
+                                        'set, the operand "%s" has to be an '
+                                        'integer')
+        return len(self.constant_value) > value
     
     def contains(self, value, **helpers):
         """
