@@ -230,6 +230,18 @@ class TestSet(object):
         except InvalidOperationError, exc:
             assert 'Item "hola" is not an operand' in unicode(exc)
     
+    def test_equality(self):
+        op = Set(Number(3), String("hola"))
+        set1 = set([3, "hola"])
+        set2 = set([3])
+        set3 = set([3, "hola", "something else"])
+        set4 = set(["nothing to do"])
+        # Comparing them...
+        ok_(op.equals(set1), "The constant equals %s" % op.constant_value)
+        assert_false(op.equals(set2))
+        assert_false(op.equals(set3))
+        assert_false(op.equals(set4))
+    
     def test_contains(self):
         op = Set(String("arepa"), Number(4))
         ok_(op.contains(4))

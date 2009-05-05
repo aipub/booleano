@@ -309,7 +309,7 @@ class Set(Constant):
                 raise InvalidOperationError('Item "%s" is not an operand, so '
                                             'it cannot be a member of a set' %
                                             item)
-        super(Set, self).__init__(items)
+        super(Set, self).__init__(set(items))
     
     def to_python(self, **helpers):
         """
@@ -319,6 +319,11 @@ class Set(Constant):
         """
         items = set(item.to_python(**helpers) for item in self.constant_value)
         return items
+    
+    def equals(self, value, **helpers):
+        """Force ``value`` to be a set and check if it equals this constant."""
+        value = set(value)
+        return value == self.to_python(**helpers)
     
     def contains(self, value, **helpers):
         """
