@@ -213,12 +213,12 @@ class String(Constant):
     """
     
     def __init__(self, string):
-        """Turn ``string`` into a string if it isn't already a string"""
+        """Turn ``string`` into a string if it isn't a string yet"""
         string = unicode(string)
         super(String, self).__init__(string)
     
     def equals(self, value, **helpers):
-        """Turn ``value`` into a string if it"""
+        """Turn ``value`` into a string if it isn't a string yet"""
         value = unicode(value)
         return super(String, self).equals(value, **helpers)
 
