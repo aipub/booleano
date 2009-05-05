@@ -217,7 +217,7 @@ class TestSet(object):
     
     def test_python_value(self):
         op = Set(Number(10), Number(1), String("paola"))
-        eq_(op.to_python(), (10, 1, "paola"))
+        eq_(op.to_python(), set((10, 1, "paola")))
     
     def test_instantiation(self):
         """All the members of a set must be operands"""

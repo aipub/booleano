@@ -39,7 +39,7 @@ class Operand(object):
     
     operations = set()
     
-    required_helpers = set()
+    required_helpers = ()
     
     def to_python(self, **helpers):
         """
@@ -313,11 +313,11 @@ class Set(Constant):
     
     def to_python(self, **helpers):
         """
-        Return a tuple made up of the Python representation of the operands
+        Return a set made up of the Python representation of the operands
         contained in this set.
         
         """
-        items = tuple(item.to_python(**helpers) for item in self.constant_value)
+        items = set(item.to_python(**helpers) for item in self.constant_value)
         return items
     
     def contains(self, value, **helpers):
