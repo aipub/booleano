@@ -2,18 +2,18 @@
 #
 # Copyright (C) 2009 by Gustavo Narea <http://gustavonarea.net/>
 #
-# This file is part of Conditions <http://code.gustavonarea.net/conditions/>
+# This file is part of Booleano <http://code.gustavonarea.net/booleano/>
 #
-# Conditions is freedomware: you can redistribute it and/or modify it under the
+# Booleano is freedomware: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or any later version.
 #
-# Conditions is distributed in the hope that it will be useful, but WITHOUT ANY
+# Booleano is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Conditions. If not, see <http://www.gnu.org/licenses/>.
+# Booleano. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
@@ -28,7 +28,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 version = open(os.path.join(here, 'VERSION.txt')).readline().rstrip()
 
-setup(name='conditions',
+setup(name='booleano',
       version=version,
       description=('Evaluation of boolean expressions in natural languages'),
       long_description=README,
@@ -46,7 +46,7 @@ setup(name='conditions',
       keywords='boolean expression natural language condition',
       author="Gustavo Narea",
       author_email="me@gustavonarea.net",
-      url="http://code.gustavonarea.net/conditions/",
+      url="http://code.gustavonarea.net/booleano/",
       license="GNU General Public License v3 (http://www.gnu.org/copyleft/gpl.html)",
       packages=find_packages('src', exclude=['tests']),
       package_dir={'': 'src'},

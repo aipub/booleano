@@ -2,18 +2,18 @@
 #
 # Copyright (C) 2009 by Gustavo Narea <http://gustavonarea.net/>
 #
-# This file is part of Conditions <http://code.gustavonarea.net/conditions/>
+# This file is part of Booleano <http://code.gustavonarea.net/booleano/>
 #
-# Conditions is freedomware: you can redistribute it and/or modify it under the
+# Booleano is freedomware: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or any later version.
 #
-# Conditions is distributed in the hope that it will be useful, but WITHOUT ANY
+# Booleano is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# Conditions. If not, see <http://www.gnu.org/licenses/>.
+# Booleano. If not, see <http://www.gnu.org/licenses/>.
 """
 Operands.
 
@@ -22,8 +22,8 @@ for the operations it's supposed to support.
 
 """
 
-from conditions.operations import OPERATIONS
-from conditions.exc import InvalidOperationError
+from booleano.operations import OPERATIONS
+from booleano.exc import InvalidOperationError
 
 __all__ = ["Variable", "String", "Number", "Set"]
 
