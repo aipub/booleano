@@ -1,4 +1,4 @@
 .project
 .pydevproject
-src/conditions.egg-info
 tests/.coverage
+src/booleano.egg-info
