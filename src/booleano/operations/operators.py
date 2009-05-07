@@ -24,7 +24,7 @@ from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
 __all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
-           "OrOperator", "XorOperator", "EqualsOperator", "LessThanOperator",
+           "OrOperator", "XorOperator", "EqualityOperator", "LessThanOperator",
            "GreaterThanOperator", "LessEqualOperator", "GreaterEqualOperator",
            "ContainsOperator", "SubsetOperator"]
 
@@ -414,8 +414,22 @@ class XorOperator(_Connective):
         return self.master_operand(**helpers) ^ self.slave_operand(**helpers)
 
 
-class EqualsOperator(BinaryOperator):
-    pass
+class EqualityOperator(BinaryOperator):
+    """
+    Check that two operands are equivalent.
+    
+    For example: ``3 == 3``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        """Check that the master operand supports equality operations."""
+        super(EqualityOperator, self).__init__(left_operand, right_operand)
+        self.check_operation(self.master_operand, "equality")
+    
+    def __call__(self, **helpers):
+        value = self.slave_operand.to_python(**helpers)
+        return self.master_operand.equals(value, **helpers)
 
 
 class LessThanOperator(BinaryOperator):

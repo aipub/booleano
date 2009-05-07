@@ -23,10 +23,11 @@ Tests for the operands.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations.operators import *
-from booleano.operations.operands import String, Variable
+from booleano.operations.operands import String, Set, Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
-from tests import TrafficLightVar
+from tests import (TrafficLightVar, PedestriansCrossingRoad,
+                   DriversAwaitingGreenLightVar)
 
 
 class TestFunctions(object):
@@ -322,6 +323,101 @@ class TestXorOperator(object):
     def test_with_mixed_results(self):
         operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=False, traffic_light="red") ))
+
+
+class TestNonConnectiveBinaryOperators(object):
+    """
+    Tests for non-connective, binary operators.
+    
+    This is, all the binary operators, excluding And, Or and Xor.
+    
+    For these tests, I'll use the equality operator to avoid importing the
+    base "Operator" class.
+    
+    """
+    
+    def test_constructor_with_constants(self):
+        """The order must not change when the parameters are constant."""
+        l_op = String("hola")
+        r_op = String("chao")
+        operation = EqualityOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+    
+    def test_constructor_with_variables(self):
+        """The order must not change when the parameters are variable."""
+        l_op = BoolVar()
+        r_op = BoolVar()
+        operation = EqualityOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+    
+    def test_constructor_with_variable_before_constant(self):
+        """
+        The order must not change when the first argument is a variable and the
+        other is a constant.
+        
+        """
+        l_op = BoolVar()
+        r_op = String("hello")
+        operation = EqualityOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+    
+    def test_constructor_with_variable_before_constant(self):
+        """
+        The order must change when the first argument is a constant and the
+        other is a variable.
+        
+        """
+        l_op = String("hello")
+        r_op = BoolVar()
+        operation = EqualityOperator(l_op, r_op)
+        eq_(r_op, operation.master_operand)
+        eq_(l_op, operation.slave_operand)
+
+
+class TestEqualityOperator():
+    """Tests for the Equality operator."""
+    
+    def test_constants_evaluation(self):
+        operation1 = EqualityOperator(String("hola"), String("hola"))
+        operation2 = EqualityOperator(String("hola"), String("chao"))
+        ok_(operation1())
+        assert_false(operation2())
+    
+    def test_variables_evaluation(self):
+        operation = EqualityOperator(PedestriansCrossingRoad(),
+                                     DriversAwaitingGreenLightVar())
+        
+        # The pedestrians awaiting the green light to cross the street are
+        # the same drivers... Must be a parallel universe!
+        helpers = {
+            'pedestrians_crossroad': ("gustavo", "carla"),
+            'drivers_trafficlight': ("carla", "gustavo")
+        }
+        ok_(operation(**helpers))
+        
+        # The pedestrians are different from the drivers... That's my universe!
+        helpers = {
+            'pedestrians_crossroad': ("gustavo", "carla"),
+            'drivers_trafficlight': ("liliana", "carlos")
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_evaluation(self):
+        operation = EqualityOperator(
+            PedestriansCrossingRoad(),
+            Set(String("gustavo"), String("carla"))
+        )
+        
+        # The same people:
+        helpers = {'pedestrians_crossroad': ("gustavo", "carla")}
+        ok_(operation(**helpers))
+        
+        # Other people:
+        helpers = {'pedestrians_crossroad': ("liliana", "carlos")}
+        assert_false(operation(**helpers))
 
 
 #{ Mock objects

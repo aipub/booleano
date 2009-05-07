@@ -69,6 +69,9 @@ class VariableSet(Variable):
     
     operations = set(("equality", "inequality", "boolean", "membership"))
     
+    def __init__(self, **names):
+        super(VariableSet, self).__init__(self.required_helpers[0], **names)
+    
     def to_python(self, **helpers):
         set_ = set(helpers[self.required_helpers[0]])
         return set_
@@ -105,7 +108,7 @@ class PedestriansCrossingRoad(VariableSet):
     required_helpers = ["pedestrians_crossroad"]
 
 
-class DriversAwaitingGreenLightVar(Variable):
+class DriversAwaitingGreenLightVar(VariableSet):
     """
     Variable that represents the drivers waiting for the green light to
     cross the crossroad.
