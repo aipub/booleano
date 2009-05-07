@@ -103,17 +103,35 @@ class VariableSet(Variable):
 class PedestriansCrossingRoad(VariableSet):
     """Variable that represents the pedestrians crossing the street."""
     
-    required_helpers = ["pedestrians-crossroad"]
+    required_helpers = ["pedestrians_crossroad"]
 
 
 class DriversAwaitingGreenLightVar(Variable):
-    operations = set(("equality", "inequality", "boolean", "membership"))
+    """
+    Variable that represents the drivers waiting for the green light to
+    cross the crossroad.
+    
+    """
+    
+    required_helpers = ["drivers_trafficlight"]
 
 
-#{ Mock functions
+#{ Mock function operators
 
 
-class LengthFunction():
-    pass
+class TrafficViolationFunc(FunctionOperator):
+    """
+    Function operator that checks if there are drivers/pedestrians crossing
+    the crossroad when their respective traffic light is red.
+    
+    """
+    
+    required_arguments = ("traffic_light", "people_crossing")
+    
+    def __call__(self, **helpers):
+        if helpers['traffic_light'] == "red" and \
+           len(helpers['people_crossing']):
+            return True
+        return False
 
 #}
