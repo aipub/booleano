@@ -16,7 +16,6 @@
 # Booleano. If not, see <http://www.gnu.org/licenses/>.
 
 """
-English translations for the operators.
+Syntax localizations for the boolean expressions.
 
 """
-
