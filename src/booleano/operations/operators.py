@@ -23,8 +23,8 @@ from booleano.operations import OPERATIONS
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
-__all__ = ["FunctionOperator", "IfOperator", "NotOperator", "AndOperator",
-           "OrOperator", "EqualsOperator", "LessThanOperator",
+__all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
+           "OrOperator", "XorOperator", "EqualsOperator", "LessThanOperator",
            "GreaterThanOperator", "LessEqualOperator", "GreaterEqualOperator",
            "ContainsOperator", "SubsetOperator"]
 
@@ -68,10 +68,6 @@ class UnaryOperator(Operator):
     """
     Base class for unary operators.
     
-    .. attribute:: required_operations = ()
-    
-        All the operations the operand must support.
-    
     """
     
     def __init__(self, operand):
@@ -83,8 +79,6 @@ class UnaryOperator(Operator):
         :type operand: :class:`booleano.operations.operands.Operand`
         
         """
-        for operation in self.required_operations:
-            self.check_operation(operand, operation)
         self.operand = operand
 
 
@@ -96,6 +90,14 @@ class BinaryOperator(Operator):
     The binary operator will make the *master operand* perform the requested
     operation using the Python value of the *slave operand*. This is found by
     the :meth:`organize_operands` method, which can be overridden.
+    
+    .. attribute:: master_operand
+    
+        The instance attribute that represents the master operand.
+    
+    .. attribute:: slave_operand
+    
+        The instance attribute that represents the slave operand.
     
     """
     
@@ -282,57 +284,159 @@ class FunctionOperator(Operator):
 #{ Unary operators
 
 
-class IfOperator(UnaryOperator):
+class TruthOperator(UnaryOperator):
     """
-    Check if a *boolean operand* evaluates to ``True``.
+    Find the truth value of an operand.
     
     This is just a wrapper around the ``is_met`` method of the operand, useful
-    for other operators to check the validity of one operand.
+    for other operators to check the logical value of one operand.
+    
+    In other words, this enables us to use an operand as a boolean expression.
     
     """
     
-    required_operations = ("boolean", )
+    def __init__(self, operand):
+        """
+        Check that ``operand`` supports boolean operations before storing it.
+        
+        :param operand: The operand in question.
+        :type operand: :class:`booleano.operations.operands.Operand`
+        :raises InvalidOperationError: If the ``operand`` doesn't support
+            boolean operations.
+        
+        """
+        self.check_operation(operand, "boolean")
+        super(TruthOperator, self).__init__(operand)
     
     def __call__(self, **helpers):
+        """Return the logical value of the operand."""
         return self.operand.is_met(**helpers)
+    
+    @classmethod
+    def convert(cls, operand):
+        """
+        Turn ``operand`` into a truth operator, unless it's already an operator.
+        
+        :param operand: The operand to be converted.
+        :type operand: Operand or Operator
+        :return: The ``operand`` turned into a truth operator if it was an
+            actual operand; otherwise it'd be returned as is.
+        :rtype: Operator
+        
+        """
+        if not isinstance(operand, Operator):
+            return cls(operand)
+        return operand
 
 
-class NotOperator(IfOperator):
+class NotOperator(UnaryOperator):
     """
-    Check if a *boolean operand* evaluates to ``False``.
+    Negate the boolean representation of an operand.
     
     """
+    
+    def __init__(self, operand):
+        """Turn ``operand`` into a truth operator before storing it."""
+        operand = TruthOperator.convert(operand)
+        super(NotOperator, self).__init__(operand)
     
     def __call__(self, **helpers):
-        return not super(NotOperator, self).__call__(**helpers)
+        """Return the negate of the truth value for the operand."""
+        return not self.operand(**helpers)
 
 
 #{ Binary operators
 
 
-class AndOperator(BinaryOperator):
-    pass
+class _Connective(BinaryOperator):
+    """
+    Logic connective to turn the left-hand and right-hand operands into
+    boolean operations, so we can manipulate their truth value easily.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        """
+        Turn the operands into truth operators so we can manipulate their
+        logic value easily and then store them.
+        
+        """
+        left_operand = TruthOperator.convert(left_operand)
+        right_operand = TruthOperator.convert(right_operand)
+        super(_Connective, self).__init__(left_operand, right_operand)
 
-class OrOperator(BinaryOperator):
-    pass
+
+class AndOperator(_Connective):
+    """
+    Check that two operations evaluate to ``True``.
+    
+    With this binary operator, the operands can be actual operands or
+    operations. If they are actual operands, they'll be wrapped around an
+    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    as an operation.
+    
+    """
+    
+    def __call__(self, **helpers):
+        """Check if both operands evaluate to ``True``"""
+        return self.master_operand(**helpers) and self.slave_operand(**helpers)
+
+
+class OrOperator(_Connective):
+    """
+    Check that at least one, out of two operations, evaluate to ``True``.
+    
+    With this binary operator, the operands can be actual operands or
+    operations. If they are actual operands, they'll be wrapped around an
+    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    as an operation.
+    
+    """
+    
+    def __call__(self, **helpers):
+        """Check if at least one of the operands evaluate to ``True``"""
+        return self.master_operand(**helpers) or self.slave_operand(**helpers)
+
+
+class XorOperator(_Connective):
+    """
+    Check that only one, out of two operations, evaluate to ``True``.
+    
+    With this binary operator, the operands can be actual operands or
+    operations. If they are actual operands, they'll be wrapped around an
+    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    as an operation.
+    
+    """
+    
+    def __call__(self, **helpers):
+        """Check that only one of the operands evaluate to ``True``"""
+        return self.master_operand(**helpers) ^ self.slave_operand(**helpers)
+
 
 class EqualsOperator(BinaryOperator):
     pass
 
+
 class LessThanOperator(BinaryOperator):
     pass
+
 
 class GreaterThanOperator(BinaryOperator):
     pass
 
+
 class LessEqualOperator(BinaryOperator):
     pass
+
 
 class GreaterEqualOperator(BinaryOperator):
     pass
 
+
 class ContainsOperator(BinaryOperator):
     pass
+
 
 class SubsetOperator(BinaryOperator):
     pass

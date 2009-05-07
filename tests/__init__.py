@@ -52,9 +52,8 @@ class TrafficLightVar(Variable):
     
     def equals(self, value, **helpers):
         """Does the traffic light's color equal to ``value``?"""
-        value = value.lower()
         if value not in self.valid_colors:
-            raise InvalidOperationError('Traffic lights cannot be in %s' % value)
+            raise InvalidOperationError("Traffic lights can't be %s" % value)
         return value == helpers['traffic_light']
 
 

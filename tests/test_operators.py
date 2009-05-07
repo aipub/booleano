@@ -23,7 +23,7 @@ Tests for the operands.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations.operators import *
-from booleano.operations.operands import String
+from booleano.operations.operands import String, Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
 from tests import TrafficLightVar
@@ -146,23 +146,23 @@ class TestFunctions(object):
             required_arguments = ("arg1", "arg1")
 
 
-class TestIfOperator(object):
-    """Tests for the :class:`IfOperator`."""
+class TestTruthOperator(object):
+    """Tests for the :class:`TruthOperator`."""
     
     def test_constructor_with_boolean_operand(self):
         traffic_light = TrafficLightVar("traffic-light")
-        IfOperator(traffic_light)
+        TruthOperator(traffic_light)
     
     @raises(InvalidOperationError)
     def test_constructor_with_non_boolean_operand(self):
         # Constants cannot act as booleans
         constant = String("Paris")
-        IfOperator(constant)
+        TruthOperator(constant)
     
     def test_evaluation(self):
         # Setup:
         traffic_light = TrafficLightVar("traffic-light")
-        operation = IfOperator(traffic_light)
+        operation = TruthOperator(traffic_light)
         # Evaluation:
         ok_(operation( **dict(traffic_light="green") ))
         assert_false(operation( **dict(traffic_light="") ))
@@ -174,6 +174,11 @@ class TestNotOperator(object):
     def test_constructor_with_boolean_operand(self):
         traffic_light = TrafficLightVar("traffic-light")
         NotOperator(traffic_light)
+    
+    def test_constructor_with_operator(self):
+        """The Not operator must also support operators as operands"""
+        traffic_light = TrafficLightVar("traffic-light")
+        NotOperator(TruthOperator(traffic_light))
     
     @raises(InvalidOperationError)
     def test_constructor_with_non_boolean_operand(self):
@@ -188,6 +193,111 @@ class TestNotOperator(object):
         # Evaluation:
         ok_(operation( **dict(traffic_light="") ))
         assert_false(operation( **dict(traffic_light="green") ))
+
+
+class TestAndOperator(object):
+    """Tests for the And operator."""
+    
+    def test_constructor_with_operands(self):
+        """The constructor must support actual operands as arguments"""
+        AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+    
+    def test_constructor_with_operators(self):
+        """The constructor must support operators as arguments."""
+        AndOperator(
+            NotOperator(BoolVar()),
+            NotOperator(TrafficLightVar("traffic-light"))
+        )
+    
+    def test_constructor_with_mixed_operands(self):
+        """
+        The constructor must support operators and actual operands as arguments.
+        
+        """
+        AndOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
+        AndOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+    
+    def test_with_both_results_as_true(self):
+        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        ok_(operation( **dict(bool=True, traffic_light="red") ))
+    
+    def test_with_both_results_as_false(self):
+        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        assert_false(operation( **dict(bool=False, traffic_light="") ))
+    
+    def test_with_mixed_results(self):
+        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        assert_false(operation( **dict(bool=False, traffic_light="red") ))
+
+
+class TestOrOperator(object):
+    """Tests for the Or operator."""
+    
+    def test_constructor_with_operands(self):
+        """The constructor must support actual operands as arguments"""
+        OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+    
+    def test_constructor_with_operators(self):
+        """The constructor must support operators as arguments."""
+        OrOperator(
+            NotOperator(BoolVar()),
+            NotOperator(TrafficLightVar("traffic-light"))
+        )
+    
+    def test_constructor_with_mixed_operands(self):
+        """
+        The constructor must support operators and actual operands as arguments.
+        
+        """
+        OrOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
+        OrOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+    
+    def test_with_both_results_as_true(self):
+        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        ok_(operation( **dict(bool=True, traffic_light="red") ))
+    
+    def test_with_both_results_as_false(self):
+        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        assert_false(operation( **dict(bool=False, traffic_light="") ))
+    
+    def test_with_mixed_results(self):
+        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        ok_(operation( **dict(bool=False, traffic_light="red") ))
+
+
+class TestXorOperator(object):
+    """Tests for the Xor operator."""
+    
+    def test_constructor_with_operands(self):
+        """The constructor must support actual operands as arguments"""
+        XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+    
+    def test_constructor_with_operators(self):
+        """The constructor must support operators as arguments."""
+        XorOperator(
+            NotOperator(BoolVar()),
+            NotOperator(TrafficLightVar("traffic-light"))
+        )
+    
+    def test_constructor_with_mixed_operands(self):
+        """
+        The constructor must support operators and actual operands as arguments.
+        
+        """
+        XorOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
+        XorOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+    
+    def test_with_both_results_as_true(self):
+        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        assert_false(operation( **dict(bool=True, traffic_light="red") ))
+    
+    def test_with_both_results_as_false(self):
+        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        assert_false(operation( **dict(bool=False, traffic_light="") ))
+    
+    def test_with_mixed_results(self):
+        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        ok_(operation( **dict(bool=False, traffic_light="red") ))
 
 
 #{ Mock objects
@@ -206,6 +316,33 @@ class PermissiveFunction(FunctionOperator):
     def check_arguments(self):
         """Do nothing -- Allow any kind of arguments."""
         pass
+
+
+class BoolVar(Variable):
+    """
+    Mock variable which represents the boolean value stored in a helper called
+    ``bool``.
+    
+    """
+    operations = set(("boolean", "equality"))
+    
+    required_helpers = ("bool", )
+    
+    def __init__(self, **names):
+        
+        super(BoolVar, self).__init__("bool", **names)
+    
+    def to_python(self, **helpers):
+        """Return the value of the ``bool`` helper"""
+        return helpers['bool']
+    
+    def equals(self, value, **helpers):
+        """Does ``value`` equal this boolean variable?"""
+        return helpers['bool'] == value
+    
+    def is_met(self, **helpers):
+        """Does the value of helper ``bool`` evaluate to True?"""
+        return bool(helpers['bool'])
 
 
 #}
