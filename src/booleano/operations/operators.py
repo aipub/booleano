@@ -31,7 +31,7 @@ __all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
 
 class Operator(object):
     """
-    Base class for operators.
+    Base class for logical operators.
     
     The operands to be used by the operator must be passed in the constructor.
     
@@ -66,7 +66,7 @@ class Operator(object):
 
 class UnaryOperator(Operator):
     """
-    Base class for unary operators.
+    Base class for unary logical operators.
     
     """
     
@@ -84,7 +84,7 @@ class UnaryOperator(Operator):
 
 class BinaryOperator(Operator):
     """
-    Base class for binary operators.
+    Base class for binary logical operators.
     
     In binary operations, the two operands are marked as "master" or "slave".
     The binary operator will make the *master operand* perform the requested
@@ -152,7 +152,7 @@ class BinaryOperator(Operator):
 
 class FunctionOperator(Operator):
     """
-    Base class for user-defined, n-ary function operators.
+    Base class for user-defined, n-ary logical functions.
     
     Subclasses must override :meth:`check_arguments` to verify the validity of
     the arguments, or to do nothing if it's not necessary.
@@ -331,6 +331,8 @@ class TruthOperator(UnaryOperator):
 
 class NotOperator(UnaryOperator):
     """
+    The logical negation (``~``).
+    
     Negate the boolean representation of an operand.
     
     """
@@ -348,7 +350,7 @@ class NotOperator(UnaryOperator):
 #{ Binary operators
 
 
-class _Connective(BinaryOperator):
+class _ConnectiveOperator(BinaryOperator):
     """
     Logic connective to turn the left-hand and right-hand operands into
     boolean operations, so we can manipulate their truth value easily.
@@ -363,12 +365,14 @@ class _Connective(BinaryOperator):
         """
         left_operand = TruthOperator.convert(left_operand)
         right_operand = TruthOperator.convert(right_operand)
-        super(_Connective, self).__init__(left_operand, right_operand)
+        super(_ConnectiveOperator, self).__init__(left_operand, right_operand)
 
 
-class AndOperator(_Connective):
+class AndOperator(_ConnectiveOperator):
     """
-    Check that two operations evaluate to ``True``.
+    The logical conjunction (``AND``).
+    
+    Connective that checks if two operations evaluate to ``True``.
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
@@ -382,9 +386,12 @@ class AndOperator(_Connective):
         return self.master_operand(**helpers) and self.slave_operand(**helpers)
 
 
-class OrOperator(_Connective):
+class OrOperator(_ConnectiveOperator):
     """
-    Check that at least one, out of two operations, evaluate to ``True``.
+    The logical inclusive disjunction (``OR``).
+    
+    Connective that check if at least one, out of two operations, evaluate to
+    ``True``.
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
@@ -398,9 +405,12 @@ class OrOperator(_Connective):
         return self.master_operand(**helpers) or self.slave_operand(**helpers)
 
 
-class XorOperator(_Connective):
+class XorOperator(_ConnectiveOperator):
     """
-    Check that only one, out of two operations, evaluate to ``True``.
+    The logical exclusive disjunction (``XOR``).
+    
+    Connective that checks if only one, out of two operations, evaluate to
+    ``True``.
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
@@ -416,7 +426,9 @@ class XorOperator(_Connective):
 
 class EqualityOperator(BinaryOperator):
     """
-    Check that two operands are equivalent.
+    The equality operator (``==``).
+    
+    Checks that two operands are equivalent.
     
     For example: ``3 == 3``.
     
@@ -432,20 +444,114 @@ class EqualityOperator(BinaryOperator):
         return self.master_operand.equals(value, **helpers)
 
 
-class LessThanOperator(BinaryOperator):
-    pass
+class _InequalityOperator(BinaryOperator):
+    """
+    Handle inequalities (``<``, ``>``) and switch the operation if the operands
+    are rearranged.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand, comparison):
+        """
+        Switch the ``comparison`` if the operands are rearranged.
+        
+        :param left_operand: The original left-hand operand in the inequality.
+        :param right_operand: The original right-hand operand in the
+            inequality.
+        :param comparison: The symbol for the particular inequality (i.e.,
+            "<" or ">").
+        :raises InvalidOperationError: If the master operand doesn't support
+            inequalities.
+        
+        If the operands are rearranged by :meth:`organize_operands`, then
+        the operation must be switched (e.g., from "<" to ">").
+        
+        This will also "compile" the comparison operation; otherwise, it'd have
+        to be calculated on a per evaluation basis.
+        
+        """
+        super(_InequalityOperator, self).__init__(left_operand, right_operand)
+        
+        self.check_operation(self.master_operand, "inequality")
+        
+        if left_operand != self.master_operand:
+            # The operands have been rearranged! Let's invert the comparison:
+            if comparison == "<":
+                comparison = ">"
+            else:
+                comparison = "<"
+        
+        # "Compiling" the comparison:
+        if comparison == ">":
+            self.comparison = self._greater_than
+        else:
+            self.comparison = self._less_than
+    
+    def __call__(self, **helpers):
+        return self.comparison(**helpers)
+    
+    def _greater_than(self, **helpers):
+        """Check if the master operand is greater than the slave"""
+        value = self.slave_operand.to_python(**helpers)
+        return self.master_operand.greater_than(value, **helpers)
+    
+    def _less_than(self, **helpers):
+        """Check if the master operand is less than the slave"""
+        value = self.slave_operand.to_python(**helpers)
+        return self.master_operand.less_than(value, **helpers)
 
 
-class GreaterThanOperator(BinaryOperator):
-    pass
+class LessThanOperator(_InequalityOperator):
+    """
+    The "less than" operator (``<``).
+    
+    For example: ``2 < 3``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        super(LessThanOperator, self).__init__(left_operand, right_operand, "<")
 
 
-class LessEqualOperator(BinaryOperator):
-    pass
+class GreaterThanOperator(_InequalityOperator):
+    """
+    The "greater than" operator (``>``).
+    
+    For example: ``3 > 2``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        super(GreaterThanOperator, self).__init__(left_operand, right_operand,
+                                                  ">")
 
 
-class GreaterEqualOperator(BinaryOperator):
-    pass
+class LessEqualOperator(NotOperator):
+    """
+    The "less than or equal to" operator (``<=``).
+    
+    For example: ``2 <= 3``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        # (x <= y) <=> ~(x > y)
+        greater_than = GreaterThanOperator(left_operand, right_operand)
+        super(LessEqualOperator, self).__init__(greater_than)
+
+
+class GreaterEqualOperator(NotOperator):
+    """
+    The "greater than or equal to" operator (``>=``).
+    
+    For example: ``2 >= 2``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        # (x >= y) <=> ~(x < y)
+        less_than = LessThanOperator(left_operand, right_operand)
+        super(GreaterEqualOperator, self).__init__(less_than)
 
 
 class ContainsOperator(BinaryOperator):

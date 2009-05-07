@@ -23,7 +23,7 @@ Tests for the operands.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations.operators import *
-from booleano.operations.operands import String, Set, Variable
+from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad,
@@ -420,6 +420,260 @@ class TestEqualityOperator():
         assert_false(operation(**helpers))
 
 
+class TestInequalities(object):
+    """
+    Tests for common functionalities in the inequality operators.
+    
+    Because we shouldn't the base :class:`_InequalityOperator`, we're going to
+    use one of its subclasses: LessThanOperator.
+    
+    """
+    
+    def test_constructor_with_constants(self):
+        """The order must not change when the parameters are constant."""
+        l_op = Number(3)
+        r_op = Number(4)
+        operation = LessThanOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+    
+    def test_constructor_with_variables(self):
+        """The order must not change when the parameters are variables."""
+        l_op = PedestriansCrossingRoad()
+        r_op = DriversAwaitingGreenLightVar()
+        operation = LessThanOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+    
+    def test_constructor_with_variable_before_constant(self):
+        """
+        The order must not change when the first parameter is a variable and
+        the second is a constant.
+        
+        """
+        l_op = PedestriansCrossingRoad()
+        r_op = Number(2)
+        operation = LessThanOperator(l_op, r_op)
+        eq_(l_op, operation.master_operand)
+        eq_(r_op, operation.slave_operand)
+
+
+class TestLessThanOperator(object):
+    """Tests for the evaluation of "less than" operations."""
+    
+    def test_constructor_with_constant_before_variable(self):
+        """
+        The order *must* change when the first parameter is a constant and
+        the second is a variable.
+        
+        """
+        l_op = Number(2)
+        r_op = PedestriansCrossingRoad()
+        operation = LessThanOperator(l_op, r_op)
+        eq_(r_op, operation.master_operand)
+        eq_(l_op, operation.slave_operand)
+    
+    def test_identical_values(self):
+        l_op = Number(3)
+        r_op = Number(3)
+        operation = LessThanOperator(l_op, r_op)
+        assert_false(operation())
+    
+    def test_two_constants(self):
+        l_op = Number(3)
+        r_op = Number(4)
+        operation = LessThanOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_variables(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = NumVar()
+        operation = LessThanOperator(l_op, r_op)
+        
+        # |{"carla"}| < 2
+        helpers = {
+            'pedestrians_crossroad': ("carla", ),
+            'num': 2,
+        }
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos"}| < 1
+        helpers = {
+            'pedestrians_crossroad': ("carla", "carlos"),
+            'num': 1,
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_arguments(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = Number(2)
+        operation = LessThanOperator(l_op, r_op)
+        
+        # |{"carla"}| < 2
+        helpers = {'pedestrians_crossroad': ("carla", )}
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos", "liliana"}| < 2
+        helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
+        assert_false(operation(**helpers))
+
+
+class TestGreaterThanOperator(object):
+    """Tests for the evaluation of "greater than" operations."""
+    
+    def test_constructor_with_constant_before_variable(self):
+        """
+        The order *must* change when the first parameter is a constant and
+        the second is a variable.
+        
+        """
+        l_op = Number(2)
+        r_op = PedestriansCrossingRoad()
+        operation = GreaterThanOperator(l_op, r_op)
+        eq_(r_op, operation.master_operand)
+        eq_(l_op, operation.slave_operand)
+    
+    def test_identical_values(self):
+        l_op = Number(3)
+        r_op = Number(3)
+        operation = GreaterThanOperator(l_op, r_op)
+        assert_false(operation())
+    
+    def test_two_constants(self):
+        l_op = Number(4)
+        r_op = Number(3)
+        operation = GreaterThanOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_variables(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = NumVar()
+        operation = GreaterThanOperator(l_op, r_op)
+        
+        # |{"carla", "yolmary"}| > 1
+        helpers = {
+            'pedestrians_crossroad': ("carla", "yolmary"),
+            'num': 1,
+        }
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos"}| > 3
+        helpers = {
+            'pedestrians_crossroad': ("carla", "carlos"),
+            'num': 3,
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_arguments(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = Number(2)
+        operation = GreaterThanOperator(l_op, r_op)
+        
+        # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
+        helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
+        ok_(operation(**helpers))
+        
+        # |{"carla"}| > 2   <=>   1 > 2
+        helpers = {'pedestrians_crossroad': ("carla", )}
+        assert_false(operation(**helpers))
+
+
+class TestLessEqualOperator(object):
+    """Tests for the evaluation of "less than or equal to" operations."""
+    
+    def test_identical_values(self):
+        l_op = Number(3)
+        r_op = Number(3)
+        operation = LessEqualOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_constants(self):
+        l_op = Number(3)
+        r_op = Number(4)
+        operation = LessEqualOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_variables(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = NumVar()
+        operation = LessEqualOperator(l_op, r_op)
+        
+        # |{"carla"}| < 2
+        helpers = {
+            'pedestrians_crossroad': ("carla", ),
+            'num': 2,
+        }
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos"}| < 1
+        helpers = {
+            'pedestrians_crossroad': ("carla", "carlos"),
+            'num': 1,
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_arguments(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = Number(2)
+        operation = LessEqualOperator(l_op, r_op)
+        
+        # |{"carla"}| < 2
+        helpers = {'pedestrians_crossroad': ("carla", )}
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos", "liliana"}| < 2
+        helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
+        assert_false(operation(**helpers))
+
+
+class TestGreaterEqualOperator(object):
+    """Tests for the evaluation of "greater than or equal to" operations."""
+    
+    def test_identical_values(self):
+        l_op = Number(3)
+        r_op = Number(3)
+        operation = GreaterEqualOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_constants(self):
+        l_op = Number(4)
+        r_op = Number(3)
+        operation = GreaterEqualOperator(l_op, r_op)
+        ok_(operation())
+    
+    def test_two_variables(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = NumVar()
+        operation = GreaterEqualOperator(l_op, r_op)
+        
+        # |{"carla", "yolmary"}| > 1
+        helpers = {
+            'pedestrians_crossroad': ("carla", "yolmary"),
+            'num': 1,
+        }
+        ok_(operation(**helpers))
+        
+        # |{"carla", "carlos"}| > 3
+        helpers = {
+            'pedestrians_crossroad': ("carla", "carlos"),
+            'num': 3,
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_arguments(self):
+        l_op = PedestriansCrossingRoad()
+        r_op = Number(2)
+        operation = GreaterEqualOperator(l_op, r_op)
+        
+        # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
+        helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
+        ok_(operation(**helpers))
+        
+        # |{"carla"}| > 2   <=>   1 > 2
+        helpers = {'pedestrians_crossroad': ("carla", )}
+        assert_false(operation(**helpers))
+
+
 #{ Mock objects
 
 
@@ -466,6 +720,33 @@ class BoolVar(Variable):
         """Does the value of helper ``bool`` evaluate to True?"""
         self.evaluated = True
         return bool(helpers['bool'])
+
+
+class NumVar(Variable):
+    """
+    Mock variable which represents a numeric value stored in a helper called
+    ``num``.
+    
+    """
+    
+    operations = set(["equality", "inequality"])
+    
+    required_helpers = ("num", )
+    
+    def __init__(self, **names):
+        super(NumVar, self).__init__("num", **names)
+    
+    def to_python(self, **helpers):
+        return helpers['num']
+    
+    def equals(self, value, **helpers):
+        return helpers['num'] == value
+    
+    def less_than(self, value, **helpers):
+        return helpers['num'] < value
+    
+    def greater_than(self, value, **helpers):
+        return helpers['num'] > value
 
 
 #}
