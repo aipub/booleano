@@ -228,6 +228,18 @@ class TestAndOperator(object):
     def test_with_mixed_results(self):
         operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=False, traffic_light="red") ))
+    
+    def test_evaluation_order(self):
+        """
+        For efficiency, the second operand must not be evaluated if the first
+        one is False.
+        
+        """
+        op1 = BoolVar()
+        op2 = BoolVar()
+        AndOperator(op1, op2)(bool=False)
+        ok_(op1.evaluated)
+        assert_false(op2.evaluated)
 
 
 class TestOrOperator(object):
@@ -263,6 +275,18 @@ class TestOrOperator(object):
     def test_with_mixed_results(self):
         operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=False, traffic_light="red") ))
+    
+    def test_evaluation_order(self):
+        """
+        For efficiency, the second operand must not be evaluated if the first
+        one is True.
+        
+        """
+        op1 = BoolVar()
+        op2 = BoolVar()
+        OrOperator(op1, op2)(bool=True)
+        ok_(op1.evaluated)
+        assert_false(op2.evaluated)
 
 
 class TestXorOperator(object):
@@ -329,19 +353,22 @@ class BoolVar(Variable):
     required_helpers = ("bool", )
     
     def __init__(self, **names):
-        
+        self.evaluated = False
         super(BoolVar, self).__init__("bool", **names)
     
     def to_python(self, **helpers):
         """Return the value of the ``bool`` helper"""
+        self.evaluated = True
         return helpers['bool']
     
     def equals(self, value, **helpers):
         """Does ``value`` equal this boolean variable?"""
+        self.evaluated = True
         return helpers['bool'] == value
     
     def is_met(self, **helpers):
         """Does the value of helper ``bool`` evaluate to True?"""
+        self.evaluated = True
         return bool(helpers['bool'])
 
 
