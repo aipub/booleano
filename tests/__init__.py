@@ -98,8 +98,9 @@ class VariableSet(Variable):
         return value in set_
     
     def is_subset(self, value, **helpers):
+        value = set(value)
         set_ = set(helpers[self.required_helpers[0]])
-        return set_.issubset(value)
+        return value.issubset(set_)
 
 
 class PedestriansCrossingRoad(VariableSet):

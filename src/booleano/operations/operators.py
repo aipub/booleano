@@ -554,12 +554,49 @@ class GreaterEqualOperator(NotOperator):
         super(GreaterEqualOperator, self).__init__(less_than)
 
 
-class ContainsOperator(BinaryOperator):
-    pass
+class _SetOperator(BinaryOperator):
+    """
+    Base class for set-related operators.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        """
+        Check if the set (right-hand operand) supports memberships operations.
+        
+        """
+        super(_SetOperator, self).__init__(left_operand, right_operand)
+        self.check_operation(self.master_operand, "membership")
+    
+    def organize_operands(self, left_operand, right_operand):
+        """Set the set (right-hand operand) as the master operand."""
+        return (right_operand, left_operand)
 
 
-class SubsetOperator(BinaryOperator):
-    pass
+class ContainsOperator(_SetOperator):
+    """
+    The "belongs to" operator (``∈``).
+    
+    For example: ``"valencia" ∈ {"caracas", "maracay", "valencia"}``.
+    
+    """
+    
+    def __call__(self, **helpers):
+        value = self.slave_operand.to_python(**helpers)
+        return self.master_operand.contains(value, **helpers)
+
+
+class SubsetOperator(_SetOperator):
+    """
+    The "is a subset of" operator (``⊂``).
+    
+    For example: ``{"valencia", "aragua"} ⊂ {"caracas", "aragua", "valencia"}``.
+    
+    """
+    
+    def __call__(self, **helpers):
+        value = self.slave_operand.to_python(**helpers)
+        return self.master_operand.is_subset(value, **helpers)
 
 
 #}

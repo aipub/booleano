@@ -490,14 +490,14 @@ class TestLessThanOperator(object):
         r_op = NumVar()
         operation = LessThanOperator(l_op, r_op)
         
-        # |{"carla"}| < 2
+        # |{"carla"}| < 2   <=>   1 < 2
         helpers = {
             'pedestrians_crossroad': ("carla", ),
             'num': 2,
         }
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos"}| < 1
+        # |{"carla", "carlos"}| < 1   <=>   2 < 1
         helpers = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 1,
@@ -509,11 +509,11 @@ class TestLessThanOperator(object):
         r_op = Number(2)
         operation = LessThanOperator(l_op, r_op)
         
-        # |{"carla"}| < 2
+        # |{"carla"}| < 2   <=>   1 < 2
         helpers = {'pedestrians_crossroad': ("carla", )}
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos", "liliana"}| < 2
+        # |{"carla", "carlos", "liliana"}| < 2   <=>   3 < 2
         helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
         assert_false(operation(**helpers))
 
@@ -550,14 +550,14 @@ class TestGreaterThanOperator(object):
         r_op = NumVar()
         operation = GreaterThanOperator(l_op, r_op)
         
-        # |{"carla", "yolmary"}| > 1
+        # |{"carla", "yolmary"}| > 1   <=>   2 > 1
         helpers = {
             'pedestrians_crossroad': ("carla", "yolmary"),
             'num': 1,
         }
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos"}| > 3
+        # |{"carla", "carlos"}| > 3   <=>   2 > 3
         helpers = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 3,
@@ -598,14 +598,14 @@ class TestLessEqualOperator(object):
         r_op = NumVar()
         operation = LessEqualOperator(l_op, r_op)
         
-        # |{"carla"}| < 2
+        # |{"carla"}| < 2   <=>   1 < 2
         helpers = {
             'pedestrians_crossroad': ("carla", ),
             'num': 2,
         }
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos"}| < 1
+        # |{"carla", "carlos"}| < 1   <=>   2 < 1
         helpers = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 1,
@@ -617,11 +617,11 @@ class TestLessEqualOperator(object):
         r_op = Number(2)
         operation = LessEqualOperator(l_op, r_op)
         
-        # |{"carla"}| < 2
+        # |{"carla"}| < 2   <=>   1 < 2
         helpers = {'pedestrians_crossroad': ("carla", )}
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos", "liliana"}| < 2
+        # |{"carla", "carlos", "liliana"}| < 2   <=>   1 < 2
         helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
         assert_false(operation(**helpers))
 
@@ -646,14 +646,14 @@ class TestGreaterEqualOperator(object):
         r_op = NumVar()
         operation = GreaterEqualOperator(l_op, r_op)
         
-        # |{"carla", "yolmary"}| > 1
+        # |{"carla", "yolmary"}| > 1   <=>   2 > 1
         helpers = {
             'pedestrians_crossroad': ("carla", "yolmary"),
             'num': 1,
         }
         ok_(operation(**helpers))
         
-        # |{"carla", "carlos"}| > 3
+        # |{"carla", "carlos"}| > 3   <=>   2 > 3
         helpers = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 3,
@@ -671,6 +671,88 @@ class TestGreaterEqualOperator(object):
         
         # |{"carla"}| > 2   <=>   1 > 2
         helpers = {'pedestrians_crossroad': ("carla", )}
+        assert_false(operation(**helpers))
+
+
+class TestContainsOperator(object):
+    """Tests for the ``∈`` set operator."""
+    
+    def test_item_and_set(self):
+        item = Number(3)
+        set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
+        operation = ContainsOperator(item, set_)
+        eq_(operation.master_operand, set_)
+        eq_(operation.slave_operand, item)
+    
+    def test_item_and_non_set(self):
+        item = String("Paris")
+        set_ = String("France")
+        assert_raises(InvalidOperationError, ContainsOperator, item, set_)
+    
+    def test_constant_evaluation(self):
+        item = Number(3)
+        set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
+        operation = ContainsOperator(item, set_)
+        ok_(operation())
+    
+    def test_variable_evaluation(self):
+        item = NumVar()
+        set_ = PedestriansCrossingRoad()
+        operation = ContainsOperator(item, set_)
+        
+        # 4 ∈ {"madrid", 4}
+        helpers = {
+            'num': 4,
+            'pedestrians_crossroad': ("madrid", 4)
+        }
+        ok_(operation(**helpers))
+        
+        # 4 ∈ {"madrid", "paris", "london"}
+        helpers = {
+            'num': 4,
+            'pedestrians_crossroad': ("madrid", "paris", "london")
+        }
+        assert_false(operation(**helpers))
+
+
+class TestSubsetOperator(object):
+    """Tests for the ``⊂`` set operator."""
+    
+    def test_set_and_set(self):
+        subset = Set(Number(2), Number(4))
+        set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
+        operation = SubsetOperator(subset, set_)
+        eq_(operation.master_operand, set_)
+        eq_(operation.slave_operand, subset)
+    
+    def test_non_set_and_non_set(self):
+        subset = String("Paris")
+        set_ = String("France")
+        assert_raises(InvalidOperationError, SubsetOperator, subset, set_)
+    
+    def test_constant_evaluation(self):
+        subset = Set(Number(3), Number(1), Number(7))
+        set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
+        operation = SubsetOperator(subset, set_)
+        ok_(operation())
+    
+    def test_variable_evaluation(self):
+        subset = DriversAwaitingGreenLightVar()
+        set_ = PedestriansCrossingRoad()
+        operation = SubsetOperator(subset, set_)
+        
+        # {"carla"} ⊂ {"carla", "andreina"}
+        helpers = {
+            'drivers_trafficlight': ("carla", ),
+            'pedestrians_crossroad': ("andreina", "carla")
+        }
+        ok_(operation(**helpers))
+        
+        # {"liliana", "carlos"} ⊂ {"manuel", "yolmary", "carla"}
+        helpers = {
+            'drivers_trafficlight': ("liliana", "carlos"),
+            'pedestrians_crossroad': ("manuel", "yolmary", "carla")
+        }
         assert_false(operation(**helpers))
 
 
