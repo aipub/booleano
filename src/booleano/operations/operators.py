@@ -286,7 +286,7 @@ class FunctionOperator(Operator):
 
 class TruthOperator(UnaryOperator):
     """
-    Find the truth value of an operand.
+    The truth function.
     
     This is just a wrapper around the ``is_met`` method of the operand, useful
     for other operators to check the logical value of one operand.
