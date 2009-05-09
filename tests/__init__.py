@@ -46,7 +46,7 @@ class TrafficLightVar(Variable):
         """Return the string that represents the current light color"""
         return helpers['traffic_light']
     
-    def is_met(self, **helpers):
+    def get_logical_value(self, **helpers):
         """Is the traffic light working?"""
         return bool(helpers['traffic_light'])
     
@@ -76,7 +76,7 @@ class VariableSet(Variable):
         set_ = set(helpers[self.required_helpers[0]])
         return set_
     
-    def is_met(self, **helpers):
+    def get_logical_value(self, **helpers):
         set_ = set(helpers[self.required_helpers[0]])
         return bool(set_)
     

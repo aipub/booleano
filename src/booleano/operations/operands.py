@@ -50,9 +50,9 @@ class Operand(object):
     
     #{ Unary operations
     
-    def is_met(self, **helpers):
+    def get_logical_value(self, **helpers):
         """
-        Check if this operand evaluates to true.
+        Return the truth value of the operand.
         
         This is a *boolean* operation.
         

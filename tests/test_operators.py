@@ -798,7 +798,7 @@ class BoolVar(Variable):
         self.evaluated = True
         return helpers['bool'] == value
     
-    def is_met(self, **helpers):
+    def get_logical_value(self, **helpers):
         """Does the value of helper ``bool`` evaluate to True?"""
         self.evaluated = True
         return bool(helpers['bool'])

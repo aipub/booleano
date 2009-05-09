@@ -288,7 +288,7 @@ class TruthOperator(UnaryOperator):
     """
     The truth function.
     
-    This is just a wrapper around the ``is_met`` method of the operand, useful
+    This is just a wrapper around the ``get_logical_value`` method of the operand, useful
     for other operators to check the logical value of one operand.
     
     In other words, this enables us to use an operand as a boolean expression.
@@ -310,7 +310,7 @@ class TruthOperator(UnaryOperator):
     
     def __call__(self, **helpers):
         """Return the logical value of the operand."""
-        return self.operand.is_met(**helpers)
+        return self.operand.get_logical_value(**helpers)
     
     @classmethod
     def convert(cls, operand):

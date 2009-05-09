@@ -48,7 +48,7 @@ class TestOperand(object):
     def test_operation_methods(self):
         """No operation should be supported by default"""
         assert_raises(NotImplementedError, self.op.to_python)
-        assert_raises(NotImplementedError, self.op.is_met)
+        assert_raises(NotImplementedError, self.op.get_logical_value)
         assert_raises(NotImplementedError, self.op.equals, None)
         assert_raises(NotImplementedError, self.op.greater_than, None)
         assert_raises(NotImplementedError, self.op.less_than, None)
