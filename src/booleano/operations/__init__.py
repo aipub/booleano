@@ -29,7 +29,7 @@ __all__ = ["OPERATIONS"]
 OPERATIONS = set((
     "equality",           # ==, !=
     "inequality",         # >, <
-    "boolean",            # is it met or not?
+    "boolean",            # Logical values
     "membership",         # does SetX contain ItemY?
 ))
 
