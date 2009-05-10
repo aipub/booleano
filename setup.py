@@ -56,7 +56,7 @@ setup(name='booleano',
       exclude_package_data={'': ['README.txt', 'docs']},
       include_package_data=True,
       zip_safe=False,
-      tests_require = ['coverage', 'nose'],
+      tests_require = ['coverage', 'nose >= 0.11.0'],
       install_requires=['pyparsing >= 1.5.2'],
       test_suite="nose.collector",
       entry_points = """\
