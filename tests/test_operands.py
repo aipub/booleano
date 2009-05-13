@@ -23,7 +23,7 @@ Tests for the operands.
 from nose.tools import eq_, ok_, assert_false, assert_raises
 
 from booleano.operations.operands import (Operand, String, Number, Set,
-                                            Variable)
+                                          Variable)
 from booleano.exc import InvalidOperationError
 
 
