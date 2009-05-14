@@ -43,7 +43,7 @@ class BaseParseTest(object):
             yield (check_expression, self.grammar, expression,
                    expected_parse_tree)
     
-    def test_operands_alone(self):
+    def test_unit_operands_alone(self):
         operand_parser = self.grammar.define_unit_operand().parseString
         for expression, expected_parse_tree in self.valid_operands.items():
             yield (check_operand, operand_parser, expression,
