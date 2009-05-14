@@ -152,8 +152,9 @@ class GenericGrammar(object):
         definitions for variables, strings and/or numbers.
         
         """
-        operand = cls.define_number() | cls.define_string() | \
-                  cls.define_variable()
+        operand = cls.define_variable() | cls.define_number() | \
+                  cls.define_string()
+                  
         return operand
     
     @classmethod
@@ -192,7 +193,7 @@ class GenericGrammar(object):
         thousands = Word(nums, max=3) + \
                     OneOrMore(thousands_sep + Word(nums, exact=3))
         integers = thousands | digits
-        decimals = decimal_sep + OneOrMore(digits)
+        decimals = decimal_sep + digits
         number = Combine(integers + Optional(decimals))
         number.setParseAction(cls.make_number)
         number.setName("number")
@@ -204,9 +205,13 @@ class GenericGrammar(object):
         Return the syntax definition for a variable.
         
         """
+        def not_a_number(tokens):
+            if all(c.isdigit() for c in tokens[0]):
+                raise ParseException('"%s" is a number, not a variable' %
+                                     tokens[0])
         space_char = re.escape(cls.T_VARIABLE_SPACING)
         variable = Regex("[\w%s]+" % space_char, re.UNICODE)
-        variable.setParseAction(cls.make_variable)
+        variable.setParseAction(not_a_number, cls.make_variable)
         variable.setName("variable")
         return variable
     

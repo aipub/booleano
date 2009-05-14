@@ -33,7 +33,11 @@ from tests.parsing import BaseParseTest
 from tests.parsing.mock_operations import STRING, NUMBER, VARIABLE, SET
 
 
-class TestValidExpressions(BaseParseTest):
+class TestParsing(BaseParseTest):
+    """
+    Tests for the parser of the generic grammar.
+    
+    """
     grammar = GenericGrammar()
     
     expressions = {
@@ -48,6 +52,7 @@ class TestValidExpressions(BaseParseTest):
         '"double quotes"': STRING("double quotes"),
         "'single quotes'": STRING("single quotes"),
         "''": STRING(""),
+        '""': STRING(""),
         "'something with \"quotes\"'": STRING('something with "quotes"'),
         '"something with \'quotes\'"': STRING("something with 'quotes'"),
         u'"áéíóúñçÁÉÍÓÚÑÇ"': STRING(u"áéíóúñçÁÉÍÓÚÑÇ"),
@@ -71,6 +76,8 @@ class TestValidExpressions(BaseParseTest):
         '    spaces': VARIABLE("spaces"),
         'spaces    ': VARIABLE("spaces"),
         '  spaces  ': VARIABLE("spaces"),
+        '1st_variable': VARIABLE("1st_variable"),
+        '25th_variable': VARIABLE("25th_variable"),
         '_protected_var': VARIABLE("_protected_var"),
         '__private_var': VARIABLE("__private_var"),
         'one_underscore': VARIABLE("one_underscore"),
@@ -88,7 +95,6 @@ class TestValidExpressions(BaseParseTest):
         "12.4,500,000",
         # Invalid variables:
         "dashes-here-cant-you-see-them",
-        "1st_variable",
         # Invalid whatever:
         "this is a phrase, not an operand",
     )
