@@ -205,7 +205,7 @@ class GenericGrammar(object):
         
         """
         space_char = re.escape(cls.T_VARIABLE_SPACING)
-        variable = Regex("[\w\d%s]+" % space_char, re.UNICODE)
+        variable = Regex("[\w%s]+" % space_char, re.UNICODE)
         variable.setParseAction(cls.make_variable)
         variable.setName("variable")
         return variable

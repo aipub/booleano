@@ -70,8 +70,6 @@ class TestValidExpressions(BaseParseTest):
         '    spaces': VARIABLE("spaces"),
         'spaces    ': VARIABLE("spaces"),
         '  spaces  ': VARIABLE("spaces"),
-        '1st_variable': VARIABLE("1st_variable"),
-        '13th_variable': VARIABLE("13th_variable"),
         '_protected_var': VARIABLE("_protected_var"),
         '__private_var': VARIABLE("__private_var"),
         'one_underscore': VARIABLE("one_underscore"),
@@ -89,6 +87,7 @@ class TestValidExpressions(BaseParseTest):
         "12.4,500,000",
         # Invalid variables:
         "dashes-here-cant-you-see-them",
+        "1st_variable",
         # Invalid whatever:
         "this is a phrase, not an operand",
     )
