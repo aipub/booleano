@@ -77,7 +77,7 @@ class _GrammarMeta(type):
             operand,
             [
                 (relationals, 2, opAssoc.LEFT),
-                (not_, 1, opAssoc.RIGHT),
+                #(not_, 1, opAssoc.RIGHT),
                 (and_, 2, opAssoc.LEFT),
                 (or_, 2, opAssoc.LEFT),
             ]
@@ -167,6 +167,7 @@ class GenericGrammar(object):
         
         """
         string = quotedString.setParseAction(removeQuotes, cls.make_string)
+        string.setName("string")
         return string
     
     @classmethod
@@ -188,11 +189,13 @@ class GenericGrammar(object):
         thousands_sep = Suppress(cls.T_THOUSANDS_SEPARATOR)
         digits = Word(nums)
         # Building the integers and decimals:
-        integers_sep = digits*(1,3) + OneOrMore(thousands_sep + digits*3)
-        integers = digits | integers_sep
-        decimals = Combine(decimal_sep + OneOrMore(digits))
+        thousands = Word(nums, max=3) + \
+                    OneOrMore(thousands_sep + Word(nums, exact=3))
+        integers = thousands | digits
+        decimals = decimal_sep + OneOrMore(digits)
         number = Combine(integers + Optional(decimals))
         number.setParseAction(cls.make_number)
+        number.setName("number")
         return number
     
     @classmethod
@@ -202,8 +205,9 @@ class GenericGrammar(object):
         
         """
         space_char = re.escape(cls.T_VARIABLE_SPACING)
-        variable = Regex("[\w\d%s]*" % space_char, re.UNICODE)
+        variable = Regex("[\w\d%s]+" % space_char, re.UNICODE)
         variable.setParseAction(cls.make_variable)
+        variable.setName("variable")
         return variable
     
     @classmethod
