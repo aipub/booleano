@@ -67,6 +67,7 @@ class TestValidExpressions(BaseParseTest):
         'camelCase': VARIABLE("camelCase"),
         'with_underscore': VARIABLE("with_underscore"),
         u'résumé': VARIABLE(u"résumé"),
+        u'有容乃大': VARIABLE(u"有容乃大"),
         '    spaces': VARIABLE("spaces"),
         'spaces    ': VARIABLE("spaces"),
         '  spaces  ': VARIABLE("spaces"),
