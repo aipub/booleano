@@ -47,7 +47,8 @@ class MockOperand(object):
     def equals(self, value):
         """Check if ``value`` equals this operand."""
         ok_(isinstance(value, self.operand_class),
-            u'"%s" must be an instance of %s' % (value, self.operand_class))
+            u'"%s" must be an instance of %s' % (repr(value),
+                                                 self.operand_class))
         original_value = self.value
         actual_value = self.get_actual_value(value)
         eq_(original_value, actual_value,
@@ -100,6 +101,34 @@ class SET(_MockConstant):
     """Mock set constant."""
     
     operand_class = Set
+    
+    def __init__(self, *elements):
+        """Store ``elements`` as a single value (a tuple)."""
+        super(SET, self).__init__(elements)
+    
+    def equals(self, value):
+        """
+        Check that the elements in set ``value`` are the same elements
+        contained in this mock set.
+        
+        """
+        unmatched_values = list(self.value)
+        eq_(len(unmatched_values), len(value.constant_value),
+            u'Sets "%s" and "%s" do not have the same cardinality' %
+            (unmatched_values, value))
+        
+        # Checking that each element is represented by a mock operand:
+        for element in value.constant_value:
+            for key in range(len(unmatched_values)):
+                try:
+                    unmatched_values[key].equals(element)
+                except AssertionError:
+                    continue
+                del unmatched_values[key]
+                break
+        
+        eq_(0, len(unmatched_values),
+            u'No match for the following elements: %s' % unmatched_values)
     
     def __unicode__(self):
         return 'Constant set %s' % self.value

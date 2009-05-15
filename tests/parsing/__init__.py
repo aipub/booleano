@@ -32,9 +32,8 @@ class BaseParseTest(object):
         self.grammar.define_string().validate()
         self.grammar.define_number().validate()
         self.grammar.define_variable().validate()
-        self.grammar.define_set().validate()
-        # Validating all the operands together:
-        self.grammar.define_unit_operand().validate()
+        # Validating all the operands together, including sets:
+        self.grammar.define_operand().validate()
         # Finally, validate the whole grammar:
         self.grammar.grammar.validate()
     
@@ -43,8 +42,8 @@ class BaseParseTest(object):
             yield (check_expression, self.grammar, expression,
                    expected_parse_tree)
     
-    def test_unit_operands_alone(self):
-        operand_parser = self.grammar.define_unit_operand().parseString
+    def test_operands_alone(self):
+        operand_parser = self.grammar.define_operand().parseString
         for expression, expected_parse_tree in self.valid_operands.items():
             yield (check_operand, operand_parser, expression,
                    expected_parse_tree)

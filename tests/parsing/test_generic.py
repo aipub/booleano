@@ -82,6 +82,27 @@ class TestParsing(BaseParseTest):
         '__private_var': VARIABLE("__private_var"),
         'one_underscore': VARIABLE("one_underscore"),
         'two__underscores__here': VARIABLE("two__underscores__here"),
+        # ----- Sets:
+        ' {} ': SET(),
+        '{{}, {}}': SET(SET(), SET()),
+        '{var1, var2}': SET(VARIABLE("var1"), VARIABLE("var2")),
+        '{var, "string"}': SET(VARIABLE("var"), STRING("string")),
+        '{3, var, "string"}': SET(NUMBER(3), STRING("string"), VARIABLE("var")),
+        '{1, 2, {"orange", "apple"}, 3}': SET(
+            NUMBER(1),
+            NUMBER(2),
+            NUMBER(3),
+            SET(STRING("orange"), STRING("apple"))
+            ),
+        u'{"españa", {"caracas", {"las chimeneas", "el trigal"}}, "france"}': \
+            SET(
+                STRING(u"españa"),
+                STRING("france"),
+                SET(
+                    STRING("caracas"),
+                    SET(STRING("el trigal"), STRING("las chimeneas"))
+                ),
+            ),
     }
     
     invalid_operands = (
@@ -95,6 +116,12 @@ class TestParsing(BaseParseTest):
         "12.4,500,000",
         # Invalid variables:
         "dashes-here-cant-you-see-them",
+        # Invalid sets:
+        "[]",
+        "{]",
+        "[}",
+        "}{",
+        "{key: 'value'}",
         # Invalid whatever:
         "this is a phrase, not an operand",
     )

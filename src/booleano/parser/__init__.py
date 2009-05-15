@@ -71,7 +71,7 @@ class _GrammarMeta(type):
         ex_or = CaselessLiteral(tokens['T_XOR'])
         or_ = in_or | ex_or
         
-        operand = cls.define_unit_operand() | cls.define_set()
+        operand = cls.define_operand()
         
         grammar = operatorPrecedence(
             operand,
@@ -136,25 +136,38 @@ class GenericGrammar(object):
         Parse ``expression`` and return its parse tree.
         
         """
-        parse_tree = self.grammar.parseString(expression)
+        parse_tree = self.grammar.parseString(expression, parseAll=True)
         return parse_tree[0]
     
     #{ Operand generators; used to create the grammar
     
     @classmethod
-    def define_unit_operand(cls):
+    def define_operand(cls):
         """
-        Return the syntax definition for a unit operand.
+        Return the syntax definition for an operand.
         
-        A "unit operand" can be a variable, a string or a number.
+        An operand can be a variable, a string, a number or a set. A set
+        is made of other operands, including other sets.
         
         **This method shouldn't be overridden**. Instead, override the syntax
         definitions for variables, strings and/or numbers.
         
+        If you want to customize the sets, check :meth:`T_SET_START`,
+        :meth:`T_SET_END` and :meth:`T_ELEMENT_SEPARATOR`.
+        
         """
-        operand = cls.define_variable() | cls.define_number() | \
-                  cls.define_string()
-                  
+        operand = Forward()
+        
+        set_start = Suppress(cls.T_SET_START)
+        set_end = Suppress(cls.T_SET_END)
+        elements = delimitedList(operand, delim=cls.T_ELEMENT_SEPARATOR)
+        set_ = Group(set_start + Optional(elements) + set_end)
+        set_.setParseAction(cls.make_set)
+        set_.setName("set")
+        
+        operand << (cls.define_variable() | cls.define_number() | \
+                    cls.define_string() | set_)
+        
         return operand
     
     @classmethod
@@ -215,23 +228,6 @@ class GenericGrammar(object):
         variable.setName("variable")
         return variable
     
-    @classmethod
-    def define_set(cls):
-        """
-        Return the syntax definition for a set.
-        
-        """
-        set_ = Forward()
-        
-        set_start = Suppress(cls.T_SET_START)
-        set_end = Suppress(cls.T_SET_END)
-        element = cls.define_unit_operand() | set_
-        elements = delimitedList(element, cls.T_ELEMENT_SEPARATOR)
-        
-        set_ << set_start + Group(Optional(elements)) + set_end
-        
-        return set_
-    
     #{ Parse actions
     
     @classmethod
@@ -248,6 +244,11 @@ class GenericGrammar(object):
     def make_variable(cls, tokens):
         """Make a Variable using the token passed."""
         return Variable(tokens[0])
+    
+    @classmethod
+    def make_set(cls, tokens):
+        """Make a Set using the token passed."""
+        return Set(*tokens[0])
     
     #{ Translators
     
