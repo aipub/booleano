@@ -14,21 +14,87 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # Booleano. If not, see <http://www.gnu.org/licenses/>.
-"""
-Mock operands and operators to represent the data structures in a parse tree.
 
-The classes defined here are all capitalized and that's anti-PEP-0008, but it
-helps to distinguish them clearly from the actual operands and operators.
+"""
+Utilities to test Booleano grammars.
 
 """
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
+from pyparsing import ParseException
 
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
         NotOperator, AndOperator, OrOperator, XorOperator, EqualityOperator,
         LessThanOperator, GreaterThanOperator, LessEqualOperator, 
         GreaterEqualOperator, ContainsOperator, SubsetOperator)
 from booleano.operations.operands import (String, Number, Set, Variable)
+
+__all__ = ["BaseParseTest", "STRING", "NUMBER", "VARIABLE", "SET"]
+
+
+#{ Test cases
+
+
+class BaseParseTest(object):
+    """
+    The base test case for the parser of a grammar.
+    
+    Subclasses must define all the following attributes for the test case to
+    work.
+    
+    .. attribute:: grammar
+    
+        An instance of the grammar to be tested.
+    
+    .. attribute:: expressions
+    
+        A dictionary with all the valid expressions recognized by the grammar,
+        where each key is the expression itself and its item is the mock
+        representation of the operation.
+    
+    """
+    
+    def test_infinitely_recursive_constructs(self):
+        """There must not exist infinitely recursive constructs."""
+        self.grammar.define_string().validate()
+        self.grammar.define_number().validate()
+        self.grammar.define_variable().validate()
+        # Validating all the operands together, including sets:
+        self.grammar.define_operand().validate()
+        # Finally, validate the whole grammar:
+        self.grammar.grammar.validate()
+    
+    def test_valid_expressions(self):
+        for expression, expected_parse_tree in self.expressions.items():
+            yield (check_expression, self.grammar, expression,
+                   expected_parse_tree)
+    
+    def test_operands_alone(self):
+        operand_parser = self.grammar.define_operand().parseString
+        for expression, expected_parse_tree in self.valid_operands.items():
+            yield (check_operand, operand_parser, expression,
+                   expected_parse_tree)
+        for expression in self.invalid_operands:
+            yield (check_invalid_operand, operand_parser, expression)
+
+
+def check_expression(parser, expression, expected_parse_tree):
+    parse_tree = parser(expression)
+    expected_parse_tree.equals(parse_tree)
+
+
+def check_operand(parser, expression, expected_parse_tree):
+    parse_tree = parser(expression, parseAll=True)
+    eq_(1, len(parse_tree))
+    expected_parse_tree.equals(parse_tree[0])
+
+
+@raises(ParseException)
+def check_invalid_operand(parser, expression):
+    parser(expression, parseAll=True)
+
+
+#{ Mock operands
 
 
 class MockOperand(object):
@@ -56,19 +122,6 @@ class MockOperand(object):
     
     def get_actual_value(self, value):
         raise NotImplementedError
-
-
-class MockOperation(object):
-    """
-    Represent an operation.
-    
-    """
-    def __init__(self, operator, *operands):
-        self.operator = operator
-        self.operands = operands
-
-
-#{ Operands
 
 
 class _MockConstant(MockOperand):
@@ -149,6 +202,19 @@ class VARIABLE(MockOperand):
     
     def __unicode__(self):
         return 'Variable "%s"' % self.value
+
+
+#{ Mock operations
+
+
+class MockOperation(object):
+    """
+    Represent an operation.
+    
+    """
+    def __init__(self, operator, *operands):
+        self.operator = operator
+        self.operands = operands
 
 
 #}

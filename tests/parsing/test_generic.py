@@ -15,22 +15,20 @@
 # You should have received a copy of the GNU General Public License along with
 # Booleano. If not, see <http://www.gnu.org/licenses/>.
 """
-Test suite for the generic grammar parser.
+Test suite for the generic grammar.
 
 """
 
 from nose.tools import eq_, ok_, assert_false, assert_raises
-from pyparsing import ParseException
 
 from booleano.parser import GenericGrammar
+from booleano.parser.testutil import (BaseParseTest, STRING, NUMBER, VARIABLE,
+                                      SET)
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
         NotOperator, AndOperator, OrOperator, XorOperator, EqualityOperator,
         LessThanOperator, GreaterThanOperator, LessEqualOperator, 
         GreaterEqualOperator, ContainsOperator, SubsetOperator)
 from booleano.operations.operands import (String, Number, Set, Variable)
-
-from tests.parsing import BaseParseTest
-from tests.parsing.mock_operations import STRING, NUMBER, VARIABLE, SET
 
 
 class TestParsing(BaseParseTest):
@@ -122,8 +120,13 @@ class TestParsing(BaseParseTest):
         "[}",
         "}{",
         "{key: 'value'}",
+        "[element1, element2, element3]",
+        "{element 1, element 2}",
+        "{element1; element2; element3}",
+        "{element == 'string'}",
         # Invalid whatever:
-        "this is a phrase, not an operand",
+        "-",
+        "this is definitely not an operand",
     )
 
 
