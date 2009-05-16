@@ -24,9 +24,9 @@ from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
 __all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
-           "OrOperator", "XorOperator", "EqualityOperator", "LessThanOperator",
-           "GreaterThanOperator", "LessEqualOperator", "GreaterEqualOperator",
-           "ContainsOperator", "SubsetOperator"]
+           "OrOperator", "XorOperator", "EqualOperator", "NotEqualOperator",
+           "LessThanOperator", "GreaterThanOperator", "LessEqualOperator",
+           "GreaterEqualOperator", "ContainsOperator", "SubsetOperator"]
 
 
 class Operator(object):
@@ -424,7 +424,7 @@ class XorOperator(_ConnectiveOperator):
         return self.master_operand(**helpers) ^ self.slave_operand(**helpers)
 
 
-class EqualityOperator(BinaryOperator):
+class EqualOperator(BinaryOperator):
     """
     The equality operator (``==``).
     
@@ -436,12 +436,28 @@ class EqualityOperator(BinaryOperator):
     
     def __init__(self, left_operand, right_operand):
         """Check that the master operand supports equality operations."""
-        super(EqualityOperator, self).__init__(left_operand, right_operand)
+        super(EqualOperator, self).__init__(left_operand, right_operand)
         self.check_operation(self.master_operand, "equality")
     
     def __call__(self, **helpers):
         value = self.slave_operand.to_python(**helpers)
         return self.master_operand.equals(value, **helpers)
+
+
+class NotEqualOperator(NotOperator):
+    """
+    The "not equal to" operator (``!=``).
+    
+    Checks that two operands are not equivalent.
+    
+    For example: ``3 != 2``.
+    
+    """
+    
+    def __init__(self, left_operand, right_operand):
+        """Check that the master operand supports equality operations."""
+        equals = EqualOperator(left_operand, right_operand)
+        super(NotEqualOperator, self).__init__(equals)
 
 
 class _InequalityOperator(BinaryOperator):

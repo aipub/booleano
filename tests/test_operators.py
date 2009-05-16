@@ -340,7 +340,7 @@ class TestNonConnectiveBinaryOperators(object):
         """The order must not change when the parameters are constant."""
         l_op = String("hola")
         r_op = String("chao")
-        operation = EqualityOperator(l_op, r_op)
+        operation = EqualOperator(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -348,7 +348,7 @@ class TestNonConnectiveBinaryOperators(object):
         """The order must not change when the parameters are variable."""
         l_op = BoolVar()
         r_op = BoolVar()
-        operation = EqualityOperator(l_op, r_op)
+        operation = EqualOperator(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -360,7 +360,7 @@ class TestNonConnectiveBinaryOperators(object):
         """
         l_op = BoolVar()
         r_op = String("hello")
-        operation = EqualityOperator(l_op, r_op)
+        operation = EqualOperator(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -372,22 +372,22 @@ class TestNonConnectiveBinaryOperators(object):
         """
         l_op = String("hello")
         r_op = BoolVar()
-        operation = EqualityOperator(l_op, r_op)
+        operation = EqualOperator(l_op, r_op)
         eq_(r_op, operation.master_operand)
         eq_(l_op, operation.slave_operand)
 
 
-class TestEqualityOperator():
+class TestEqualOperator():
     """Tests for the Equality operator."""
     
     def test_constants_evaluation(self):
-        operation1 = EqualityOperator(String("hola"), String("hola"))
-        operation2 = EqualityOperator(String("hola"), String("chao"))
+        operation1 = EqualOperator(String("hola"), String("hola"))
+        operation2 = EqualOperator(String("hola"), String("chao"))
         ok_(operation1())
         assert_false(operation2())
     
     def test_variables_evaluation(self):
-        operation = EqualityOperator(PedestriansCrossingRoad(),
+        operation = EqualOperator(PedestriansCrossingRoad(),
                                      DriversAwaitingGreenLightVar())
         
         # The pedestrians awaiting the green light to cross the street are
@@ -406,7 +406,7 @@ class TestEqualityOperator():
         assert_false(operation(**helpers))
     
     def test_mixed_evaluation(self):
-        operation = EqualityOperator(
+        operation = EqualOperator(
             PedestriansCrossingRoad(),
             Set(String("gustavo"), String("carla"))
         )
@@ -417,6 +417,49 @@ class TestEqualityOperator():
         
         # Other people:
         helpers = {'pedestrians_crossroad': ("liliana", "carlos")}
+        assert_false(operation(**helpers))
+
+
+class TestNotEqualOperator():
+    """Tests for the "not equal" operator."""
+    
+    def test_constants_evaluation(self):
+        operation1 = NotEqualOperator(String("hola"), String("chao"))
+        operation2 = NotEqualOperator(String("hola"), String("hola"))
+        ok_(operation1())
+        assert_false(operation2())
+    
+    def test_variables_evaluation(self):
+        operation = NotEqualOperator(PedestriansCrossingRoad(),
+                                     DriversAwaitingGreenLightVar())
+        
+        # The pedestrians are different from the drivers... That's my universe!
+        helpers = {
+            'pedestrians_crossroad': ("gustavo", "carla"),
+            'drivers_trafficlight': ("liliana", "carlos")
+        }
+        ok_(operation(**helpers))
+        
+        # The pedestrians awaiting the green light to cross the street are
+        # the same drivers... Must be a parallel universe!
+        helpers = {
+            'pedestrians_crossroad': ("gustavo", "carla"),
+            'drivers_trafficlight': ("carla", "gustavo")
+        }
+        assert_false(operation(**helpers))
+    
+    def test_mixed_evaluation(self):
+        operation = NotEqualOperator(
+            PedestriansCrossingRoad(),
+            Set(String("gustavo"), String("carla"))
+        )
+        
+        # Other people:
+        helpers = {'pedestrians_crossroad': ("liliana", "carlos")}
+        ok_(operation(**helpers))
+        
+        # The same people:
+        helpers = {'pedestrians_crossroad': ("gustavo", "carla")}
         assert_false(operation(**helpers))
 
 

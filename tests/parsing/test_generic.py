@@ -25,7 +25,7 @@ from booleano.parser import GenericGrammar
 from booleano.parser.testutil import (BaseParseTest, STRING, NUMBER, VARIABLE,
                                       SET)
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
-        NotOperator, AndOperator, OrOperator, XorOperator, EqualityOperator,
+        NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
         LessThanOperator, GreaterThanOperator, LessEqualOperator, 
         GreaterEqualOperator, ContainsOperator, SubsetOperator)
 from booleano.operations.operands import (String, Number, Set, Variable)
