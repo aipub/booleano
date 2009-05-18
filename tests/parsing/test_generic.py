@@ -32,7 +32,7 @@ Test suite for the generic grammar.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises
 
-from booleano.parser import GenericGrammar
+from booleano.parser.syntaxes import GenericGrammar
 from booleano.parser.testutils import BaseParseTest
 from booleano.parser.testutils.tree import (STRING, NUMBER, VARIABLE, SET)
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
