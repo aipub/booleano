@@ -37,7 +37,7 @@ from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad,
-                   DriversAwaitingGreenLightVar)
+                   DriversAwaitingGreenLightVar, TrafficViolationFunc)
 
 
 class TestFunctions(object):
@@ -155,6 +155,71 @@ class TestFunctions(object):
         """Two required arguments must not share the same name."""
         class FunctionWithDuplicateArguments(FunctionOperator):
             required_arguments = ("arg1", "arg1")
+    
+    def test_equivalence(self):
+        """
+        Two functions are equivalent if they share the name, the required
+        and optional arguments, and the actual arguments passed.
+        
+        """
+        class FooFunction(FunctionOperator):
+            required_arguments = ("abc", )
+            optional_arguments = {"xyz": "123"}
+            def check_arguments(self): pass
+        
+        func1 = FooFunction("whatever")
+        func2 = FooFunction("whatever")
+        func3 = TrafficViolationFunc("pedestrians")
+        func4 = PermissiveFunction("foo")
+        func5 = FooFunction("something")
+        
+        func1.check_equivalence(func2)
+        func2.check_equivalence(func1)
+        
+        assert_raises(AssertionError, func1.check_equivalence, func3)
+        assert_raises(AssertionError, func1.check_equivalence, func4)
+        assert_raises(AssertionError, func1.check_equivalence, func5)
+        assert_raises(AssertionError, func2.check_equivalence, func3)
+        assert_raises(AssertionError, func2.check_equivalence, func4)
+        assert_raises(AssertionError, func2.check_equivalence, func5)
+        assert_raises(AssertionError, func3.check_equivalence, func1)
+        assert_raises(AssertionError, func3.check_equivalence, func2)
+        assert_raises(AssertionError, func3.check_equivalence, func4)
+        assert_raises(AssertionError, func3.check_equivalence, func5)
+        assert_raises(AssertionError, func4.check_equivalence, func1)
+        assert_raises(AssertionError, func4.check_equivalence, func2)
+        assert_raises(AssertionError, func4.check_equivalence, func3)
+        assert_raises(AssertionError, func4.check_equivalence, func5)
+        assert_raises(AssertionError, func5.check_equivalence, func1)
+        assert_raises(AssertionError, func5.check_equivalence, func2)
+        assert_raises(AssertionError, func5.check_equivalence, func3)
+        assert_raises(AssertionError, func5.check_equivalence, func4)
+        
+        ok_(func1 == func2)
+        ok_(func2 == func1)
+        ok_(func1 != func3)
+        ok_(func1 != func4)
+        ok_(func1 != func5)
+        ok_(func2 != func3)
+        ok_(func2 != func4)
+        ok_(func2 != func5)
+        ok_(func3 != func1)
+        ok_(func3 != func2)
+        ok_(func3 != func4)
+        ok_(func3 != func5)
+        ok_(func4 != func1)
+        ok_(func4 != func2)
+        ok_(func4 != func3)
+        ok_(func4 != func5)
+        ok_(func5 != func1)
+        ok_(func5 != func2)
+        ok_(func5 != func3)
+        ok_(func5 != func4)
+    
+    def test_string(self):
+        func = PermissiveFunction("foo", u"bár")
+        eq_(unicode(func), u"PermissiveFunction(arg0=foo, oarg0=b\xe1r, oarg1=1)")
+        eq_(str(func), "PermissiveFunction(arg0=foo, oarg0=b\xc3\xa1r, oarg1=1)")
 
 
 class TestTruthOperator(object):
@@ -177,6 +242,36 @@ class TestTruthOperator(object):
         # Evaluation:
         ok_(operation( **dict(traffic_light="green") ))
         assert_false(operation( **dict(traffic_light="") ))
+    
+    def test_equivalence(self):
+        """
+        Two truth operations are equivalent if they evaluate the same operand.
+        
+        """
+        op1 = TruthOperator(BoolVar())
+        op2 = TruthOperator(BoolVar())
+        op3 = TruthOperator(PedestriansCrossingRoad())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op = TruthOperator(BoolVar())
+        as_unicode = unicode(op)
+        eq_(as_unicode, "TruthOperator(Variable bool)")
+        eq_(as_unicode, str(op))
 
 
 class TestNotOperator(object):
@@ -204,6 +299,42 @@ class TestNotOperator(object):
         # Evaluation:
         ok_(operation( **dict(traffic_light="") ))
         assert_false(operation( **dict(traffic_light="green") ))
+    
+    def test_equivalent(self):
+        """
+        Two negation operations are equivalent if they evaluate the same 
+        operand.
+        
+        """
+        op1 = NotOperator(BoolVar())
+        op2 = NotOperator(BoolVar())
+        op3 = NotOperator(PedestriansCrossingRoad())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op1 = NotOperator(BoolVar())
+        op2 = NotOperator(AndOperator(BoolVar(), BoolVar()))
+        as_unicode1 = unicode(op1)
+        as_unicode2 = unicode(op2)
+        eq_(as_unicode1, "NotOperator(Variable bool)")
+        eq_(as_unicode1, str(op1))
+        eq_(as_unicode2,
+            "NotOperator(AndOperator(Variable bool, Variable bool))")
+        eq_(as_unicode2, str(op2))
 
 
 class TestAndOperator(object):
@@ -251,6 +382,33 @@ class TestAndOperator(object):
         AndOperator(op1, op2)(bool=False)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
+    
+    def test_equivalent(self):
+        """Two conjunctions are equivalent if they have the same operands."""
+        op1 = AndOperator(BoolVar(), PedestriansCrossingRoad())
+        op2 = AndOperator(PedestriansCrossingRoad(), BoolVar())
+        op3 = AndOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op = AndOperator(BoolVar(), BoolVar())
+        as_unicode = unicode(op)
+        eq_(as_unicode, "AndOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, str(op))
 
 
 class TestOrOperator(object):
@@ -298,6 +456,37 @@ class TestOrOperator(object):
         OrOperator(op1, op2)(bool=True)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
+    
+    def test_equivalent(self):
+        """
+        Two inclusive disjunctions are equivalent if they have the same
+        operands.
+        
+        """
+        op1 = OrOperator(BoolVar(), PedestriansCrossingRoad())
+        op2 = OrOperator(PedestriansCrossingRoad(), BoolVar())
+        op3 = OrOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op = OrOperator(BoolVar(), BoolVar())
+        as_unicode = unicode(op)
+        eq_(as_unicode, "OrOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, str(op))
 
 
 class TestXorOperator(object):
@@ -333,6 +522,37 @@ class TestXorOperator(object):
     def test_with_mixed_results(self):
         operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=False, traffic_light="red") ))
+    
+    def test_equivalent(self):
+        """
+        Two exclusive disjunctions are equivalent if they have the same
+        operands.
+        
+        """
+        op1 = XorOperator(BoolVar(), PedestriansCrossingRoad())
+        op2 = XorOperator(PedestriansCrossingRoad(), BoolVar())
+        op3 = XorOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op = XorOperator(BoolVar(), BoolVar())
+        as_unicode = unicode(op)
+        eq_(as_unicode, "XorOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, str(op))
 
 
 class TestNonConnectiveBinaryOperators(object):
@@ -342,7 +562,7 @@ class TestNonConnectiveBinaryOperators(object):
     This is, all the binary operators, excluding And, Or and Xor.
     
     For these tests, I'll use the equality operator to avoid importing the
-    base "Operator" class.
+    base :class:`BinaryOperator`.
     
     """
     
@@ -385,6 +605,35 @@ class TestNonConnectiveBinaryOperators(object):
         operation = EqualOperator(l_op, r_op)
         eq_(r_op, operation.master_operand)
         eq_(l_op, operation.slave_operand)
+    
+    def test_equivalent(self):
+        """
+        Two binary operators are equivalent if they have the same operands.
+        
+        """
+        op1 = EqualOperator(BoolVar(), PedestriansCrossingRoad())
+        op2 = EqualOperator(PedestriansCrossingRoad(), BoolVar())
+        op3 = EqualOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        
+        op1.check_equivalence(op2)
+        op2.check_equivalence(op1)
+        
+        assert_raises(AssertionError, op1.check_equivalence, op3)
+        assert_raises(AssertionError, op2.check_equivalence, op3)
+        assert_raises(AssertionError, op3.check_equivalence, op1)
+        assert_raises(AssertionError, op3.check_equivalence, op2)
+        
+        ok_(op1 == op2)
+        ok_(op2 == op1)
+        ok_(op1 != op3)
+        ok_(op2 != op3)
+        ok_(op3 != op1)
+        ok_(op3 != op2)
+    
+    def test_string(self):
+        op = EqualOperator(String(u"qué hora es?"), BoolVar())
+        eq_(unicode(op), u'EqualOperator(Variable bool, "qué hora es?")')
+        eq_(str(op), 'EqualOperator(Variable bool, "qu\xc3\xa9 hora es?")')
 
 
 class TestEqualOperator():

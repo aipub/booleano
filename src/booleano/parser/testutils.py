@@ -65,30 +65,31 @@ class BaseParseTest(object):
         self.grammar.grammar.validate()
     
     def test_valid_expressions(self):
-        for expression, expected_parse_tree in self.expressions.items():
+        for expression, expected_node in self.expressions.items():
             yield (check_expression, self.grammar, expression,
-                   expected_parse_tree)
+                   expected_node)
     
     def test_operands_alone(self):
         operand_parser = self.grammar.define_operand().parseString
-        for expression, expected_parse_tree in self.valid_operands.items():
+        for expression, expected_node in self.valid_operands.items():
             yield (check_operand, operand_parser, expression,
-                   expected_parse_tree)
+                   expected_node)
         for expression in self.invalid_operands:
             yield (check_invalid_operand, operand_parser, expression)
 
 
-def check_expression(parser, expression, expected_parse_tree):
-    parse_tree = parser(expression)
-    expected_parse_tree.equals(parse_tree)
+def check_expression(parser, expression, expected_node):
+    node = parser(expression)
+    expected_node.check_equivalence(node)
 
 
-def check_operand(parser, expression, expected_parse_tree):
-    parse_tree = parser(expression, parseAll=True)
-    eq_(1, len(parse_tree))
-    expected_parse_tree.equals(parse_tree[0])
+def check_operand(parser, expression, expected_node):
+    node = parser(expression, parseAll=True)
+    eq_(1, len(node))
+    expected_node.check_equivalence(node[0])
 
 
 @raises(ParseException)
 def check_invalid_operand(parser, expression):
     parser(expression, parseAll=True)
+

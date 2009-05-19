@@ -140,12 +140,18 @@ class TrafficViolationFunc(FunctionOperator):
     
     """
     
-    required_arguments = ("traffic_light", "people_crossing")
+    required_arguments = ("light", )
+    
+    def check_arguments(self):
+        if self.arguments['light'] not in ("pedestrians", "drivers"):
+            raise BadCallError("Only pedestrians and drivers have lights")
     
     def __call__(self, **helpers):
-        if helpers['traffic_light'] == "red" and \
-           len(helpers['people_crossing']):
-            return True
-        return False
+        if self.arguments['light'] == "pedestrians":
+            return helpers['pedestrians_light'] == "red" and \
+                   len(helpers['people_crossing'])
+        # It's the drivers' light.
+        return helpers['drivers_light'] == "red" and \
+               len(helpers['cars_crossing'])
 
 #}

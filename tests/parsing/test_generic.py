@@ -34,11 +34,10 @@ from nose.tools import eq_, ok_, assert_false, assert_raises
 
 from booleano.parser.syntaxes import GenericGrammar
 from booleano.parser.testutils import BaseParseTest
-from booleano.parser.testutils.tree import (STRING, NUMBER, VARIABLE, SET)
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
-        NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
-        LessThanOperator, GreaterThanOperator, LessEqualOperator, 
-        GreaterEqualOperator, ContainsOperator, SubsetOperator)
+    NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
+    LessThanOperator, GreaterThanOperator, LessEqualOperator, 
+    GreaterEqualOperator, ContainsOperator, SubsetOperator)
 from booleano.operations.operands import (String, Number, Set, Variable)
 
 
@@ -50,66 +49,66 @@ class TestParsing(BaseParseTest):
     grammar = GenericGrammar()
     
     expressions = {
-        '  "a string"     ': STRING("a string"),
-        '   2   ': NUMBER(2),
-        ' last_night': VARIABLE("last_night"),
+        '  "a string"     ': String("a string"),
+        '   2   ': Number(2),
+        ' last_night': Variable("last_night"),
         }
     
     valid_operands = {
         # ----- Strings
-        '"oneword"': STRING("oneword"),
-        '"double quotes"': STRING("double quotes"),
-        "'single quotes'": STRING("single quotes"),
-        "''": STRING(""),
-        '""': STRING(""),
-        "'something with \"quotes\"'": STRING('something with "quotes"'),
-        '"something with \'quotes\'"': STRING("something with 'quotes'"),
-        u'"áéíóúñçÁÉÍÓÚÑÇ"': STRING(u"áéíóúñçÁÉÍÓÚÑÇ"),
-        u'"海納百川，有容乃大"': STRING(u"海納百川，有容乃大"),
-        u"'مقالة مختارة'": STRING(u"مقالة مختارة"),
-        u'"вільної енциклопедії"': STRING(u"вільної енциклопедії"),
+        '"oneword"': String("oneword"),
+        '"double quotes"': String("double quotes"),
+        "'single quotes'": String("single quotes"),
+        "''": String(""),
+        '""': String(""),
+        "'something with \"quotes\"'": String('something with "quotes"'),
+        '"something with \'quotes\'"': String("something with 'quotes'"),
+        u'"áéíóúñçÁÉÍÓÚÑÇ"': String(u"áéíóúñçÁÉÍÓÚÑÇ"),
+        u'"海納百川，有容乃大"': String(u"海納百川，有容乃大"),
+        u"'مقالة مختارة'": String(u"مقالة مختارة"),
+        u'"вільної енциклопедії"': String(u"вільної енциклопедії"),
         # ----- Numbers
-        '1': NUMBER(1),
-        '01': NUMBER(1),
-        '5000': NUMBER(5000),
-        '2.34': NUMBER(2.34),
-        '2.2': NUMBER(2.2),
-        '5,000': NUMBER(5000),
-        '1,000,000.34': NUMBER(1000000.34),
+        '1': Number(1),
+        '01': Number(1),
+        '5000': Number(5000),
+        '2.34': Number(2.34),
+        '2.2': Number(2.2),
+        '5,000': Number(5000),
+        '1,000,000.34': Number(1000000.34),
         # ----- Variables:
-        'today': VARIABLE("today"),
-        'camelCase': VARIABLE("camelCase"),
-        'with_underscore': VARIABLE("with_underscore"),
-        u'résumé': VARIABLE(u"résumé"),
-        u'有容乃大': VARIABLE(u"有容乃大"),
-        '    spaces': VARIABLE("spaces"),
-        'spaces    ': VARIABLE("spaces"),
-        '  spaces  ': VARIABLE("spaces"),
-        '1st_variable': VARIABLE("1st_variable"),
-        '25th_variable': VARIABLE("25th_variable"),
-        '_protected_var': VARIABLE("_protected_var"),
-        '__private_var': VARIABLE("__private_var"),
-        'one_underscore': VARIABLE("one_underscore"),
-        'two__underscores__here': VARIABLE("two__underscores__here"),
+        'today': Variable("today"),
+        'camelCase': Variable("camelCase"),
+        'with_underscore': Variable("with_underscore"),
+        u'résumé': Variable(u"résumé"),
+        u'有容乃大': Variable(u"有容乃大"),
+        '    spaces': Variable("spaces"),
+        'spaces    ': Variable("spaces"),
+        '  spaces  ': Variable("spaces"),
+        '1st_variable': Variable("1st_variable"),
+        '25th_variable': Variable("25th_variable"),
+        '_protected_var': Variable("_protected_var"),
+        '__private_var': Variable("__private_var"),
+        'one_underscore': Variable("one_underscore"),
+        'two__underscores__here': Variable("two__underscores__here"),
         # ----- Sets:
-        ' {} ': SET(),
-        '{{}, {}}': SET(SET(), SET()),
-        '{var1, var2}': SET(VARIABLE("var1"), VARIABLE("var2")),
-        '{var, "string"}': SET(VARIABLE("var"), STRING("string")),
-        '{3, var, "string"}': SET(NUMBER(3), STRING("string"), VARIABLE("var")),
-        '{1, 2, {"orange", "apple"}, 3}': SET(
-            NUMBER(1),
-            NUMBER(2),
-            NUMBER(3),
-            SET(STRING("orange"), STRING("apple"))
+        ' {} ': Set(),
+        '{{}, {}}': Set(Set(), Set()),
+        '{var1, var2}': Set(Variable("var1"), Variable("var2")),
+        '{var, "string"}': Set(Variable("var"), String("string")),
+        '{3, var, "string"}': Set(Number(3), String("string"), Variable("var")),
+        '{1, 2, {"orange", "apple"}, 3}': Set(
+            Number(1),
+            Number(2),
+            Number(3),
+            Set(String("orange"), String("apple"))
             ),
         u'{"españa", {"caracas", {"las chimeneas", "el trigal"}}, "france"}': \
-            SET(
-                STRING(u"españa"),
-                STRING("france"),
-                SET(
-                    STRING("caracas"),
-                    SET(STRING("el trigal"), STRING("las chimeneas"))
+            Set(
+                String(u"españa"),
+                String("france"),
+                Set(
+                    String("caracas"),
+                    Set(String("el trigal"), String("las chimeneas"))
                 ),
             ),
     }

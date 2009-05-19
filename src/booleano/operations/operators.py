@@ -30,7 +30,7 @@ Built-in operators.
 
 """
 
-from booleano.operations import OPERATIONS
+from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
@@ -40,7 +40,7 @@ __all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
            "GreaterEqualOperator", "ContainsOperator", "SubsetOperator"]
 
 
-class Operator(object):
+class Operator(ParseTreeNode):
     """
     Base class for logical operators.
     
@@ -91,6 +91,30 @@ class UnaryOperator(Operator):
         
         """
         self.operand = operand
+    
+    def check_equivalence(self, node):
+        """
+        Make sure unary operator ``node`` and this unary operator are
+        equivalent.
+        
+        :param node: The other operator which may be equivalent to this one.
+        :type node: UnaryOperator
+        :raises AssertionError: If ``node`` is not a unary operator or if it's
+            an unary operator but doesn't have the same operand as this one.
+        
+        """
+        super(UnaryOperator, self).check_equivalence(node)
+        assert node.operand == self.operand, \
+               'Operands of unary operations %s and %s are not equivalent' % \
+               (node, self)
+    
+    def __unicode__(self):
+        """
+        Return the Unicode representation for this operator and its operand.
+        
+        """
+        operand = unicode(self.operand)
+        return u"%s(%s)" % (self.__class__.__name__, operand)
 
 
 class BinaryOperator(Operator):
@@ -159,6 +183,51 @@ class BinaryOperator(Operator):
         # The right-hand operand is the variable and the left-hand operand the
         # constant:
         return (right_operand, left_operand)
+    
+    def check_equivalence(self, node):
+        """
+        Make sure binary operator ``node`` and this binary operator are
+        equivalent.
+        
+        :param node: The other operator which may be equivalent to this one.
+        :type node: BinaryOperator
+        :raises AssertionError: If ``node`` is not a binary operator or if it's
+            an binary operator but doesn't have the same operands as this one.
+        
+        """
+        super(BinaryOperator, self).check_equivalence(node)
+        same_operands = (
+            (node.master_operand == self.master_operand and
+             node.slave_operand == self.slave_operand)
+            or
+            (node.master_operand == self.slave_operand and
+             self.master_operand == node.slave_operand)
+        )
+        assert same_operands, \
+               'Operands of binary operations %s and %s are not equivalent' % \
+               (node, self)
+    
+    def __unicode__(self):
+        """
+        Return the Unicode representation for this binary operator, including
+        its operands.
+        
+        If one of the operands is wrapped around a truth operation, such a 
+        truth operation will be ignored in the representation.
+        
+        """
+        if isinstance(self.master_operand, TruthOperator):
+            master_operand = self.master_operand.operand
+        else:
+            master_operand = self.master_operand
+            
+        if isinstance(self.slave_operand, TruthOperator):
+            slave_operand = self.slave_operand.operand
+        else:
+            slave_operand = self.slave_operand
+        
+        return u"%s(%s, %s)" % (self.__class__.__name__, master_operand,
+                                slave_operand)
 
 
 class FunctionOperator(Operator):
@@ -280,16 +349,38 @@ class FunctionOperator(Operator):
         """
         Check if all the arguments are correct.
         
+        :raises BadCallError: If at least one of the arguments are incorrect.
+        
         **This method must be overridden in subclasses**.
         
         The arguments dictionary will be available in the :attr:`arguments`
         attribute. If any of them is wrong, this method must raise a
         :class:`BadCallError` exception.
         
-        :raises BadCallError: If at least one of the arguments are incorrect.
+        """
+        raise NotImplementedError("Functions must validate the arguments")
+    
+    def check_equivalence(self, node):
+        """
+        Make sure function ``node`` and this function are equivalent.
+        
+        :param node: The other function which may be equivalent to this one.
+        :type node: FunctionOperator
+        :raises AssertionError: If ``node`` is not a function or if it's a
+            function but doesn't have the same arguments as this one.
         
         """
-        raise NotImplementedError
+        super(FunctionOperator, self).check_equivalence(node)
+        assert node.arguments == self.arguments, \
+               "Functions %s and %s were called with different arguments" % \
+               (node, self)
+    
+    def __unicode__(self):
+        """Return the Unicode representation for this function."""
+        func_name = self.__class__.__name__
+        args = ["%s=%s" % (k, v) for (k, v) in self.arguments.items()]
+        args = ", ".join(args)
+        return "%s(%s)" % (func_name, args)
 
 
 #{ Unary operators
@@ -299,8 +390,9 @@ class TruthOperator(UnaryOperator):
     """
     The truth function.
     
-    This is just a wrapper around the ``get_logical_value`` method of the operand, useful
-    for other operators to check the logical value of one operand.
+    This is just a wrapper around the ``get_logical_value`` method of the 
+    operand, useful for other operators to check the logical value of one
+    operand.
     
     In other words, this enables us to use an operand as a boolean expression.
     
@@ -356,6 +448,13 @@ class NotOperator(UnaryOperator):
     def __call__(self, **helpers):
         """Return the negate of the truth value for the operand."""
         return not self.operand(**helpers)
+    
+    def __unicode__(self):
+        if isinstance(self.operand, TruthOperator):
+            operand = unicode(self.operand.operand)
+        else:
+            operand = unicode(self.operand)
+        return u"%s(%s)" % (self.__class__.__name__, operand)
 
 
 #{ Binary operators

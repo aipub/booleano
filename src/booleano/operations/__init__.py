@@ -28,19 +28,98 @@
 """
 Supported operations represented in Python objects.
 
+In other words, this package contains the elements of the parse trees.
+
 Once parsed, the binary expressions are turned into the relevant operation
 using the classes provided by this package.
 
 """
 
-__all__ = ["OPERATIONS"]
+__all__ = ["OPERATIONS", "ParseTreeNode"]
 
 
 # Byte flag for the base operations:
 OPERATIONS = set((
     "equality",           # ==, !=
-    "inequality",         # >, <
+    "inequality",         # >, <, >=, <=
     "boolean",            # Logical values
-    "membership",         # does SetX contain ItemY?
+    "membership",         # Set operations (i.e., ∈ and ⊂)
 ))
+
+
+class ParseTreeNode(object):
+    """
+    Base class for the individual elements available in parse trees (i.e.,
+    operands and operations).
+    
+    """
+    
+    def check_equivalence(self, node):
+        """
+        Make sure ``node`` and this node are equivalent.
+        
+        :param node: The other node which may be equivalent to this one.
+        :type node: ParseTreeNode
+        :raises AssertionError: If both nodes have different classes.
+        
+        Operands and operations must extend this method to check for other
+        attributes specific to such nodes.
+        
+        """
+        error_msg = 'Nodes "%s" and "%s" are not equivalent'
+        assert isinstance(node, self.__class__), error_msg % (node, self)
+    
+    def __eq__(self, other):
+        """
+        Check if the ``other`` node is equivalent to this one.
+        
+        :return: Whether they are equivalent.
+        :rtype: bool
+        
+        """
+        try:
+            self.check_equivalence(other)
+            return True
+        except AssertionError:
+            return False
+    
+    def __ne__(self, other):
+        """
+        Check if the ``other`` node is not equivalent to this one.
+        
+        :return: Whether they are not equivalent.
+        :rtype: bool
+        
+        """
+        try:
+            self.check_equivalence(other)
+            return False
+        except AssertionError:
+            return True
+    
+    def __str__(self):
+        """
+        Return the ASCII representation of this node.
+        
+        :raises NotImplementedError: If the Unicode representation is not
+            yet implemented.
+        
+        If it contains non-English characters, they'll get converted into ASCII
+        into ugly things -- It's best to use the Unicode representation
+        directly.
+        
+        """
+        as_unicode = self.__unicode__()
+        return str(as_unicode.encode("utf-8"))
+    
+    def __unicode__(self):
+        """
+        Return the Unicode representation for this node.
+        
+        :raises NotImplementedError: If the Unicode representation is not
+            yet implemented.
+        
+        """
+        raise NotImplementedError("Node %s doesn't have an Unicode "
+                                  "representation" % type(self))
 

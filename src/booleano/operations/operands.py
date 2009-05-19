@@ -33,13 +33,13 @@ for the operations it's supposed to support.
 
 """
 
-from booleano.operations import OPERATIONS
+from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.exc import InvalidOperationError
 
 __all__ = ["Variable", "String", "Number", "Set"]
 
 
-class Operand(object):
+class Operand(ParseTreeNode):
     """
     Base class for operands.
     
@@ -142,6 +142,37 @@ class Variable(Operand):
         self.global_name = global_name
         self.names = self.default_names.copy()
         self.names.update(names)
+    
+    def check_equivalence(self, node):
+        """
+        Make sure variable ``node`` and this variable are equivalent.
+        
+        :param node: The other variable which may be equivalent to this
+            one.
+        :type node: Variable
+        :raises AssertionError: If both trees don't share the same class or
+            don't share the same global and localized names.
+        
+        """
+        super(Variable, self).check_equivalence(node)
+        assert node.global_name == self.global_name, \
+               u'Variables %s and %s have different global names' % (self,
+                                                                    node)
+        assert node.names == self.names, \
+               u'Variables %s and %s have different translations' % (self,
+                                                                     node)
+    
+    def __unicode__(self):
+        """Return the Unicode representation of this variable."""
+        return "Variable %s" % self.global_name
+    '''
+    def __repr__(self):
+        """Represent this variable, including its translations."""
+        translations = ['%s="%s"' % (locale, name) for (locale, name)
+                        in self.names]
+        translations = " ".join(translations)
+        return "<Variable %s %s>" % (self.global_name, translations)
+    '''
 
 
 #{ Constants
@@ -185,6 +216,26 @@ class Constant(Operand):
         
         """
         return self.constant_value == value
+    
+    def check_equivalence(self, node):
+        """
+        Make sure constant ``node`` and this constant are equivalent.
+        
+        :param node: The other constant which may be equivalent to this one.
+        :type node: Constant
+        :raises AssertionError: If the constants are of different types or
+            represent different values.
+        
+        """
+        super(Constant, self).check_equivalence(node)
+        assert node.constant_value == self.constant_value, \
+               u'Constants %s and %s represent different values' % (self,
+                                                                    node)
+    '''
+    def __repr__(self):
+        """Represent this constant."""
+        return "<Constant %s>" % unicode(self)
+    '''
 
 
 class String(Constant):
@@ -232,6 +283,10 @@ class String(Constant):
         """Turn ``value`` into a string if it isn't a string yet"""
         value = unicode(value)
         return super(String, self).equals(value, **helpers)
+    
+    def __unicode__(self):
+        """Return the Unicode representation of this constant string."""
+        return u'"%s"' % self.constant_value
 
 
 class Number(Constant):
@@ -293,6 +348,10 @@ class Number(Constant):
         
         """
         return self.constant_value < float(value)
+    
+    def __unicode__(self):
+        """Return the Unicode representation of this constant number."""
+        return unicode(self.constant_value)
 
 
 class Set(Constant):
@@ -394,6 +453,39 @@ class Set(Constant):
             if not self.contains(item, **helpers):
                 return False
         return True
+    
+    def check_equivalence(self, node):
+        """
+        Make sure set ``node`` and this set are equivalent.
+        
+        :param node: The other set which may be equivalent to this one.
+        :type node: Set
+        :raises AssertionError: If ``node`` is not a set or it's a set 
+            with different elements.
+        
+        """
+        Operand.check_equivalence(self, node)
+        
+        unmatched_elements = list(self.constant_value)
+        assert len(unmatched_elements) == len(node.constant_value), \
+               u'Sets %s and %s do not have the same cardinality' % \
+               (unmatched_elements, node)
+        
+        # Checking that each element is represented by a mock operand:
+        for element in node.constant_value:
+            for key in range(len(unmatched_elements)):
+                if unmatched_elements[key] == element:
+                    del unmatched_elements[key]
+                    break
+        
+        assert 0 == len(unmatched_elements), \
+               u'No match for the following elements: %s' % unmatched_elements
+    
+    def __unicode__(self):
+        """Return the Unicode representation of this constant set."""
+        elements = [unicode(element) for element in self.constant_value]
+        elements = u", ".join(elements)
+        return "{%s}" % elements
 
 
 #}

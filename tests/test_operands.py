@@ -37,6 +37,8 @@ from booleano.operations.operands import (Operand, String, Number, Set,
                                           Variable)
 from booleano.exc import InvalidOperationError
 
+from tests import TrafficLightVar
+
 
 class TestOperand(object):
     """
@@ -65,6 +67,10 @@ class TestOperand(object):
         assert_raises(NotImplementedError, self.op.less_than, None)
         assert_raises(NotImplementedError, self.op.contains, None)
         assert_raises(NotImplementedError, self.op.is_subset, None)
+    
+    def test_no_unicode_by_default(self):
+        """Operands must not have a default Unicode representation."""
+        assert_raises(NotImplementedError, unicode, self.op)
 
 
 class TestVariable(object):
@@ -102,6 +108,33 @@ class TestVariable(object):
         # Appending and replacing names:
         greeting_var = GreetingVariable("greet", fr="salut", es="hola")
         eq_({'fr': "salut", 'es': "hola"}, greeting_var.names)
+    
+    def test_equivalence(self):
+        """Two variables are equivalent if they have the same names."""
+        var1 = TrafficLightVar("traffic_light", es=u"semáforo")
+        var2 = TrafficLightVar("traffic_light")
+        var3 = TrafficLightVar("semaphore", fr=u"carrefour à feux")
+        var4 = TrafficLightVar("traffic_light", es=u"semáforo")
+        
+        var1.check_equivalence(var4)
+        var4.check_equivalence(var1)
+        assert_raises(AssertionError, var1.check_equivalence, var2)
+        assert_raises(AssertionError, var1.check_equivalence, var3)
+        assert_raises(AssertionError, var2.check_equivalence, var1)
+        assert_raises(AssertionError, var2.check_equivalence, var3)
+        assert_raises(AssertionError, var3.check_equivalence, var1)
+        assert_raises(AssertionError, var3.check_equivalence, var2)
+        
+        ok_(var1 == var4)
+        ok_(var4 == var1)
+        ok_(var1 != var2)
+        ok_(var1 != var3)
+    
+    def test_string_representation(self):
+        var = TrafficLightVar("the_var", es="la_variable")
+        as_unicode = unicode(var)
+        eq_("Variable the_var", as_unicode)
+        eq_(str(var), as_unicode)
 
 
 #{ Constants tests
@@ -138,6 +171,35 @@ class TestString(object):
         # When both are defined as numbers:
         op = String(10)
         ok_(op.equals(10))
+    
+    def test_equivalence(self):
+        """
+        Two constant strings are equivalent if they represent the same string.
+        
+        """
+        text1 = String("hello world")
+        text2 = String("hello earth")
+        text3 = String("hello world")
+        
+        text1.check_equivalence(text3)
+        text3.check_equivalence(text1)
+        
+        assert_raises(AssertionError, text1.check_equivalence, text2)
+        assert_raises(AssertionError, text2.check_equivalence, text1)
+        assert_raises(AssertionError, text2.check_equivalence, text3)
+        assert_raises(AssertionError, text3.check_equivalence, text2)
+        
+        ok_(text1 == text3)
+        ok_(text3 == text1)
+        ok_(text1 != text2)
+        ok_(text2 != text1)
+        ok_(text2 != text3)
+        ok_(text3 != text2)
+    
+    def test_string(self):
+        string = String(u"caña")
+        eq_(unicode(string), u'"caña"')
+        eq_(str(string), '"ca\xc3\xb1a"')
 
 
 class TestNumber(object):
@@ -211,6 +273,34 @@ class TestNumber(object):
         ok_(op.greater_than("9"))
         assert_false(op.less_than("9"))
         assert_false(op.greater_than("11"))
+    
+    def test_equivalence(self):
+        """
+        Two constant numbers are equivalent if they represent the same number.
+        
+        """
+        number1 = Number(22)
+        number2 = Number(23)
+        number3 = Number(22)
+        
+        number1.check_equivalence(number3)
+        number3.check_equivalence(number1)
+        assert_raises(AssertionError, number1.check_equivalence, number2)
+        assert_raises(AssertionError, number2.check_equivalence, number1)
+        assert_raises(AssertionError, number2.check_equivalence, number3)
+        assert_raises(AssertionError, number3.check_equivalence, number2)
+        
+        ok_(number1 == number3)
+        ok_(number3 == number1)
+        ok_(number1 != number2)
+        ok_(number2 != number1)
+        ok_(number2 != number3)
+        ok_(number3 != number2)
+    
+    def test_string(self):
+        number = Number(4)
+        eq_(unicode(number), "4.0")
+        eq_(str(number), "4.0")
 
 
 class TestSet(object):
@@ -286,6 +376,49 @@ class TestSet(object):
         ok_(op.is_subset(["andreina", "carla"]))
         assert_false(op.is_subset(["gustavo", "carlos"]))
         assert_false(op.is_subset(["carla", "gustavo"]))
+    
+    def test_equivalence(self):
+        """
+        Two constant sets A and B are equivalent if each element in A is
+        equivalent to one element in B.
+        
+        """
+        set1 = Set(String("hi"), Set(Number(3), String("hello")))
+        set2 = Set(String("hi"), Number(3), String("hello"))
+        set3 = Set(Set(String("hello"), Number(3)), String("hi"))
+        set4 = Set(String("hi"), String("hello"))
+        
+        set1.check_equivalence(set3)
+        set3.check_equivalence(set1)
+        assert_raises(AssertionError, set1.check_equivalence, set2)
+        assert_raises(AssertionError, set1.check_equivalence, set4)
+        assert_raises(AssertionError, set2.check_equivalence, set1)
+        assert_raises(AssertionError, set2.check_equivalence, set3)
+        assert_raises(AssertionError, set2.check_equivalence, set4)
+        assert_raises(AssertionError, set3.check_equivalence, set2)
+        assert_raises(AssertionError, set3.check_equivalence, set4)
+        assert_raises(AssertionError, set4.check_equivalence, set1)
+        assert_raises(AssertionError, set4.check_equivalence, set2)
+        assert_raises(AssertionError, set4.check_equivalence, set3)
+        
+        ok_(set1 == set3)
+        ok_(set3 == set1)
+        ok_(set1 != set2)
+        ok_(set1 != set4)
+        ok_(set2 != set1)
+        ok_(set2 != set3)
+        ok_(set2 != set4)
+        ok_(set3 != set2)
+        ok_(set3 != set4)
+        ok_(set4 != set1)
+        ok_(set4 != set2)
+        ok_(set4 != set3)
+    
+    def test_string(self):
+        set_ = Set(Number(3), Number(5))
+        as_unicode = unicode(set_)
+        eq_(as_unicode, "{5.0, 3.0}")
+        eq_(as_unicode, str(set_))
 
 
 #}

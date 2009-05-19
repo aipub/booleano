@@ -35,15 +35,14 @@ and no words.
 import re
 
 from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
-                       nums, operatorPrecedence, opAssoc, Forward,
-                       ParseException, removeQuotes, Optional, OneOrMore,
-                       Combine, StringStart, StringEnd, ZeroOrMore, Group,
-                       Regex, Literal, delimitedList)
+    nums, operatorPrecedence, opAssoc, Forward, ParseException, removeQuotes,
+    Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
+    Regex, Literal, delimitedList)
 
 from booleano.operations.operators import (FunctionOperator, TruthOperator,
-        NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
-        LessThanOperator, GreaterThanOperator, LessEqualOperator, 
-        GreaterEqualOperator, ContainsOperator, SubsetOperator)
+    NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
+    NotEqualOperator, LessThanOperator, GreaterThanOperator, LessEqualOperator,
+    GreaterEqualOperator, ContainsOperator, SubsetOperator)
 from booleano.operations.operands import String, Number, Set, Variable
 
 
@@ -74,6 +73,14 @@ class _GrammarMeta(type):
         le = CaselessLiteral(tokens['T_LE'])
         ge = CaselessLiteral(tokens['T_GE'])
         relationals = eq | ne | lt | gt | le | ge
+        cls.__operations__ = {
+            tokens['T_EQ']: EqualOperator,
+            tokens['T_NE']: NotEqualOperator,
+            tokens['T_LT']: LessThanOperator,
+            tokens['T_GT']: GreaterThanOperator,
+            tokens['T_LE']: LessEqualOperator,
+            tokens['T_GE']: GreaterEqualOperator,
+        }
         
         # Making the logical connectives:
         not_ = CaselessLiteral(tokens['T_NOT'])
@@ -87,7 +94,7 @@ class _GrammarMeta(type):
         grammar = operatorPrecedence(
             operand,
             [
-                (relationals, 2, opAssoc.LEFT),
+                (relationals, 2, opAssoc.LEFT, cls.make_relational),
                 #(not_, 1, opAssoc.RIGHT),
                 (and_, 2, opAssoc.LEFT),
                 (or_, 2, opAssoc.LEFT),
@@ -147,8 +154,8 @@ class GenericGrammar(object):
         Parse ``expression`` and return its parse tree.
         
         """
-        parse_tree = self.grammar.parseString(expression, parseAll=True)
-        return parse_tree[0]
+        node = self.grammar.parseString(expression, parseAll=True)
+        return node[0]
     
     #{ Operand generators; used to create the grammar
     
@@ -260,6 +267,17 @@ class GenericGrammar(object):
     def make_set(cls, tokens):
         """Make a Set using the token passed."""
         return Set(*tokens[0])
+    
+    @classmethod
+    def make_relational(cls, tokens):
+        """Make a relational operation using the tokens passed."""
+        left_op = tokens[0][0]
+        operator = tokens[0][1]
+        right_op = tokens[0][2]
+        
+        operation = cls.__operations__[operator]
+        
+        return operation(left_op, right_op)
     
     #{ Translators
     
