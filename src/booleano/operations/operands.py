@@ -33,7 +33,7 @@ for the operations it's supposed to support.
 
 """
 
-from booleano.operations import OPERATIONS, ParseTreeNode
+from booleano.operations import OPERATIONS, ParseTreeNode, TranslatableNode
 from booleano.exc import InvalidOperationError
 
 __all__ = ["Variable", "String", "Number", "Set"]
@@ -120,47 +120,11 @@ class Operand(ParseTreeNode):
     #}
 
 
-class Variable(Operand):
+class Variable(TranslatableNode, Operand):
     """
     User-defined variable.
     
     """
-    
-    default_names = {}
-    
-    def __init__(self, global_name, **names):
-        """
-        Create the variable using ``global_name`` as it's default name.
-        
-        Additional keyword arguments represent the other names this variable
-        can take in different languages.
-        
-        .. note::
-            ``global_name`` does *not* have to be an English/ASCII string.
-        
-        """
-        self.global_name = global_name
-        self.names = self.default_names.copy()
-        self.names.update(names)
-    
-    def check_equivalence(self, node):
-        """
-        Make sure variable ``node`` and this variable are equivalent.
-        
-        :param node: The other variable which may be equivalent to this
-            one.
-        :type node: Variable
-        :raises AssertionError: If both trees don't share the same class or
-            don't share the same global and localized names.
-        
-        """
-        super(Variable, self).check_equivalence(node)
-        assert node.global_name == self.global_name, \
-               u'Variables %s and %s have different global names' % (self,
-                                                                    node)
-        assert node.names == self.names, \
-               u'Variables %s and %s have different translations' % (self,
-                                                                     node)
     
     def __unicode__(self):
         """Return the Unicode representation of this variable."""

@@ -30,7 +30,7 @@ Built-in operators.
 
 """
 
-from booleano.operations import OPERATIONS, ParseTreeNode
+from booleano.operations import OPERATIONS, ParseTreeNode, TranslatableNode
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
 
@@ -230,7 +230,7 @@ class BinaryOperator(Operator):
                                 slave_operand)
 
 
-class FunctionOperator(Operator):
+class FunctionOperator(TranslatableNode, Operator):
     """
     Base class for user-defined, n-ary logical functions.
     
@@ -322,15 +322,20 @@ class FunctionOperator(Operator):
     
     optional_arguments = {}
     
-    def __init__(self, *arguments):
+    def __init__(self, global_name, *arguments, **names):
         """
         Store the ``arguments`` and validate them.
         
+        :param global_name: The global name for this function.
         :raises BadCallError: If :meth:`check_arguments` finds that the
             ``arguments`` are invalid, or if few arguments are passed, or
             if too much arguments are passed.
         
+        Additional keyword arguments will be used to find the alternative names
+        for this functions in various grammars.
+        
         """
+        TranslatableNode.__init__(self, global_name, **names)
         # Checking the amount of arguments received:
         argn = len(arguments)
         if argn < len(self.required_arguments):
@@ -367,7 +372,8 @@ class FunctionOperator(Operator):
         :param node: The other function which may be equivalent to this one.
         :type node: FunctionOperator
         :raises AssertionError: If ``node`` is not a function or if it's a
-            function but doesn't have the same arguments as this one.
+            function but doesn't have the same arguments as this one OR doesn't
+            have the same names as this one.
         
         """
         super(FunctionOperator, self).check_equivalence(node)
@@ -377,10 +383,9 @@ class FunctionOperator(Operator):
     
     def __unicode__(self):
         """Return the Unicode representation for this function."""
-        func_name = self.__class__.__name__
         args = ["%s=%s" % (k, v) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
-        return "%s(%s)" % (func_name, args)
+        return "%s(%s)" % (self.global_name, args)
 
 
 #{ Unary operators

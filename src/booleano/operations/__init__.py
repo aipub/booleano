@@ -35,7 +35,7 @@ using the classes provided by this package.
 
 """
 
-__all__ = ["OPERATIONS", "ParseTreeNode"]
+__all__ = ["OPERATIONS", "ParseTreeNode", "TranslatableNode"]
 
 
 # Byte flag for the base operations:
@@ -122,4 +122,48 @@ class ParseTreeNode(object):
         """
         raise NotImplementedError("Node %s doesn't have an Unicode "
                                   "representation" % type(self))
+
+
+class TranslatableNode(ParseTreeNode):
+    """
+    Base class for the parse tree nodes which can be available under different
+    names, depending on the grammar used (i.e., variables and functions).
+    
+    """
+    
+    default_names = {}
+    
+    def __init__(self, global_name, **names):
+        """
+        Create the variable using ``global_name`` as it's default name.
+        
+        Additional keyword arguments represent the other names this variable
+        can take in different languages.
+        
+        .. note::
+            ``global_name`` does *not* have to be an English/ASCII string.
+        
+        """
+        self.global_name = global_name
+        self.names = self.default_names.copy()
+        self.names.update(names)
+    
+    def check_equivalence(self, node):
+        """
+        Make sure ``node`` and this node are equivalent.
+        
+        :param node: The other translatable node which may be equivalent to
+            this one.
+        :type node: TranslatableNode
+        :raises AssertionError: If the nodes don't share the same class or
+            don't share the same global and localized names.
+        
+        """
+        super(TranslatableNode, self).check_equivalence(node)
+        assert node.global_name == self.global_name, \
+               u'Translatable nodes %s and %s have different global names' % \
+               (self, node)
+        assert node.names == self.names, \
+               u'Translatable nodes %s and %s have different translations' % \
+               (self, node)
 

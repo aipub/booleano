@@ -44,7 +44,7 @@ class TestFunctions(object):
     """Tests for the base class of user-defined function operators."""
     
     def test_constructor_with_minimum_arguments(self):
-        func = PermissiveFunction("this-is-arg0")
+        func = PermissiveFunction("permissive", "this-is-arg0")
         args = {
             'arg0': "this-is-arg0",
             'oarg0': None,
@@ -53,7 +53,8 @@ class TestFunctions(object):
         eq_(func.arguments, args)
     
     def test_constructor_with_one_optional_argument(self):
-        func = PermissiveFunction("this-is-arg0", "this-is-oarg0")
+        func = PermissiveFunction("permissive", "this-is-arg0",
+                                  "this-is-oarg0")
         args = {
             'arg0': "this-is-arg0",
             'oarg0': "this-is-oarg0",
@@ -62,7 +63,7 @@ class TestFunctions(object):
         eq_(func.arguments, args)
     
     def test_constructor_with_all_arguments(self):
-        func = PermissiveFunction("this-is-arg0", "this-is-oarg0",
+        func = PermissiveFunction("permissive", "this-is-arg0", "this-is-oarg0",
                                   "this-is-oarg1")
         args = {
             'arg0': "this-is-arg0",
@@ -73,11 +74,11 @@ class TestFunctions(object):
     
     @raises(BadCallError)
     def test_constructor_with_few_arguments(self):
-        PermissiveFunction()
+        PermissiveFunction("permissive", )
     
     @raises(BadCallError)
     def test_constructor_with_many_arguments(self):
-        PermissiveFunction(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+        PermissiveFunction("permissive", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
     
     def test_no_validation_by_default(self):
         """
@@ -87,7 +88,7 @@ class TestFunctions(object):
         
         """
         class MockFunction(FunctionOperator): pass
-        assert_raises(NotImplementedError, MockFunction)
+        assert_raises(NotImplementedError, MockFunction, "mock")
     
     def test_evaluation_not_implemented(self):
         """Expression evaluation must *not* be available by default"""
@@ -95,7 +96,7 @@ class TestFunctions(object):
             def check_arguments(self):
                 pass
         
-        func = FakeFunction()
+        func = FakeFunction("fake")
         assert_raises(NotImplementedError, func)
     
     def test_checking_supported_operation(self):
@@ -167,11 +168,12 @@ class TestFunctions(object):
             optional_arguments = {"xyz": "123"}
             def check_arguments(self): pass
         
-        func1 = FooFunction("whatever")
-        func2 = FooFunction("whatever")
-        func3 = TrafficViolationFunc("pedestrians")
-        func4 = PermissiveFunction("foo")
-        func5 = FooFunction("something")
+        func1 = FooFunction("foo", "whatever")
+        func2 = FooFunction("foo", "whatever")
+        func3 = TrafficViolationFunc("traffic_violation", "pedestrians")
+        func4 = PermissiveFunction("permissive", "foo")
+        func5 = FooFunction("foo", "something")
+        func6 = FooFunction("bar", "whatever")
         
         func1.check_equivalence(func2)
         func2.check_equivalence(func1)
@@ -179,47 +181,67 @@ class TestFunctions(object):
         assert_raises(AssertionError, func1.check_equivalence, func3)
         assert_raises(AssertionError, func1.check_equivalence, func4)
         assert_raises(AssertionError, func1.check_equivalence, func5)
+        assert_raises(AssertionError, func1.check_equivalence, func6)
         assert_raises(AssertionError, func2.check_equivalence, func3)
         assert_raises(AssertionError, func2.check_equivalence, func4)
         assert_raises(AssertionError, func2.check_equivalence, func5)
+        assert_raises(AssertionError, func2.check_equivalence, func6)
         assert_raises(AssertionError, func3.check_equivalence, func1)
         assert_raises(AssertionError, func3.check_equivalence, func2)
         assert_raises(AssertionError, func3.check_equivalence, func4)
         assert_raises(AssertionError, func3.check_equivalence, func5)
+        assert_raises(AssertionError, func3.check_equivalence, func6)
         assert_raises(AssertionError, func4.check_equivalence, func1)
         assert_raises(AssertionError, func4.check_equivalence, func2)
         assert_raises(AssertionError, func4.check_equivalence, func3)
         assert_raises(AssertionError, func4.check_equivalence, func5)
+        assert_raises(AssertionError, func4.check_equivalence, func6)
         assert_raises(AssertionError, func5.check_equivalence, func1)
         assert_raises(AssertionError, func5.check_equivalence, func2)
         assert_raises(AssertionError, func5.check_equivalence, func3)
         assert_raises(AssertionError, func5.check_equivalence, func4)
+        assert_raises(AssertionError, func5.check_equivalence, func6)
+        assert_raises(AssertionError, func6.check_equivalence, func1)
+        assert_raises(AssertionError, func6.check_equivalence, func2)
+        assert_raises(AssertionError, func6.check_equivalence, func3)
+        assert_raises(AssertionError, func6.check_equivalence, func4)
+        assert_raises(AssertionError, func6.check_equivalence, func5)
         
         ok_(func1 == func2)
         ok_(func2 == func1)
         ok_(func1 != func3)
         ok_(func1 != func4)
         ok_(func1 != func5)
+        ok_(func1 != func6)
         ok_(func2 != func3)
         ok_(func2 != func4)
         ok_(func2 != func5)
+        ok_(func2 != func6)
         ok_(func3 != func1)
         ok_(func3 != func2)
         ok_(func3 != func4)
         ok_(func3 != func5)
+        ok_(func3 != func6)
         ok_(func4 != func1)
         ok_(func4 != func2)
         ok_(func4 != func3)
         ok_(func4 != func5)
+        ok_(func4 != func6)
         ok_(func5 != func1)
         ok_(func5 != func2)
         ok_(func5 != func3)
         ok_(func5 != func4)
+        ok_(func5 != func6)
+        ok_(func6 != func1)
+        ok_(func6 != func2)
+        ok_(func6 != func3)
+        ok_(func6 != func4)
+        ok_(func6 != func5)
     
     def test_string(self):
-        func = PermissiveFunction("foo", u"bár")
-        eq_(unicode(func), u"PermissiveFunction(arg0=foo, oarg0=b\xe1r, oarg1=1)")
-        eq_(str(func), "PermissiveFunction(arg0=foo, oarg0=b\xc3\xa1r, oarg1=1)")
+        func = PermissiveFunction("perm", "foo", u"bár")
+        eq_(unicode(func), u"perm(arg0=foo, oarg0=bár, oarg1=1)")
+        eq_(str(func), "perm(arg0=foo, oarg0=b\xc3\xa1r, oarg1=1)")
 
 
 class TestTruthOperator(object):
