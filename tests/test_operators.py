@@ -43,6 +43,52 @@ from tests import (TrafficLightVar, PedestriansCrossingRoad,
 class TestFunctions(object):
     """Tests for the base class of user-defined function operators."""
     
+    def test_no_language_specific_names(self):
+        func = PermissiveFunction("greeting", "arg0")
+        eq_("greeting", func.global_name)
+        eq_({}, func.names)
+    
+    def test_with_language_specific_names(self):
+        """
+        There are no language-specific names defined by default.
+        
+        """
+        names = {
+            'fr': "bonjour",
+            'en': "hi",
+            'es': "hello",
+        }
+        func = PermissiveFunction("greeting", "arg0", **names)
+        eq_(names, func.names)
+    
+    def test_with_default_language_specific_names(self):
+        """
+        Functions can be created with default names in any language.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            default_names = {'fr': "bonjour"}
+        
+        # Appending names:
+        func = GreetingFunction("greet", "arg0", en="hi", es="hola")
+        eq_({'fr': "bonjour", 'en': "hi", 'es': "hola"}, func.names)
+        # Appending and replacing names:
+        func = GreetingFunction("greet", "arg0", fr="salut", es="hola")
+        eq_({'fr': "salut", 'es': "hola"}, func.names)
+    
+    def test_with_default_case_insensitive_names(self):
+        """
+        The default names are case insensitive.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
+        
+        func = GreetingFunction("GREET", "arg0")
+        eq_(func.global_name, "greet")
+        eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
+            GreetingFunction.default_names)
+    
     def test_constructor_with_minimum_arguments(self):
         func = PermissiveFunction("permissive", "this-is-arg0")
         args = {
@@ -170,22 +216,29 @@ class TestFunctions(object):
         
         func1 = FooFunction("foo", "whatever")
         func2 = FooFunction("foo", "whatever")
-        func3 = TrafficViolationFunc("traffic_violation", "pedestrians")
+        func3 = TrafficViolationFunc("traffic_violation", "pedestrians",
+                                     es=u"peatón")
         func4 = PermissiveFunction("permissive", "foo")
         func5 = FooFunction("foo", "something")
         func6 = FooFunction("bar", "whatever")
+        func7 = TrafficViolationFunc("TRAFFIC_VIOLATION", "pedestrians",
+                                     es=u"PEATÓN")
         
         func1.check_equivalence(func2)
         func2.check_equivalence(func1)
+        func3.check_equivalence(func7)
+        func7.check_equivalence(func3)
         
         assert_raises(AssertionError, func1.check_equivalence, func3)
         assert_raises(AssertionError, func1.check_equivalence, func4)
         assert_raises(AssertionError, func1.check_equivalence, func5)
         assert_raises(AssertionError, func1.check_equivalence, func6)
+        assert_raises(AssertionError, func1.check_equivalence, func7)
         assert_raises(AssertionError, func2.check_equivalence, func3)
         assert_raises(AssertionError, func2.check_equivalence, func4)
         assert_raises(AssertionError, func2.check_equivalence, func5)
         assert_raises(AssertionError, func2.check_equivalence, func6)
+        assert_raises(AssertionError, func2.check_equivalence, func7)
         assert_raises(AssertionError, func3.check_equivalence, func1)
         assert_raises(AssertionError, func3.check_equivalence, func2)
         assert_raises(AssertionError, func3.check_equivalence, func4)
@@ -196,27 +249,39 @@ class TestFunctions(object):
         assert_raises(AssertionError, func4.check_equivalence, func3)
         assert_raises(AssertionError, func4.check_equivalence, func5)
         assert_raises(AssertionError, func4.check_equivalence, func6)
+        assert_raises(AssertionError, func4.check_equivalence, func7)
         assert_raises(AssertionError, func5.check_equivalence, func1)
         assert_raises(AssertionError, func5.check_equivalence, func2)
         assert_raises(AssertionError, func5.check_equivalence, func3)
         assert_raises(AssertionError, func5.check_equivalence, func4)
         assert_raises(AssertionError, func5.check_equivalence, func6)
+        assert_raises(AssertionError, func5.check_equivalence, func7)
         assert_raises(AssertionError, func6.check_equivalence, func1)
         assert_raises(AssertionError, func6.check_equivalence, func2)
         assert_raises(AssertionError, func6.check_equivalence, func3)
         assert_raises(AssertionError, func6.check_equivalence, func4)
         assert_raises(AssertionError, func6.check_equivalence, func5)
+        assert_raises(AssertionError, func6.check_equivalence, func7)
+        assert_raises(AssertionError, func7.check_equivalence, func1)
+        assert_raises(AssertionError, func7.check_equivalence, func2)
+        assert_raises(AssertionError, func7.check_equivalence, func4)
+        assert_raises(AssertionError, func7.check_equivalence, func5)
+        assert_raises(AssertionError, func7.check_equivalence, func6)
         
         ok_(func1 == func2)
         ok_(func2 == func1)
+        ok_(func3 == func7)
+        ok_(func7 == func3)
         ok_(func1 != func3)
         ok_(func1 != func4)
         ok_(func1 != func5)
         ok_(func1 != func6)
+        ok_(func1 != func7)
         ok_(func2 != func3)
         ok_(func2 != func4)
         ok_(func2 != func5)
         ok_(func2 != func6)
+        ok_(func2 != func7)
         ok_(func3 != func1)
         ok_(func3 != func2)
         ok_(func3 != func4)
@@ -227,16 +292,24 @@ class TestFunctions(object):
         ok_(func4 != func3)
         ok_(func4 != func5)
         ok_(func4 != func6)
+        ok_(func4 != func7)
         ok_(func5 != func1)
         ok_(func5 != func2)
         ok_(func5 != func3)
         ok_(func5 != func4)
         ok_(func5 != func6)
+        ok_(func5 != func7)
         ok_(func6 != func1)
         ok_(func6 != func2)
         ok_(func6 != func3)
         ok_(func6 != func4)
         ok_(func6 != func5)
+        ok_(func6 != func7)
+        ok_(func7 != func1)
+        ok_(func7 != func2)
+        ok_(func7 != func4)
+        ok_(func7 != func5)
+        ok_(func7 != func6)
     
     def test_string(self):
         func = PermissiveFunction("perm", "foo", u"bár")

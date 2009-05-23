@@ -35,7 +35,7 @@ This module contains utilities shared among the whole test suite.
 
 from booleano.operations.operators import FunctionOperator
 from booleano.operations.operands import Variable
-from booleano.exc import InvalidOperationError
+from booleano.exc import InvalidOperationError, BadCallError
 
 
 #{ Mock variables

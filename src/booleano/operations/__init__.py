@@ -124,12 +124,25 @@ class ParseTreeNode(object):
                                   "representation" % type(self))
 
 
+
+class _TranslatableNodeMeta(type):
+    """Metaclass for the translatable nodes."""
+    
+    def __init__(cls, name, bases, ns):
+        """Lower-case the default names for the node."""
+        type.__init__(cls, name, bases, ns)
+        for (locale, name) in cls.default_names.items():
+            cls.default_names[locale] = name.lower()
+
+
 class TranslatableNode(ParseTreeNode):
     """
     Base class for the parse tree nodes which can be available under different
     names, depending on the grammar used (i.e., variables and functions).
     
     """
+    
+    __metaclass__ = _TranslatableNodeMeta
     
     default_names = {}
     
@@ -144,8 +157,12 @@ class TranslatableNode(ParseTreeNode):
             ``global_name`` does *not* have to be an English/ASCII string.
         
         """
-        self.global_name = global_name
+        self.global_name = global_name.lower()
         self.names = self.default_names.copy()
+        # Convert the ``names`` to lower-case, before updating the resulting
+        # names:
+        for (locale, name) in names.items():
+            names[locale] = name.lower()
         self.names.update(names)
     
     def check_equivalence(self, node):

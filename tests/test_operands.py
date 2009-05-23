@@ -277,26 +277,88 @@ class TestVariable(object):
         greeting_var = GreetingVariable("greet", fr="salut", es="hola")
         eq_({'fr': "salut", 'es': "hola"}, greeting_var.names)
     
+    def test_with_default_case_insensitive_names(self):
+        """
+        The default names are case insensitive.
+        
+        """
+        class GreetingVariable(Variable):
+            bypass_operation_check = True
+            default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
+        
+        greeting_var = GreetingVariable("GREET")
+        eq_(greeting_var.global_name, "greet")
+        eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
+            GreetingVariable.default_names)
+    
     def test_equivalence(self):
         """Two variables are equivalent if they have the same names."""
         var1 = TrafficLightVar("traffic_light", es=u"semáforo")
         var2 = TrafficLightVar("traffic_light")
         var3 = TrafficLightVar("semaphore", fr=u"carrefour à feux")
         var4 = TrafficLightVar("traffic_light", es=u"semáforo")
+        var5 = TrafficLightVar("TRAFFIC_LIGHT", es=u"SEMÁFORO")
+        var6 = TrafficLightVar("TRAFFIC_LIGHT")
         
         var1.check_equivalence(var4)
+        var1.check_equivalence(var5)
+        var2.check_equivalence(var6)
         var4.check_equivalence(var1)
+        var4.check_equivalence(var5)
+        var5.check_equivalence(var1)
+        var5.check_equivalence(var4)
+        var6.check_equivalence(var2)
         assert_raises(AssertionError, var1.check_equivalence, var2)
         assert_raises(AssertionError, var1.check_equivalence, var3)
+        assert_raises(AssertionError, var1.check_equivalence, var6)
         assert_raises(AssertionError, var2.check_equivalence, var1)
         assert_raises(AssertionError, var2.check_equivalence, var3)
+        assert_raises(AssertionError, var2.check_equivalence, var5)
         assert_raises(AssertionError, var3.check_equivalence, var1)
         assert_raises(AssertionError, var3.check_equivalence, var2)
+        assert_raises(AssertionError, var3.check_equivalence, var5)
+        assert_raises(AssertionError, var3.check_equivalence, var6)
+        assert_raises(AssertionError, var4.check_equivalence, var2)
+        assert_raises(AssertionError, var4.check_equivalence, var3)
+        assert_raises(AssertionError, var4.check_equivalence, var6)
+        assert_raises(AssertionError, var5.check_equivalence, var2)
+        assert_raises(AssertionError, var5.check_equivalence, var3)
+        assert_raises(AssertionError, var5.check_equivalence, var6)
+        assert_raises(AssertionError, var6.check_equivalence, var1)
+        assert_raises(AssertionError, var6.check_equivalence, var3)
+        assert_raises(AssertionError, var6.check_equivalence, var4)
+        assert_raises(AssertionError, var6.check_equivalence, var5)
         
         ok_(var1 == var4)
+        ok_(var1 == var5)
+        ok_(var2 == var6)
         ok_(var4 == var1)
+        ok_(var4 == var5)
+        ok_(var5 == var1)
+        ok_(var5 == var4)
+        ok_(var6 == var2)
         ok_(var1 != var2)
         ok_(var1 != var3)
+        ok_(var1 != var6)
+        ok_(var2 != var1)
+        ok_(var2 != var3)
+        ok_(var2 != var4)
+        ok_(var2 != var5)
+        ok_(var3 != var1)
+        ok_(var3 != var2)
+        ok_(var3 != var4)
+        ok_(var3 != var5)
+        ok_(var3 != var6)
+        ok_(var4 != var2)
+        ok_(var4 != var3)
+        ok_(var4 != var6)
+        ok_(var5 != var2)
+        ok_(var5 != var3)
+        ok_(var5 != var6)
+        ok_(var6 != var1)
+        ok_(var6 != var3)
+        ok_(var6 != var4)
+        ok_(var6 != var5)
     
     def test_string_representation(self):
         var = TrafficLightVar("the_var", es="la_variable")

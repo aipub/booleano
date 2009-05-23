@@ -96,6 +96,10 @@ class TestParsing(BaseParseTest):
         '__private_var': Variable("__private_var"),
         'one_underscore': Variable("one_underscore"),
         'two__underscores__here': Variable("two__underscores__here"),
+        'case_insensitive_var': Variable("CASE_INSENSITIVE_VAR"),
+        'CASE_INSENSITIVE_VAR': Variable("case_insensitive_var"),
+        'cAsE_iNsEnSiTiVe_VaR': Variable("CaSe_InSeNsItIvE_vAr"),
+        u'MAYÚSCULA_minúscula_AQUÍ': Variable(u"mayúscula_MINÚSCULA_aquí"),
         # ----- Sets:
         ' {} ': Set(),
         '{{}, {}}': Set(Set(), Set()),

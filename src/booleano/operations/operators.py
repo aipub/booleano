@@ -292,7 +292,7 @@ class FunctionOperator(TranslatableNode, Operator):
     
     """
     
-    class __metaclass__(type):
+    class __metaclass__(TranslatableNode.__metaclass__):
         """
         Pre-process user-defined functions right after they've been defined.
         
@@ -317,6 +317,8 @@ class FunctionOperator(TranslatableNode, Operator):
             cls.all_args = tuple(rargs_set | oargs_set)
             # Finding the arity:
             cls.arity = len(cls.all_args)
+            # Calling the parent constructor:
+            TranslatableNode.__metaclass__.__init__(cls, name, bases, ns)
     
     required_arguments = ()
     

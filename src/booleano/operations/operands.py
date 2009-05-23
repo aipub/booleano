@@ -199,11 +199,25 @@ class Operand(ParseTreeNode):
     #}
 
 
+class _VariableMeta(_OperandMeta, TranslatableNode.__metaclass__):
+    """
+    Metaclass for variables to resolve the metaclass conflict that would be
+    caused by using two base class with different metaclasses.
+    
+    """
+    
+    def __init__(cls, name, bases, ns):
+        _OperandMeta.__init__(cls, name, bases, ns)
+        TranslatableNode.__metaclass__.__init__(cls, name, bases, ns)
+
+
 class Variable(TranslatableNode, Operand):
     """
     User-defined variable.
     
     """
+    
+    __metaclass__ = _VariableMeta
     
     # Only actual variables should be checked.
     bypass_operation_check = True
