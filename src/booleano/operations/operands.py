@@ -28,16 +28,80 @@
 """
 Operands.
 
-TODO: Write a metaclass to check that the operand implements the methods
-for the operations it's supposed to support.
-
 """
 
 from booleano.operations import OPERATIONS, ParseTreeNode, TranslatableNode
-from booleano.exc import InvalidOperationError
+from booleano.exc import InvalidOperationError, BadOperandError
 
 __all__ = ["Variable", "String", "Number", "Set"]
 
+
+class _OperandMeta(type):
+    """
+    Metaclass for the operands.
+    
+    It checks that all the operands were defined correctly.
+    
+    """
+    
+    def __init__(cls, name, bases, ns):
+        """
+        Check the operations supported unless told otherwise.
+        
+        If the class defines the ``bypass_operation_check`` attribute and it
+        evaluates to ``True``, :meth:`check_operations` won't be run.
+        
+        """
+        type.__init__(cls, name, bases, ns)
+        if not ns.get("bypass_operation_check"):
+            cls.check_operations(name, bases, ns)
+    
+    def check_operations(cls, name, bases, ns):
+        """
+        Check that the operand supports all the relevant methods.
+        
+        :raises BadOperandError: If theere are problems with the operations
+            the operand claims to support.
+        
+        """
+        if not cls.operations.issubset(OPERATIONS):
+            raise BadOperandError("Operand %s supports invalid operations" %
+                                  name)
+        if len(cls.operations) == 0:
+            raise BadOperandError("Operand %s must support at least one "
+                                  "operation" % name)
+        if not cls.is_implemented(cls.to_python):
+            raise BadOperandError("Operand %s must define the .to_python() "
+                                  "method" % name)
+        # Checking the operations supported:
+        if ("boolean" in cls.operations and 
+            not cls.is_implemented(cls.get_logical_value)):
+            raise BadOperandError("Operand %s must define the  "
+                                  ".get_logical_value() method" % name)
+        if "equality" in cls.operations and not cls.is_implemented(cls.equals):
+            raise BadOperandError("Operand %s must define the .equals() "
+                                  "method because it supports equalities" %
+                                  name)
+        if ("inequality" in cls.operations and
+            not (
+                 cls.is_implemented(cls.less_than) and 
+                 cls.is_implemented(cls.greater_than))
+            ):
+            raise BadOperandError("Operand %s must define the .greater_than() "
+                                  "and .less_than() methods because it "
+                                  "supports inequalities" % name)
+        if ("membership" in cls.operations and
+            not (
+                 cls.is_implemented(cls.contains) and 
+                 cls.is_implemented(cls.is_subset))
+            ):
+            raise BadOperandError("Operand %s must define the .contains() "
+                                  "and .is_subset() methods because it "
+                                  "supports memberships" % name)
+    
+    def is_implemented(cls, method):
+        """Check that ``method`` is implemented."""
+        return getattr(method, "implemented", True)
 
 class Operand(ParseTreeNode):
     """
@@ -46,7 +110,15 @@ class Operand(ParseTreeNode):
     .. attribute:: operations = set()
         The set of operations supported by this operand.
     
+    .. attribute:: bypass_operation_check = True
+        Whether it should be checked that the operand really supports the
+        operations it claims to support.
+    
     """
+    
+    __metaclass__ = _OperandMeta
+    
+    bypass_operation_check = True
     
     operations = set()
     
@@ -58,6 +130,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    to_python.implemented = False
     
     #{ Unary operations
     
@@ -69,6 +142,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    get_logical_value.implemented = False
     
     #{ Binary operations
     
@@ -80,6 +154,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    equals.implemented = False
     
     def greater_than(self, value, **helpers):
         """
@@ -89,6 +164,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    greater_than.implemented = False
     
     def less_than(self, value, **helpers):
         """
@@ -98,6 +174,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    less_than.implemented = False
     
     def contains(self, value, **helpers):
         """
@@ -107,6 +184,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    contains.implemented = False
     
     def is_subset(self, value, **helpers):
         """
@@ -116,6 +194,7 @@ class Operand(ParseTreeNode):
         
         """
         raise NotImplementedError
+    is_subset.implemented = False
     
     #}
 
@@ -125,6 +204,9 @@ class Variable(TranslatableNode, Operand):
     User-defined variable.
     
     """
+    
+    # Only actual variables should be checked.
+    bypass_operation_check = True
     
     def __unicode__(self):
         """Return the Unicode representation of this variable."""

@@ -31,11 +31,11 @@ Tests for the operands.
 
 """
 
-from nose.tools import eq_, ok_, assert_false, assert_raises
+from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations.operands import (Operand, String, Number, Set,
                                           Variable)
-from booleano.exc import InvalidOperationError
+from booleano.exc import InvalidOperationError, BadOperandError
 
 from tests import TrafficLightVar
 
@@ -71,6 +71,173 @@ class TestOperand(object):
     def test_no_unicode_by_default(self):
         """Operands must not have a default Unicode representation."""
         assert_raises(NotImplementedError, unicode, self.op)
+    
+    #{ Operations support
+    
+    def test_checking_valid_operations(self):
+        """Valid operations should just work."""
+        class EqualityOperand(Operand):
+            operations = set(["equality"])
+            def to_python(self, value, **helpers):
+                pass
+            def equals(self, value, **helpers):
+                pass
+        
+        class InequalityOperand(Operand):
+            operations = set(["inequality"])
+            def to_python(self, value, **helpers):
+                pass
+            def less_than(self, value, **helpers):
+                pass
+            def greater_than(self, value, **helpers):
+                pass
+        
+        class BooleanOperand(Operand):
+            operations = set(["boolean"])
+            def to_python(self, value, **helpers):
+                pass
+            def get_logical_value(self, value, **helpers):
+                pass
+        
+        class MembershipOperand(Operand):
+            operations = set(["membership"])
+            def to_python(self, value, **helpers):
+                pass
+            def contains(self, value, **helpers):
+                pass
+            def is_subset(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_invalid_operations(self):
+        """Invalid operations must be detected."""
+        class SillyOperand(Operand):
+            operations = set(["equality", "addition"])
+    
+    @raises(BadOperandError)
+    def test_checking_no_operation(self):
+        """Operands must support at least one type of operation."""
+        class BadOperand(Operand):
+            operations = set()
+    
+    @raises(BadOperandError)
+    def test_checking_no_to_python(self):
+        """Operands must define the .to_python() method."""
+        class BadOperand(Operand):
+            operations = set(["equality"])
+            def equals(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_logic_value(self):
+        """
+        Operands supporting truth values must define the .get_logical_value()
+        method.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["boolean"])
+            def to_python(self, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_equals(self):
+        """Operands supporting equality must define the .equals() method."""
+        class BadOperand(Operand):
+            operations = set(["equality"])
+            def to_python(self, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_lessthan_nor_greaterthan(self):
+        """
+        Operands supporting inequality must define the .less_than() and
+        .greater_than() methods.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["inequality"])
+            def to_python(self, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_lessthan(self):
+        """
+        Operands supporting inequality must define the .less_than() method.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["inequality"])
+            def to_python(self, **helpers):
+                pass
+            def greater_than(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_greaterthan(self):
+        """
+        Operands supporting inequality must define the .greater_than() method.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["inequality"])
+            def to_python(self, **helpers):
+                pass
+            def less_than(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_contains_nor_issubset(self):
+        """
+        Operands supporting membership must define the .contains() and
+        .is_subset() methods.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["membership"])
+            def to_python(self, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_contains(self):
+        """
+        Operands supporting membership must define the .contains() method.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["membership"])
+            def to_python(self, **helpers):
+                pass
+            def is_subset(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_no_issubset(self):
+        """
+        Operands supporting membership must define the .is_subset() method.
+        
+        """
+        class BadOperand(Operand):
+            operations = set(["membership"])
+            def to_python(self, **helpers):
+                pass
+            def contains(self, value, **helpers):
+                pass
+    
+    def test_bypassing_operation_check(self):
+        """Operations shouldn't be checked if asked so explicitly."""
+        class BadOperand(Operand):
+            bypass_operation_check = True
+    
+    @raises(BadOperandError)
+    def test_bypassing_operation_check_not_inherited(self):
+        """The operation support check setting shouldn't be inherited."""
+        class ForgivenOperand(Operand):
+            bypass_operation_check = True
+        class BadOperand(ForgivenOperand):
+            pass
+    
+    #}
 
 
 class TestVariable(object):
@@ -100,6 +267,7 @@ class TestVariable(object):
         
         """
         class GreetingVariable(Variable):
+            bypass_operation_check = True
             default_names = {'fr': "bonjour"}
         
         # Appending names:
@@ -417,7 +585,7 @@ class TestSet(object):
     def test_string(self):
         set_ = Set(Number(3), Number(5))
         as_unicode = unicode(set_)
-        eq_(as_unicode, "{5.0, 3.0}")
+        eq_(as_unicode, "{3.0, 5.0}")
         eq_(as_unicode, str(set_))
 
 

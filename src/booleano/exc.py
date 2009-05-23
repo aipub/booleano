@@ -30,7 +30,8 @@ Exceptions raised by :mod:`booleano`.
 
 """
 
-__all__ = ["InvalidOperationError", "BadCallError", "BadFunctionError"]
+__all__ = ["InvalidOperationError", "BadCallError", "BadOperandError",
+           "BadFunctionError"]
 
 
 class BooleanoException(Exception):
@@ -66,6 +67,17 @@ class BadCallError(InvalidOperationError):
     pass
 
 
+class BadOperandError(BooleanoException):
+    """
+    Exception raised when an operand is defined incorrectly.
+    
+    Because it's aimed at developers, its message doesn't have to be
+    translatable.
+    
+    """
+    pass
+
+
 class BadFunctionError(BooleanoException):
     """
     Exception raised when a function is defined incorrectly.
@@ -74,6 +86,7 @@ class BadFunctionError(BooleanoException):
     translatable.
     
     """
+    pass
 
 
 #}
