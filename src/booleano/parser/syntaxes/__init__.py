@@ -139,6 +139,10 @@ class GenericGrammar(object):
     T_GROUP_START = "("
     T_GROUP_END = ")"
     
+    # Signed numbers:
+    T_POSITIVE_SIGN = "+"
+    T_NEGATIVE_SIGN = "-"
+    
     # Miscellaneous tokens:
     T_VARIABLE_SPACING = "_"
     T_DECIMAL_SEPARATOR = "."
@@ -217,15 +221,20 @@ class GenericGrammar(object):
         """
         # Defining the basic tokens:
         to_dot = lambda t: "."
+        to_plus = lambda t: "+"
+        to_minus = lambda t: "-"
+        positive_sign = Literal(cls.T_POSITIVE_SIGN).setParseAction(to_plus)
+        negative_sign = Literal(cls.T_NEGATIVE_SIGN).setParseAction(to_minus)
         decimal_sep = Literal(cls.T_DECIMAL_SEPARATOR).setParseAction(to_dot)
         thousands_sep = Suppress(cls.T_THOUSANDS_SEPARATOR)
         digits = Word(nums)
         # Building the integers and decimals:
+        sign = positive_sign | negative_sign
         thousands = Word(nums, max=3) + \
                     OneOrMore(thousands_sep + Word(nums, exact=3))
         integers = thousands | digits
         decimals = decimal_sep + digits
-        number = Combine(integers + Optional(decimals))
+        number = Combine(Optional(sign) + integers + Optional(decimals))
         number.setParseAction(cls.make_number)
         number.setName("number")
         return number
