@@ -99,6 +99,10 @@ class TestParsing(BaseParseTest):
         # ----- Sets:
         ' {} ': Set(),
         '{{}, {}}': Set(Set(), Set()),
+        '{1,000, 3.05}': Set(Number(1000), Number(3.05)),
+        '{1,234,567}': Set(Number(1234567)),
+        '{23,24,25}': Set(Number(23), Number(24), Number(25)),
+        '{100, 200, 300}': Set(Number(100), Number(200), Number(300)),
         '{var1, var2}': Set(Variable("var1"), Variable("var2")),
         '{var, "string"}': Set(Variable("var"), String("string")),
         '{3, var, "string"}': Set(Number(3), String("string"), Variable("var")),
