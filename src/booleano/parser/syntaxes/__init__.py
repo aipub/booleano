@@ -245,13 +245,13 @@ class GenericGrammar(object):
         Return the syntax definition for a variable.
         
         """
-        def not_a_number(tokens):
-            if all(c.isdigit() for c in tokens[0]):
-                raise ParseException('"%s" is a number, not a variable' %
-                                     tokens[0])
+        def first_not_a_number(tokens):
+            if tokens[0][0].isdigit():
+                raise ParseException('Variable "%s" must not start by a '
+                                     'number' % tokens[0])
         space_char = re.escape(cls.T_VARIABLE_SPACING)
         variable = Regex("[\w%s]+" % space_char, re.UNICODE)
-        variable.setParseAction(not_a_number, cls.make_variable)
+        variable.setParseAction(first_not_a_number, cls.make_variable)
         variable.setName("variable")
         return variable
     
