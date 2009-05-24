@@ -33,8 +33,7 @@ This module contains utilities shared among the whole test suite.
 
 """
 
-from booleano.operations.operators import FunctionOperator
-from booleano.operations.operands import Variable
+from booleano.operations.operands import Variable, Function
 from booleano.exc import InvalidOperationError, BadCallError
 
 
@@ -130,15 +129,40 @@ class DriversAwaitingGreenLightVar(VariableSet):
     required_helpers = ["drivers_trafficlight"]
 
 
-#{ Mock function operators
+#{ Mock functions
 
 
-class TrafficViolationFunc(FunctionOperator):
+class PermissiveFunction(Function):
+    """
+    A mock function operator which accepts any type of arguments.
+    
+    """
+    
+    operations = set(["boolean"])
+    
+    required_arguments = ("arg0", )
+    
+    optional_arguments = {'oarg0': None, 'oarg1': 1}
+    
+    def check_arguments(self):
+        """Do nothing -- Allow any kind of arguments."""
+        pass
+    
+    def to_python(self, **helpers):
+        return self.arguments
+    
+    def get_logical_value(self, **helpers):
+        return True
+
+
+class TrafficViolationFunc(Function):
     """
     Function operator that checks if there are drivers/pedestrians crossing
     the crossroad when their respective traffic light is red.
     
     """
+    
+    operations = set(["boolean"])
     
     required_arguments = ("light", )
     
@@ -146,7 +170,10 @@ class TrafficViolationFunc(FunctionOperator):
         if self.arguments['light'] not in ("pedestrians", "drivers"):
             raise BadCallError("Only pedestrians and drivers have lights")
     
-    def __call__(self, **helpers):
+    def to_python(self, **helpers):
+        return self.arguments
+    
+    def get_logical_value(self, **helpers):
         if self.arguments['light'] == "pedestrians":
             return helpers['pedestrians_light'] == "red" and \
                    len(helpers['people_crossing'])

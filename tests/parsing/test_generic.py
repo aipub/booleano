@@ -34,11 +34,12 @@ from nose.tools import eq_, ok_, assert_false, assert_raises
 
 from booleano.parser.syntaxes import GenericGrammar
 from booleano.parser.testutils import BaseParseTest
-from booleano.operations.operators import (FunctionOperator, TruthOperator,
-    NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
-    LessThanOperator, GreaterThanOperator, LessEqualOperator, 
+from booleano.operations.operators import (TruthOperator, NotOperator,
+    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
+    LessThanOperator, GreaterThanOperator, LessEqualOperator,
     GreaterEqualOperator, ContainsOperator, SubsetOperator)
-from booleano.operations.operands import (String, Number, Set, Variable)
+from booleano.operations.operands import (String, Number, Set, Variable,
+                                          Function)
 
 
 class TestParsing(BaseParseTest):

@@ -30,12 +30,12 @@ Built-in operators.
 
 """
 
-from booleano.operations import OPERATIONS, ParseTreeNode, TranslatableNode
+from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.operations.operands import Variable
-from booleano.exc import InvalidOperationError, BadCallError, BadFunctionError
+from booleano.exc import InvalidOperationError
 
-__all__ = ["FunctionOperator", "TruthOperator", "NotOperator", "AndOperator",
-           "OrOperator", "XorOperator", "EqualOperator", "NotEqualOperator",
+__all__ = ["TruthOperator", "NotOperator", "AndOperator", "OrOperator",
+           "XorOperator", "EqualOperator", "NotEqualOperator",
            "LessThanOperator", "GreaterThanOperator", "LessEqualOperator",
            "GreaterEqualOperator", "ContainsOperator", "SubsetOperator"]
 
@@ -228,166 +228,6 @@ class BinaryOperator(Operator):
         
         return u"%s(%s, %s)" % (self.__class__.__name__, master_operand,
                                 slave_operand)
-
-
-class FunctionOperator(TranslatableNode, Operator):
-    """
-    Base class for user-defined, n-ary logical functions.
-    
-    Subclasses must override :meth:`check_arguments` to verify the validity of
-    the arguments, or to do nothing if it's not necessary.
-    
-    .. attribute:: required_arguments = ()
-    
-        The names of the required arguments.
-        
-        For example, if you have a binary function whose required arguments
-        are ``"name"`` and ``"address"``, your function should be defined as::
-        
-            class MyFunction(FunctionOperator):
-                
-                required_arguments = ("name", "address")
-                
-                # (...)
-    
-    .. attribute:: optional_arguments = {}
-    
-        The optional arguments along with their default values.
-        
-        This is a dictionary whose keys are the argument names and the items
-        are their respective default values.
-        
-        For example, if you have a binary function whose arguments are both
-        optional (``"name"`` and ``"address"``), your function should be 
-        defined as::
-        
-            class MyFunction(FunctionOperator):
-                
-                # (...)
-                
-                optional_arguments = {
-                    'name': "Gustavo",
-                    'address': "Somewhere in Madrid",
-                    }
-                
-                # (...)
-        
-        Then when it's called without these arguments, their default values
-        will be taken.
-    
-    .. attribute:: arguments
-    
-        This is an instance attribute which represents the dictionary for the
-        received arguments and their values (or their default values, for those
-        optional arguments not set explicitly).
-    
-    .. attribute:: arity
-    
-        The arity of the function (i.e., the sum of the amount of the required
-        arguments and the amount of optional arguments)
-    
-    .. attribute:: all_args
-    
-        The names of all the arguments, required and optional.
-    
-    """
-    
-    class __metaclass__(TranslatableNode.__metaclass__):
-        """
-        Pre-process user-defined functions right after they've been defined.
-        
-        """
-        
-        def __init__(cls, name, bases, ns):
-            """
-            Calculate the arity of the function and create an utility variable
-            which will contain all the valid arguments.
-            
-            """
-            # A few short-cuts:
-            req_args = ns.get("required_arguments", cls.required_arguments)
-            opt_args = ns.get("optional_arguments", cls.optional_arguments)
-            rargs_set = set(req_args)
-            oargs_set = set(opt_args.keys())
-            # Checking that are no duplicate entries:
-            if len(rargs_set) != len(req_args) or rargs_set & oargs_set:
-                raise BadFunctionError('Function "%s" has duplicate arguments'
-                                       % name)
-            # Merging all the arguments into a single list for convenience:
-            cls.all_args = tuple(rargs_set | oargs_set)
-            # Finding the arity:
-            cls.arity = len(cls.all_args)
-            # Calling the parent constructor:
-            TranslatableNode.__metaclass__.__init__(cls, name, bases, ns)
-    
-    required_arguments = ()
-    
-    optional_arguments = {}
-    
-    def __init__(self, global_name, *arguments, **names):
-        """
-        Store the ``arguments`` and validate them.
-        
-        :param global_name: The global name for this function.
-        :raises BadCallError: If :meth:`check_arguments` finds that the
-            ``arguments`` are invalid, or if few arguments are passed, or
-            if too much arguments are passed.
-        
-        Additional keyword arguments will be used to find the alternative names
-        for this functions in various grammars.
-        
-        """
-        TranslatableNode.__init__(self, global_name, **names)
-        # Checking the amount of arguments received:
-        argn = len(arguments)
-        if argn < len(self.required_arguments):
-            raise BadCallError("Too few arguments")
-        if argn > self.arity:
-            raise BadCallError("Too many arguments")
-        # Storing their values:
-        self.arguments = self.optional_arguments.copy()
-        for arg_pos in range(len(arguments)):
-            arg_name = self.all_args[arg_pos]
-            self.arguments[arg_name] = arguments[arg_pos]
-        # Finally, check that all the parameters are correct:
-        self.check_arguments()
-    
-    def check_arguments(self):
-        """
-        Check if all the arguments are correct.
-        
-        :raises BadCallError: If at least one of the arguments are incorrect.
-        
-        **This method must be overridden in subclasses**.
-        
-        The arguments dictionary will be available in the :attr:`arguments`
-        attribute. If any of them is wrong, this method must raise a
-        :class:`BadCallError` exception.
-        
-        """
-        raise NotImplementedError("Functions must validate the arguments")
-    
-    def check_equivalence(self, node):
-        """
-        Make sure function ``node`` and this function are equivalent.
-        
-        :param node: The other function which may be equivalent to this one.
-        :type node: FunctionOperator
-        :raises AssertionError: If ``node`` is not a function or if it's a
-            function but doesn't have the same arguments as this one OR doesn't
-            have the same names as this one.
-        
-        """
-        super(FunctionOperator, self).check_equivalence(node)
-        assert node.arguments == self.arguments, \
-               "Functions %s and %s were called with different arguments" % \
-               (node, self)
-    
-    def __unicode__(self):
-        """Return the Unicode representation for this function."""
-        args = ["%s=%s" % (k, v) for (k, v) in self.arguments.items()]
-        args = ", ".join(args)
-        return "%s(%s)" % (self.global_name, args)
 
 
 #{ Unary operators

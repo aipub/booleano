@@ -35,7 +35,7 @@ using the classes provided by this package.
 
 """
 
-__all__ = ["OPERATIONS", "ParseTreeNode", "TranslatableNode"]
+__all__ = ["OPERATIONS", "ParseTreeNode"]
 
 
 # Byte flag for the base operations:
@@ -122,65 +122,4 @@ class ParseTreeNode(object):
         """
         raise NotImplementedError("Node %s doesn't have an Unicode "
                                   "representation" % type(self))
-
-
-
-class _TranslatableNodeMeta(type):
-    """Metaclass for the translatable nodes."""
-    
-    def __init__(cls, name, bases, ns):
-        """Lower-case the default names for the node."""
-        type.__init__(cls, name, bases, ns)
-        for (locale, name) in cls.default_names.items():
-            cls.default_names[locale] = name.lower()
-
-
-class TranslatableNode(ParseTreeNode):
-    """
-    Base class for the parse tree nodes which can be available under different
-    names, depending on the grammar used (i.e., variables and functions).
-    
-    """
-    
-    __metaclass__ = _TranslatableNodeMeta
-    
-    default_names = {}
-    
-    def __init__(self, global_name, **names):
-        """
-        Create the variable using ``global_name`` as it's default name.
-        
-        Additional keyword arguments represent the other names this variable
-        can take in different languages.
-        
-        .. note::
-            ``global_name`` does *not* have to be an English/ASCII string.
-        
-        """
-        self.global_name = global_name.lower()
-        self.names = self.default_names.copy()
-        # Convert the ``names`` to lower-case, before updating the resulting
-        # names:
-        for (locale, name) in names.items():
-            names[locale] = name.lower()
-        self.names.update(names)
-    
-    def check_equivalence(self, node):
-        """
-        Make sure ``node`` and this node are equivalent.
-        
-        :param node: The other translatable node which may be equivalent to
-            this one.
-        :type node: TranslatableNode
-        :raises AssertionError: If the nodes don't share the same class or
-            don't share the same global and localized names.
-        
-        """
-        super(TranslatableNode, self).check_equivalence(node)
-        assert node.global_name == self.global_name, \
-               u'Translatable nodes %s and %s have different global names' % \
-               (self, node)
-        assert node.names == self.names, \
-               u'Translatable nodes %s and %s have different translations' % \
-               (self, node)
 

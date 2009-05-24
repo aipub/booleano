@@ -78,7 +78,7 @@ class BadOperandError(BooleanoException):
     pass
 
 
-class BadFunctionError(BooleanoException):
+class BadFunctionError(BadOperandError):
     """
     Exception raised when a function is defined incorrectly.
     

@@ -39,11 +39,12 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
     Regex, Literal, delimitedList)
 
-from booleano.operations.operators import (FunctionOperator, TruthOperator,
-    NotOperator, AndOperator, OrOperator, XorOperator, EqualOperator,
-    NotEqualOperator, LessThanOperator, GreaterThanOperator, LessEqualOperator,
+from booleano.operations.operators import (TruthOperator, NotOperator,
+    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
+    LessThanOperator, GreaterThanOperator, LessEqualOperator,
     GreaterEqualOperator, ContainsOperator, SubsetOperator)
-from booleano.operations.operands import String, Number, Set, Variable
+from booleano.operations.operands import (String, Number, Set, Variable,
+                                          Function)
 
 
 __all__ = ["GenericGrammar"]

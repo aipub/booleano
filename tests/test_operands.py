@@ -34,10 +34,11 @@ Tests for the operands.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations.operands import (Operand, String, Number, Set,
-                                          Variable)
-from booleano.exc import InvalidOperationError, BadOperandError
+                                          Variable, Function)
+from booleano.exc import (InvalidOperationError, BadOperandError, BadCallError,
+                          BadFunctionError)
 
-from tests import TrafficLightVar
+from tests import TrafficLightVar, PermissiveFunction, TrafficViolationFunc
 
 
 class TestOperand(object):
@@ -261,6 +262,28 @@ class TestVariable(object):
         greeting_var = Variable("greeting", **names)
         eq_(names, greeting_var.names)
     
+    def test_checking_supported_operations(self):
+        class GreetingVariable(Variable):
+            operations = set(["equality"])
+            
+            default_names = {'fr': "bonjour"}
+            
+            def to_python(self, **helpers):
+                pass
+            
+            def equals(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_unsupported_operations(self):
+        class GreetingVariable(Variable):
+            operations = set(["equality"])
+            
+            default_names = {'fr': "bonjour"}
+            
+            def to_python(self, **helpers):
+                pass
+    
     def test_with_default_language_specific_names(self):
         """
         Variables can be created with default names in any language.
@@ -365,6 +388,287 @@ class TestVariable(object):
         as_unicode = unicode(var)
         eq_("Variable the_var", as_unicode)
         eq_(str(var), as_unicode)
+
+
+class TestFunction(object):
+    """Tests for the base class of user-defined function operators."""
+    
+    def test_no_language_specific_names(self):
+        func = PermissiveFunction("greeting", "arg0")
+        eq_("greeting", func.global_name)
+        eq_({}, func.names)
+    
+    def test_with_language_specific_names(self):
+        """
+        There are no language-specific names defined by default.
+        
+        """
+        names = {
+            'fr': "bonjour",
+            'en': "hi",
+            'es': "hello",
+        }
+        func = PermissiveFunction("greeting", "arg0", **names)
+        eq_(names, func.names)
+    
+    def test_with_default_language_specific_names(self):
+        """
+        Functions can be created with default names in any language.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            default_names = {'fr': "bonjour"}
+        
+        # Appending names:
+        func = GreetingFunction("greet", "arg0", en="hi", es="hola")
+        eq_({'fr': "bonjour", 'en': "hi", 'es': "hola"}, func.names)
+        # Appending and replacing names:
+        func = GreetingFunction("greet", "arg0", fr="salut", es="hola")
+        eq_({'fr': "salut", 'es': "hola"}, func.names)
+    
+    def test_with_default_case_insensitive_names(self):
+        """
+        The default names are case insensitive.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
+        
+        func = GreetingFunction("GREET", "arg0")
+        eq_(func.global_name, "greet")
+        eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
+            GreetingFunction.default_names)
+    
+    def test_checking_supported_operations(self):
+        class GreetingFunction(Function):
+            operations = set(["equality"])
+            
+            default_names = {'fr': "bonjour"}
+            
+            def to_python(self, **helpers):
+                pass
+            
+            def equals(self, value, **helpers):
+                pass
+    
+    @raises(BadOperandError)
+    def test_checking_unsupported_operations(self):
+        class GreetingFunction(Function):
+            operations = set(["equality"])
+            
+            default_names = {'fr': "bonjour"}
+            
+            def to_python(self, **helpers):
+                pass
+    
+    def test_constructor_with_minimum_arguments(self):
+        func = PermissiveFunction("permissive", "this-is-arg0")
+        args = {
+            'arg0': "this-is-arg0",
+            'oarg0': None,
+            'oarg1': 1
+        }
+        eq_(func.arguments, args)
+    
+    def test_constructor_with_one_optional_argument(self):
+        func = PermissiveFunction("permissive", "this-is-arg0",
+                                  "this-is-oarg0")
+        args = {
+            'arg0': "this-is-arg0",
+            'oarg0': "this-is-oarg0",
+            'oarg1': 1
+        }
+        eq_(func.arguments, args)
+    
+    def test_constructor_with_all_arguments(self):
+        func = PermissiveFunction("permissive", "this-is-arg0", "this-is-oarg0",
+                                  "this-is-oarg1")
+        args = {
+            'arg0': "this-is-arg0",
+            'oarg0': "this-is-oarg0",
+            'oarg1': "this-is-oarg1"
+        }
+        eq_(func.arguments, args)
+    
+    @raises(BadCallError)
+    def test_constructor_with_few_arguments(self):
+        PermissiveFunction("permissive", )
+    
+    @raises(BadCallError)
+    def test_constructor_with_many_arguments(self):
+        PermissiveFunction("permissive", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+    
+    def test_no_argument_validation_by_default(self):
+        """
+        Arguments must be explicitly validated by the function.
+        
+        This is, their .check_arguments() method must be overriden.
+        
+        """
+        class MockFunction(Function):
+            bypass_operation_check = True
+        assert_raises(NotImplementedError, MockFunction, "mock")
+    
+    def test_arity(self):
+        """
+        The arity and all the arguments for a function must be calculated
+        right after it's been defined.
+        
+        """
+        # Nullary function:
+        class NullaryFunction(Function):
+            bypass_operation_check = True
+        eq_(NullaryFunction.arity, 0)
+        eq_(NullaryFunction.all_args, ())
+        
+        # Unary function:
+        class UnaryFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("arg1", )
+        eq_(UnaryFunction.arity, 1)
+        eq_(UnaryFunction.all_args, ("arg1", ))
+        
+        # Unary function, with its argument optional:
+        class OptionalUnaryFunction(Function):
+            bypass_operation_check = True
+            optional_arguments = {'oarg1': None}
+        eq_(OptionalUnaryFunction.arity, 1)
+        eq_(OptionalUnaryFunction.all_args, ("oarg1", ))
+        
+        # Binary function:
+        class BinaryFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("arg1", )
+            optional_arguments = {'oarg1': None}
+        eq_(BinaryFunction.arity, 2)
+        eq_(BinaryFunction.all_args, ("arg1", "oarg1"))
+    
+    @raises(BadFunctionError)
+    def test_duplicate_arguments(self):
+        """An optional argument shouldn't share its name with a required one"""
+        class FunctionWithDuplicateArguments(Function):
+            required_arguments = ("arg1", )
+            optional_arguments = {'arg1': None}
+    
+    @raises(BadFunctionError)
+    def test_duplicate_required_arguments(self):
+        """Two required arguments must not share the same name."""
+        class FunctionWithDuplicateArguments(Function):
+            required_arguments = ("arg1", "arg1")
+    
+    def test_equivalence(self):
+        """
+        Two functions are equivalent if they share the name, the required
+        and optional arguments, and the actual arguments passed.
+        
+        """
+        class FooFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("abc", )
+            optional_arguments = {"xyz": "123"}
+            def check_arguments(self): pass
+        
+        func1 = FooFunction("foo", "whatever")
+        func2 = FooFunction("foo", "whatever")
+        func3 = TrafficViolationFunc("traffic_violation", "pedestrians",
+                                     es=u"peatón")
+        func4 = PermissiveFunction("permissive", "foo")
+        func5 = FooFunction("foo", "something")
+        func6 = FooFunction("bar", "whatever")
+        func7 = TrafficViolationFunc("TRAFFIC_VIOLATION", "pedestrians",
+                                     es=u"PEATÓN")
+        
+        func1.check_equivalence(func2)
+        func2.check_equivalence(func1)
+        func3.check_equivalence(func7)
+        func7.check_equivalence(func3)
+        
+        assert_raises(AssertionError, func1.check_equivalence, func3)
+        assert_raises(AssertionError, func1.check_equivalence, func4)
+        assert_raises(AssertionError, func1.check_equivalence, func5)
+        assert_raises(AssertionError, func1.check_equivalence, func6)
+        assert_raises(AssertionError, func1.check_equivalence, func7)
+        assert_raises(AssertionError, func2.check_equivalence, func3)
+        assert_raises(AssertionError, func2.check_equivalence, func4)
+        assert_raises(AssertionError, func2.check_equivalence, func5)
+        assert_raises(AssertionError, func2.check_equivalence, func6)
+        assert_raises(AssertionError, func2.check_equivalence, func7)
+        assert_raises(AssertionError, func3.check_equivalence, func1)
+        assert_raises(AssertionError, func3.check_equivalence, func2)
+        assert_raises(AssertionError, func3.check_equivalence, func4)
+        assert_raises(AssertionError, func3.check_equivalence, func5)
+        assert_raises(AssertionError, func3.check_equivalence, func6)
+        assert_raises(AssertionError, func4.check_equivalence, func1)
+        assert_raises(AssertionError, func4.check_equivalence, func2)
+        assert_raises(AssertionError, func4.check_equivalence, func3)
+        assert_raises(AssertionError, func4.check_equivalence, func5)
+        assert_raises(AssertionError, func4.check_equivalence, func6)
+        assert_raises(AssertionError, func4.check_equivalence, func7)
+        assert_raises(AssertionError, func5.check_equivalence, func1)
+        assert_raises(AssertionError, func5.check_equivalence, func2)
+        assert_raises(AssertionError, func5.check_equivalence, func3)
+        assert_raises(AssertionError, func5.check_equivalence, func4)
+        assert_raises(AssertionError, func5.check_equivalence, func6)
+        assert_raises(AssertionError, func5.check_equivalence, func7)
+        assert_raises(AssertionError, func6.check_equivalence, func1)
+        assert_raises(AssertionError, func6.check_equivalence, func2)
+        assert_raises(AssertionError, func6.check_equivalence, func3)
+        assert_raises(AssertionError, func6.check_equivalence, func4)
+        assert_raises(AssertionError, func6.check_equivalence, func5)
+        assert_raises(AssertionError, func6.check_equivalence, func7)
+        assert_raises(AssertionError, func7.check_equivalence, func1)
+        assert_raises(AssertionError, func7.check_equivalence, func2)
+        assert_raises(AssertionError, func7.check_equivalence, func4)
+        assert_raises(AssertionError, func7.check_equivalence, func5)
+        assert_raises(AssertionError, func7.check_equivalence, func6)
+        
+        ok_(func1 == func2)
+        ok_(func2 == func1)
+        ok_(func3 == func7)
+        ok_(func7 == func3)
+        ok_(func1 != func3)
+        ok_(func1 != func4)
+        ok_(func1 != func5)
+        ok_(func1 != func6)
+        ok_(func1 != func7)
+        ok_(func2 != func3)
+        ok_(func2 != func4)
+        ok_(func2 != func5)
+        ok_(func2 != func6)
+        ok_(func2 != func7)
+        ok_(func3 != func1)
+        ok_(func3 != func2)
+        ok_(func3 != func4)
+        ok_(func3 != func5)
+        ok_(func3 != func6)
+        ok_(func4 != func1)
+        ok_(func4 != func2)
+        ok_(func4 != func3)
+        ok_(func4 != func5)
+        ok_(func4 != func6)
+        ok_(func4 != func7)
+        ok_(func5 != func1)
+        ok_(func5 != func2)
+        ok_(func5 != func3)
+        ok_(func5 != func4)
+        ok_(func5 != func6)
+        ok_(func5 != func7)
+        ok_(func6 != func1)
+        ok_(func6 != func2)
+        ok_(func6 != func3)
+        ok_(func6 != func4)
+        ok_(func6 != func5)
+        ok_(func6 != func7)
+        ok_(func7 != func1)
+        ok_(func7 != func2)
+        ok_(func7 != func4)
+        ok_(func7 != func5)
+        ok_(func7 != func6)
+    
+    def test_string(self):
+        func = PermissiveFunction("perm", "foo", u"bár")
+        eq_(unicode(func), u"perm(arg0=foo, oarg0=bár, oarg1=1)")
+        eq_(str(func), "perm(arg0=foo, oarg0=b\xc3\xa1r, oarg1=1)")
 
 
 #{ Constants tests
