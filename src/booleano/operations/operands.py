@@ -229,7 +229,7 @@ class _VariableMeta(_OperandMeta):
 
 class Variable(Operand):
     """
-    User-defined variable.
+    Developer-defined variable.
     
     """
     
@@ -346,7 +346,7 @@ class _FunctionMeta(_VariableMeta):
 
 class Function(Variable):
     """
-    Base class for user-defined, n-ary functions.
+    Base class for developer-defined, n-ary functions.
     
     Subclasses must override :meth:`check_arguments` to verify the validity of
     the arguments, or to do nothing if it's not necessary.
