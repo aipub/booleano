@@ -264,7 +264,7 @@ class Variable(Operand):
         elif self.default_global_name:
             self.global_name = self.default_global_name
         else:
-            raise BadOperandError("%s doesn't have a default global name; set"
+            raise BadOperandError("%s doesn't have a default global name; set "
                                   "one explicitly" % self.__class__.__name__)
         self.names = self.default_names.copy()
         # Convert the ``names`` to lower-case, before updating the resulting
