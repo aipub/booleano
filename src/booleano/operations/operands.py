@@ -311,6 +311,9 @@ class _FunctionMeta(_VariableMeta):
         Calculate the arity of the function and create an utility variable
         which will contain all the valid arguments.
         
+        Also checks that there are no duplicate arguments and that each argument
+        is an operand.
+        
         """
         # A few short-cuts:
         req_args = ns.get("required_arguments", cls.required_arguments)
@@ -321,12 +324,19 @@ class _FunctionMeta(_VariableMeta):
         if len(rargs_set) != len(req_args) or rargs_set & oargs_set:
             raise BadFunctionError('Function "%s" has duplicate arguments'
                                    % name)
+        # Checking that the default values for the optional arguments are all
+        # operands:
+        for (key, value) in opt_args.items():
+            if not isinstance(value, Operand):
+                raise BadFunctionError('Default value for argument "%s" in '
+                                       'function %s is not an operand' %
+                                       (key, name))
         # Merging all the arguments into a single list for convenience:
         cls.all_args = tuple(rargs_set | oargs_set)
         # Finding the arity:
         cls.arity = len(cls.all_args)
         # Calling the parent constructor:
-        _VariableMeta.__init__(cls, name, bases, ns)
+        super(_FunctionMeta, cls).__init__(name, bases, ns)
 
 
 class Function(Variable):
@@ -414,13 +424,18 @@ class Function(Variable):
         for this functions in various grammars.
         
         """
-        Variable.__init__(self, global_name, **names)
+        super(Function, self).__init__(global_name, **names)
         # Checking the amount of arguments received:
         argn = len(arguments)
         if argn < len(self.required_arguments):
             raise BadCallError("Too few arguments")
         if argn > self.arity:
             raise BadCallError("Too many arguments")
+        # Checking that all the arguments are operands:
+        for argument in arguments:
+            if not isinstance(argument, Operand):
+                raise BadCallError('Argument "%s" is not an operand' %
+                                   argument)
         # Storing their values:
         self.arguments = self.optional_arguments.copy()
         for arg_pos in range(len(arguments)):
@@ -462,7 +477,7 @@ class Function(Variable):
     
     def __unicode__(self):
         """Return the Unicode representation for this function."""
-        args = ["%s=%s" % (k, v) for (k, v) in self.arguments.items()]
+        args = [u'%s=%s' % (k, v) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
         return "%s(%s)" % (self.global_name, args)
 

@@ -424,7 +424,7 @@ class TestFunction(object):
     """Tests for the base class of user-defined function operators."""
     
     def test_no_language_specific_names(self):
-        func = PermissiveFunction("greeting", "arg0")
+        func = PermissiveFunction("greeting", String("arg0"))
         eq_("greeting", func.global_name)
         eq_({}, func.names)
     
@@ -438,7 +438,7 @@ class TestFunction(object):
             'en': "hi",
             'es': "hello",
         }
-        func = PermissiveFunction("greeting", "arg0", **names)
+        func = PermissiveFunction("greeting", String("arg0"), **names)
         eq_(names, func.names)
     
     def test_with_default_language_specific_names(self):
@@ -450,10 +450,10 @@ class TestFunction(object):
             default_names = {'fr': "bonjour"}
         
         # Appending names:
-        func = GreetingFunction("greet", "arg0", en="hi", es="hola")
+        func = GreetingFunction("greet", String("arg0"), en="hi", es="hola")
         eq_({'fr': "bonjour", 'en': "hi", 'es': "hola"}, func.names)
         # Appending and replacing names:
-        func = GreetingFunction("greet", "arg0", fr="salut", es="hola")
+        func = GreetingFunction("greet", String("arg0"), fr="salut", es="hola")
         eq_({'fr': "salut", 'es': "hola"}, func.names)
     
     def test_with_default_case_insensitive_names(self):
@@ -464,7 +464,7 @@ class TestFunction(object):
         class GreetingFunction(PermissiveFunction):
             default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
         
-        func = GreetingFunction("GREET", "arg0")
+        func = GreetingFunction("GREET", String("arg0"))
         eq_(func.global_name, "greet")
         eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
             GreetingFunction.default_names)
@@ -478,10 +478,10 @@ class TestFunction(object):
             default_global_name = "greeting"
         
         # Using the default global name:
-        greeting_func = GreetingFunction(None, "arg0")
+        greeting_func = GreetingFunction(None, String("arg0"))
         eq_("greeting", greeting_func.global_name)
         # Overriding the global name:
-        greeting_func = GreetingFunction("greet", "arg0")
+        greeting_func = GreetingFunction("greet", String("arg0"))
         eq_("greet", greeting_func.global_name)
     
     def test_with_default_case_insensitive_global_names(self):
@@ -491,10 +491,10 @@ class TestFunction(object):
         
         eq_(GreetingFunction.default_global_name, "greeting")
         # Using the default global name:
-        greeting_func = GreetingFunction(None, "arg0")
+        greeting_func = GreetingFunction(None, String("arg0"))
         eq_("greeting", greeting_func.global_name)
         # Overriding the global name:
-        greeting_func = GreetingFunction("GREET", "arg0")
+        greeting_func = GreetingFunction("GREET", String("arg0"))
         eq_("greet", greeting_func.global_name)
     
     def test_checking_supported_operations(self):
@@ -520,31 +520,34 @@ class TestFunction(object):
                 pass
     
     def test_constructor_with_minimum_arguments(self):
-        func = PermissiveFunction("permissive", "this-is-arg0")
+        func = PermissiveFunction("permissive", String("this-is-arg0"))
         args = {
-            'arg0': "this-is-arg0",
-            'oarg0': None,
-            'oarg1': 1
+            'arg0': String("this-is-arg0"),
+            'oarg0': Set(),
+            'oarg1': Number(1),
         }
         eq_(func.arguments, args)
     
     def test_constructor_with_one_optional_argument(self):
-        func = PermissiveFunction("permissive", "this-is-arg0",
-                                  "this-is-oarg0")
+        func = PermissiveFunction("permissive", String("this-is-arg0"),
+                                  String("this-is-oarg0"))
         args = {
-            'arg0': "this-is-arg0",
-            'oarg0': "this-is-oarg0",
-            'oarg1': 1
+            'arg0': String("this-is-arg0"),
+            'oarg0': String("this-is-oarg0"),
+            'oarg1': Number(1),
         }
         eq_(func.arguments, args)
     
     def test_constructor_with_all_arguments(self):
-        func = PermissiveFunction("permissive", "this-is-arg0", "this-is-oarg0",
-                                  "this-is-oarg1")
+        func = PermissiveFunction("permissive",
+            String("this-is-arg0"),
+            String("this-is-oarg0"),
+            String("this-is-oarg1"),
+        )
         args = {
-            'arg0': "this-is-arg0",
-            'oarg0': "this-is-oarg0",
-            'oarg1': "this-is-oarg1"
+            'arg0': String("this-is-arg0"),
+            'oarg0': String("this-is-oarg0"),
+            'oarg1': String("this-is-oarg1"),
         }
         eq_(func.arguments, args)
     
@@ -554,7 +557,23 @@ class TestFunction(object):
     
     @raises(BadCallError)
     def test_constructor_with_many_arguments(self):
-        PermissiveFunction("permissive", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+        PermissiveFunction("permissive",
+            Number(0),
+            Number(1),
+            Number(2),
+            Number(3),
+            Number(4),
+            Number(5),
+            Number(6),
+            Number(7),
+            Number(8),
+            Number(9),
+        )
+    
+    def test_constructor_accepts_operands(self):
+        """Only operands are valid function arguments."""
+        PermissiveFunction("permissive", Number(0), Number(1))
+        assert_raises(BadCallError, PermissiveFunction, "permissive", 0, 1)
     
     def test_no_argument_validation_by_default(self):
         """
@@ -589,7 +608,7 @@ class TestFunction(object):
         # Unary function, with its argument optional:
         class OptionalUnaryFunction(Function):
             bypass_operation_check = True
-            optional_arguments = {'oarg1': None}
+            optional_arguments = {'oarg1': Set()}
         eq_(OptionalUnaryFunction.arity, 1)
         eq_(OptionalUnaryFunction.all_args, ("oarg1", ))
         
@@ -597,7 +616,7 @@ class TestFunction(object):
         class BinaryFunction(Function):
             bypass_operation_check = True
             required_arguments = ("arg1", )
-            optional_arguments = {'oarg1': None}
+            optional_arguments = {'oarg1': Set()}
         eq_(BinaryFunction.arity, 2)
         eq_(BinaryFunction.all_args, ("arg1", "oarg1"))
     
@@ -614,6 +633,13 @@ class TestFunction(object):
         class FunctionWithDuplicateArguments(Function):
             required_arguments = ("arg1", "arg1")
     
+    @raises(BadFunctionError)
+    def test_non_operand_default_arguments(self):
+        """Default values for the optional arguments must be operands."""
+        class FunctionWithNonOperands(Function):
+            bypass_operation_check = True
+            optional_arguments = {'arg': 1}
+    
     def test_equivalence(self):
         """
         Two functions are equivalent if they share the name, the required
@@ -623,17 +649,17 @@ class TestFunction(object):
         class FooFunction(Function):
             bypass_operation_check = True
             required_arguments = ("abc", )
-            optional_arguments = {"xyz": "123"}
+            optional_arguments = {"xyz": String("123")}
             def check_arguments(self): pass
         
-        func1 = FooFunction("foo", "whatever")
-        func2 = FooFunction("foo", "whatever")
-        func3 = TrafficViolationFunc("traffic_violation", "pedestrians",
+        func1 = FooFunction("foo", String("whatever"))
+        func2 = FooFunction("foo", String("whatever"))
+        func3 = TrafficViolationFunc("traffic_violation", String("pedestrians"),
                                      es=u"peatón")
-        func4 = PermissiveFunction("permissive", "foo")
-        func5 = FooFunction("foo", "something")
-        func6 = FooFunction("bar", "whatever")
-        func7 = TrafficViolationFunc("TRAFFIC_VIOLATION", "pedestrians",
+        func4 = PermissiveFunction("permissive", String("foo"))
+        func5 = FooFunction("foo", String("something"))
+        func6 = FooFunction("bar", String("whatever"))
+        func7 = TrafficViolationFunc("TRAFFIC_VIOLATION", String("pedestrians"),
                                      es=u"PEATÓN")
         
         func1.check_equivalence(func2)
@@ -724,9 +750,9 @@ class TestFunction(object):
         ok_(func7 != func6)
     
     def test_string(self):
-        func = PermissiveFunction("perm", "foo", u"bár")
-        eq_(unicode(func), u"perm(arg0=foo, oarg0=bár, oarg1=1)")
-        eq_(str(func), "perm(arg0=foo, oarg0=b\xc3\xa1r, oarg1=1)")
+        func = PermissiveFunction("perm", String("foo"), String(u"bár"))
+        eq_(unicode(func), u'perm(arg0="foo", oarg0="bár", oarg1=1.0)')
+        eq_(str(func), 'perm(arg0="foo", oarg0="b\xc3\xa1r", oarg1=1.0)')
 
 
 #{ Constants tests

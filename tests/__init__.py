@@ -33,7 +33,7 @@ This module contains utilities shared among the whole test suite.
 
 """
 
-from booleano.operations.operands import Variable, Function
+from booleano.operations.operands import String, Number, Set, Variable, Function
 from booleano.exc import InvalidOperationError, BadCallError
 
 
@@ -142,7 +142,7 @@ class PermissiveFunction(Function):
     
     required_arguments = ("arg0", )
     
-    optional_arguments = {'oarg0': None, 'oarg1': 1}
+    optional_arguments = {'oarg0': Set(), 'oarg1': Number(1)}
     
     def check_arguments(self):
         """Do nothing -- Allow any kind of arguments."""
@@ -167,7 +167,9 @@ class TrafficViolationFunc(Function):
     required_arguments = ("light", )
     
     def check_arguments(self):
-        if self.arguments['light'] not in ("pedestrians", "drivers"):
+        assert isinstance(self.arguments['light'], String)
+        light = self.arguments['light'].constant_value
+        if light not in ("pedestrians", "drivers"):
             raise BadCallError("Only pedestrians and drivers have lights")
     
     def to_python(self, **helpers):
