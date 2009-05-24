@@ -133,6 +133,21 @@ class Operand(ParseTreeNode):
         raise NotImplementedError
     to_python.implemented = False
     
+    def check_operation(self, operation):
+        """
+        Check that this operand supports ``operation``.
+        
+        :param operation: The operation this operand must support.
+        :type operation: basestring
+        :raises InvalidOperationError: If this operand doesn't support
+            ``operation``.
+        
+        """
+        if operation in self.operations:
+            return
+        raise InvalidOperationError('Operand "%s" does not support operation '
+                                    '"%s"' % (repr(self), operation))
+    
     #{ Unary operations
     
     def get_logical_value(self, **helpers):

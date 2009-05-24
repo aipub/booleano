@@ -55,24 +55,6 @@ class Operator(ParseTreeNode):
         
         """
         raise NotImplementedError
-    
-    @classmethod
-    def check_operation(cls, operand, operation):
-        """
-        Check that ``operand`` supports ``operation``.
-        
-        :param operand: The operand in question.
-        :type operand: :class:`booleano.operations.operands.Operand`
-        :param operation: The operation ``operand`` must support.
-        :type operation: basestring
-        :raises InvalidOperationError: If ``operand doesn't support
-            ``operation``.
-        
-        """
-        if operation in operand.operations:
-            return
-        raise InvalidOperationError('Operand "%s" does not support operation '
-                                    '"%s"' % (repr(operand), operation))
 
 
 class UnaryOperator(Operator):
@@ -255,7 +237,7 @@ class TruthOperator(UnaryOperator):
             boolean operations.
         
         """
-        self.check_operation(operand, "boolean")
+        operand.check_operation("boolean")
         super(TruthOperator, self).__init__(operand)
     
     def __call__(self, **helpers):
@@ -394,7 +376,7 @@ class EqualOperator(BinaryOperator):
     def __init__(self, left_operand, right_operand):
         """Check that the master operand supports equality operations."""
         super(EqualOperator, self).__init__(left_operand, right_operand)
-        self.check_operation(self.master_operand, "equality")
+        self.master_operand.check_operation("equality")
     
     def __call__(self, **helpers):
         value = self.slave_operand.to_python(**helpers)
@@ -445,7 +427,7 @@ class _InequalityOperator(BinaryOperator):
         """
         super(_InequalityOperator, self).__init__(left_operand, right_operand)
         
-        self.check_operation(self.master_operand, "inequality")
+        self.master_operand.check_operation("inequality")
         
         if left_operand != self.master_operand:
             # The operands have been rearranged! Let's invert the comparison:
@@ -539,7 +521,7 @@ class _SetOperator(BinaryOperator):
         
         """
         super(_SetOperator, self).__init__(left_operand, right_operand)
-        self.check_operation(self.master_operand, "membership")
+        self.master_operand.check_operation("membership")
     
     def organize_operands(self, left_operand, right_operand):
         """Set the set (right-hand operand) as the master operand."""
