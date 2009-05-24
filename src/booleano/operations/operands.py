@@ -249,6 +249,8 @@ class Variable(Operand):
         :param global_name: The global name used by this variable; if not set,
             the :attr:`default_global_name` will be used.
         :type global_name: basestring
+        :raises BadOperandError: If the variable class doesn't set a default
+            global name and ``global_name`` is not set either.
         
         Additional keyword arguments represent the other names this variable
         can take in different languages.
@@ -259,8 +261,11 @@ class Variable(Operand):
         """
         if global_name:
             self.global_name = global_name.lower()
-        else:
+        elif self.default_global_name:
             self.global_name = self.default_global_name
+        else:
+            raise BadOperandError("%s doesn't have a default global name; set"
+                                  "one explicitly" % self.__class__.__name__)
         self.names = self.default_names.copy()
         # Convert the ``names`` to lower-case, before updating the resulting
         # names:
@@ -419,6 +424,8 @@ class Function(Variable):
         :raises BadCallError: If :meth:`check_arguments` finds that the
             ``arguments`` are invalid, or if few arguments are passed, or
             if too much arguments are passed.
+        :raises BadOperandError: If the function class doesn't set a default
+            global name and ``global_name`` is not set either.
         
         Additional keyword arguments will be used to find the alternative names
         for this functions in various grammars.
