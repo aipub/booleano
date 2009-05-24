@@ -221,6 +221,8 @@ class _VariableMeta(_OperandMeta):
     def __init__(cls, name, bases, ns):
         """Lower-case the default names for the node."""
         _OperandMeta.__init__(cls, name, bases, ns)
+        if cls.default_global_name:
+            cls.default_global_name = cls.default_global_name.lower()
         for (locale, name) in cls.default_names.items():
             cls.default_names[locale] = name.lower()
 
@@ -236,11 +238,17 @@ class Variable(Operand):
     # Only actual variables should be checked.
     bypass_operation_check = True
     
+    default_global_name = None
+    
     default_names = {}
     
-    def __init__(self, global_name, **names):
+    def __init__(self, global_name=None, **names):
         """
         Create the variable using ``global_name`` as it's default name.
+        
+        :param global_name: The global name used by this variable; if not set,
+            the :attr:`default_global_name` will be used.
+        :type global_name: basestring
         
         Additional keyword arguments represent the other names this variable
         can take in different languages.
@@ -249,7 +257,10 @@ class Variable(Operand):
             ``global_name`` does *not* have to be an English/ASCII string.
         
         """
-        self.global_name = global_name.lower()
+        if global_name:
+            self.global_name = global_name.lower()
+        else:
+            self.global_name = self.default_global_name
         self.names = self.default_names.copy()
         # Convert the ``names`` to lower-case, before updating the resulting
         # names:
@@ -389,11 +400,12 @@ class Function(Variable):
     
     optional_arguments = {}
     
-    def __init__(self, global_name, *arguments, **names):
+    def __init__(self, global_name=None, *arguments, **names):
         """
         Store the ``arguments`` and validate them.
         
-        :param global_name: The global name for this function.
+        :param global_name: The global name for this function; if not set,
+            the :attr:`default_global_name` will be used..
         :raises BadCallError: If :meth:`check_arguments` finds that the
             ``arguments`` are invalid, or if few arguments are passed, or
             if too much arguments are passed.

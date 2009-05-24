@@ -314,6 +314,36 @@ class TestVariable(object):
         eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
             GreetingVariable.default_names)
     
+    def test_with_default_global_names(self):
+        """
+        Variables can be created with a default global name.
+        
+        """
+        class GreetingVariable(Variable):
+            bypass_operation_check = True
+            default_global_name = "greeting"
+        
+        # Using the default global name:
+        greeting_var = GreetingVariable()
+        eq_("greeting", greeting_var.global_name)
+        # Overriding the global name:
+        greeting_var = GreetingVariable("greet")
+        eq_("greet", greeting_var.global_name)
+    
+    def test_with_default_case_insensitive_global_names(self):
+        """The default global names are case insensitive."""
+        class GreetingVariable(Variable):
+            bypass_operation_check = True
+            default_global_name = "GREETING"
+        
+        eq_(GreetingVariable.default_global_name, "greeting")
+        # Using the default global name:
+        greeting_var = GreetingVariable()
+        eq_("greeting", greeting_var.global_name)
+        # Overriding the global name:
+        greeting_var = GreetingVariable("GREET")
+        eq_("greet", greeting_var.global_name)
+    
     def test_equivalence(self):
         """Two variables are equivalent if they have the same names."""
         var1 = TrafficLightVar("traffic_light", es=u"semáforo")
@@ -438,6 +468,34 @@ class TestFunction(object):
         eq_(func.global_name, "greet")
         eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
             GreetingFunction.default_names)
+    
+    def test_with_default_global_names(self):
+        """
+        Functions can be created with a default global name.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            default_global_name = "greeting"
+        
+        # Using the default global name:
+        greeting_func = GreetingFunction(None, "arg0")
+        eq_("greeting", greeting_func.global_name)
+        # Overriding the global name:
+        greeting_func = GreetingFunction("greet", "arg0")
+        eq_("greet", greeting_func.global_name)
+    
+    def test_with_default_case_insensitive_global_names(self):
+        """The default global names are case insensitive."""
+        class GreetingFunction(PermissiveFunction):
+            default_global_name = "GREETING"
+        
+        eq_(GreetingFunction.default_global_name, "greeting")
+        # Using the default global name:
+        greeting_func = GreetingFunction(None, "arg0")
+        eq_("greeting", greeting_func.global_name)
+        # Overriding the global name:
+        greeting_func = GreetingFunction("GREET", "arg0")
+        eq_("greet", greeting_func.global_name)
     
     def test_checking_supported_operations(self):
         class GreetingFunction(Function):
