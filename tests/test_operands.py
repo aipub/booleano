@@ -330,6 +330,15 @@ class TestVariable(object):
         greeting_var = GreetingVariable("greet")
         eq_("greet", greeting_var.global_name)
     
+    def test_without_global_name(self):
+        """
+        Variables cannot be created without a global name.
+        
+        """
+        class GreetingVariable(Variable):
+            bypass_operation_check = True
+        assert_raises(BadOperandError, GreetingVariable)
+    
     def test_with_default_case_insensitive_global_names(self):
         """The default global names are case insensitive."""
         class GreetingVariable(Variable):
@@ -483,6 +492,15 @@ class TestFunction(object):
         # Overriding the global name:
         greeting_func = GreetingFunction("greet", String("arg0"))
         eq_("greet", greeting_func.global_name)
+    
+    def test_without_global_name(self):
+        """
+        Functions cannot be created without a global name.
+        
+        """
+        class GreetingFunction(PermissiveFunction):
+            bypass_operation_check = True
+        assert_raises(BadOperandError, GreetingFunction, None, String("arg0"))
     
     def test_with_default_case_insensitive_global_names(self):
         """The default global names are case insensitive."""
