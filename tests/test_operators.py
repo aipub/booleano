@@ -32,12 +32,24 @@ Tests for the operands.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations.operators import *
+from booleano.operations.operators import (TruthOperator, NotOperator,
+    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
+    LessThanOperator, GreaterThanOperator, LessEqualOperator,
+    GreaterEqualOperator, ContainsOperator, SubsetOperator, Operator)
 from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad,
                    DriversAwaitingGreenLightVar)
+
+
+class TestOperator(object):
+    """Tests for the base Operator class."""
+    
+    def test_no_evaluation_implemented(self):
+        """Evaluations must not be implemented by default."""
+        op = Operator()
+        assert_raises(NotImplementedError, op)
 
 
 class TestTruthOperator(object):
