@@ -32,10 +32,8 @@ Tests for the operands.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations import (TruthOperator, NotOperator, AndOperator,
-    OrOperator, XorOperator, EqualOperator, NotEqualOperator,
-    LessThanOperator, GreaterThanOperator, LessEqualOperator,
-    GreaterEqualOperator, ContainsOperator, SubsetOperator)
+from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset)
 from booleano.operations.operators import Operator
 from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
@@ -53,23 +51,23 @@ class TestOperator(object):
         assert_raises(NotImplementedError, op)
 
 
-class TestTruthOperator(object):
-    """Tests for the :class:`TruthOperator`."""
+class TestTruth(object):
+    """Tests for the :class:`Truth`."""
     
     def test_constructor_with_boolean_operand(self):
         traffic_light = TrafficLightVar("traffic-light")
-        TruthOperator(traffic_light)
+        Truth(traffic_light)
     
     @raises(InvalidOperationError)
     def test_constructor_with_non_boolean_operand(self):
         # Constants cannot act as booleans
         constant = String("Paris")
-        TruthOperator(constant)
+        Truth(constant)
     
     def test_evaluation(self):
         # Setup:
         traffic_light = TrafficLightVar("traffic-light")
-        operation = TruthOperator(traffic_light)
+        operation = Truth(traffic_light)
         # Evaluation:
         ok_(operation( **dict(traffic_light="green") ))
         assert_false(operation( **dict(traffic_light="") ))
@@ -79,9 +77,9 @@ class TestTruthOperator(object):
         Two truth operations are equivalent if they evaluate the same operand.
         
         """
-        op1 = TruthOperator(BoolVar())
-        op2 = TruthOperator(BoolVar())
-        op3 = TruthOperator(PedestriansCrossingRoad())
+        op1 = Truth(BoolVar())
+        op2 = Truth(BoolVar())
+        op3 = Truth(PedestriansCrossingRoad())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -99,34 +97,34 @@ class TestTruthOperator(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op = TruthOperator(BoolVar())
+        op = Truth(BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "TruthOperator(Variable bool)")
+        eq_(as_unicode, "Truth(Variable bool)")
         eq_(as_unicode, str(op))
 
 
-class TestNotOperator(object):
-    """Tests for the :class:`NotOperator`."""
+class TestNot(object):
+    """Tests for the :class:`Not`."""
     
     def test_constructor_with_boolean_operand(self):
         traffic_light = TrafficLightVar("traffic-light")
-        NotOperator(traffic_light)
+        Not(traffic_light)
     
     def test_constructor_with_operator(self):
         """The Not operator must also support operators as operands"""
         traffic_light = TrafficLightVar("traffic-light")
-        NotOperator(TruthOperator(traffic_light))
+        Not(Truth(traffic_light))
     
     @raises(InvalidOperationError)
     def test_constructor_with_non_boolean_operand(self):
         # Constants cannot act as booleans
         constant = String("Paris")
-        NotOperator(constant)
+        Not(constant)
     
     def test_evaluation(self):
         # Setup:
         traffic_light = TrafficLightVar("traffic-light")
-        operation = NotOperator(traffic_light)
+        operation = Not(traffic_light)
         # Evaluation:
         ok_(operation( **dict(traffic_light="") ))
         assert_false(operation( **dict(traffic_light="green") ))
@@ -137,9 +135,9 @@ class TestNotOperator(object):
         operand.
         
         """
-        op1 = NotOperator(BoolVar())
-        op2 = NotOperator(BoolVar())
-        op3 = NotOperator(PedestriansCrossingRoad())
+        op1 = Not(BoolVar())
+        op2 = Not(BoolVar())
+        op3 = Not(PedestriansCrossingRoad())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -157,29 +155,29 @@ class TestNotOperator(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op1 = NotOperator(BoolVar())
-        op2 = NotOperator(AndOperator(BoolVar(), BoolVar()))
+        op1 = Not(BoolVar())
+        op2 = Not(And(BoolVar(), BoolVar()))
         as_unicode1 = unicode(op1)
         as_unicode2 = unicode(op2)
-        eq_(as_unicode1, "NotOperator(Variable bool)")
+        eq_(as_unicode1, "Not(Variable bool)")
         eq_(as_unicode1, str(op1))
         eq_(as_unicode2,
-            "NotOperator(AndOperator(Variable bool, Variable bool))")
+            "Not(And(Variable bool, Variable bool))")
         eq_(as_unicode2, str(op2))
 
 
-class TestAndOperator(object):
+class TestAnd(object):
     """Tests for the And operator."""
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        And(BoolVar(), TrafficLightVar("traffic-light"))
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        AndOperator(
-            NotOperator(BoolVar()),
-            NotOperator(TrafficLightVar("traffic-light"))
+        And(
+            Not(BoolVar()),
+            Not(TrafficLightVar("traffic-light"))
         )
     
     def test_constructor_with_mixed_operands(self):
@@ -187,19 +185,19 @@ class TestAndOperator(object):
         The constructor must support operators and actual operands as arguments.
         
         """
-        AndOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
-        AndOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+        And(BoolVar(), Not(TrafficLightVar("traffic-light")))
+        And(Not(BoolVar()), TrafficLightVar("traffic-light"))
     
     def test_with_both_results_as_true(self):
-        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = AndOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
@@ -210,15 +208,15 @@ class TestAndOperator(object):
         """
         op1 = BoolVar()
         op2 = BoolVar()
-        AndOperator(op1, op2)(bool=False)
+        And(op1, op2)(bool=False)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
     
     def test_equivalent(self):
         """Two conjunctions are equivalent if they have the same operands."""
-        op1 = AndOperator(BoolVar(), PedestriansCrossingRoad())
-        op2 = AndOperator(PedestriansCrossingRoad(), BoolVar())
-        op3 = AndOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        op1 = And(BoolVar(), PedestriansCrossingRoad())
+        op2 = And(PedestriansCrossingRoad(), BoolVar())
+        op3 = And(DriversAwaitingGreenLightVar(), BoolVar())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -236,24 +234,24 @@ class TestAndOperator(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op = AndOperator(BoolVar(), BoolVar())
+        op = And(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "AndOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, "And(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
 
 
-class TestOrOperator(object):
+class TestOr(object):
     """Tests for the Or operator."""
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        Or(BoolVar(), TrafficLightVar("traffic-light"))
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        OrOperator(
-            NotOperator(BoolVar()),
-            NotOperator(TrafficLightVar("traffic-light"))
+        Or(
+            Not(BoolVar()),
+            Not(TrafficLightVar("traffic-light"))
         )
     
     def test_constructor_with_mixed_operands(self):
@@ -261,19 +259,19 @@ class TestOrOperator(object):
         The constructor must support operators and actual operands as arguments.
         
         """
-        OrOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
-        OrOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+        Or(BoolVar(), Not(TrafficLightVar("traffic-light")))
+        Or(Not(BoolVar()), TrafficLightVar("traffic-light"))
     
     def test_with_both_results_as_true(self):
-        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = OrOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
@@ -284,7 +282,7 @@ class TestOrOperator(object):
         """
         op1 = BoolVar()
         op2 = BoolVar()
-        OrOperator(op1, op2)(bool=True)
+        Or(op1, op2)(bool=True)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
     
@@ -294,9 +292,9 @@ class TestOrOperator(object):
         operands.
         
         """
-        op1 = OrOperator(BoolVar(), PedestriansCrossingRoad())
-        op2 = OrOperator(PedestriansCrossingRoad(), BoolVar())
-        op3 = OrOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        op1 = Or(BoolVar(), PedestriansCrossingRoad())
+        op2 = Or(PedestriansCrossingRoad(), BoolVar())
+        op3 = Or(DriversAwaitingGreenLightVar(), BoolVar())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -314,24 +312,24 @@ class TestOrOperator(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op = OrOperator(BoolVar(), BoolVar())
+        op = Or(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "OrOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, "Or(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
 
 
-class TestXorOperator(object):
+class TestXor(object):
     """Tests for the Xor operator."""
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        Xor(BoolVar(), TrafficLightVar("traffic-light"))
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        XorOperator(
-            NotOperator(BoolVar()),
-            NotOperator(TrafficLightVar("traffic-light"))
+        Xor(
+            Not(BoolVar()),
+            Not(TrafficLightVar("traffic-light"))
         )
     
     def test_constructor_with_mixed_operands(self):
@@ -339,19 +337,19 @@ class TestXorOperator(object):
         The constructor must support operators and actual operands as arguments.
         
         """
-        XorOperator(BoolVar(), NotOperator(TrafficLightVar("traffic-light")))
-        XorOperator(NotOperator(BoolVar()), TrafficLightVar("traffic-light"))
+        Xor(BoolVar(), Not(TrafficLightVar("traffic-light")))
+        Xor(Not(BoolVar()), TrafficLightVar("traffic-light"))
     
     def test_with_both_results_as_true(self):
-        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = XorOperator(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
         ok_(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_equivalent(self):
@@ -360,9 +358,9 @@ class TestXorOperator(object):
         operands.
         
         """
-        op1 = XorOperator(BoolVar(), PedestriansCrossingRoad())
-        op2 = XorOperator(PedestriansCrossingRoad(), BoolVar())
-        op3 = XorOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        op1 = Xor(BoolVar(), PedestriansCrossingRoad())
+        op2 = Xor(PedestriansCrossingRoad(), BoolVar())
+        op3 = Xor(DriversAwaitingGreenLightVar(), BoolVar())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -380,9 +378,9 @@ class TestXorOperator(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op = XorOperator(BoolVar(), BoolVar())
+        op = Xor(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "XorOperator(Variable bool, Variable bool)")
+        eq_(as_unicode, "Xor(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
 
 
@@ -401,7 +399,7 @@ class TestNonConnectiveBinaryOperators(object):
         """The order must not change when the parameters are constant."""
         l_op = String("hola")
         r_op = String("chao")
-        operation = EqualOperator(l_op, r_op)
+        operation = Equal(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -409,7 +407,7 @@ class TestNonConnectiveBinaryOperators(object):
         """The order must not change when the parameters are variable."""
         l_op = BoolVar()
         r_op = BoolVar()
-        operation = EqualOperator(l_op, r_op)
+        operation = Equal(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -421,7 +419,7 @@ class TestNonConnectiveBinaryOperators(object):
         """
         l_op = BoolVar()
         r_op = String("hello")
-        operation = EqualOperator(l_op, r_op)
+        operation = Equal(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -433,7 +431,7 @@ class TestNonConnectiveBinaryOperators(object):
         """
         l_op = String("hello")
         r_op = BoolVar()
-        operation = EqualOperator(l_op, r_op)
+        operation = Equal(l_op, r_op)
         eq_(r_op, operation.master_operand)
         eq_(l_op, operation.slave_operand)
     
@@ -442,9 +440,9 @@ class TestNonConnectiveBinaryOperators(object):
         Two binary operators are equivalent if they have the same operands.
         
         """
-        op1 = EqualOperator(BoolVar(), PedestriansCrossingRoad())
-        op2 = EqualOperator(PedestriansCrossingRoad(), BoolVar())
-        op3 = EqualOperator(DriversAwaitingGreenLightVar(), BoolVar())
+        op1 = Equal(BoolVar(), PedestriansCrossingRoad())
+        op2 = Equal(PedestriansCrossingRoad(), BoolVar())
+        op3 = Equal(DriversAwaitingGreenLightVar(), BoolVar())
         
         op1.check_equivalence(op2)
         op2.check_equivalence(op1)
@@ -462,22 +460,22 @@ class TestNonConnectiveBinaryOperators(object):
         ok_(op3 != op2)
     
     def test_string(self):
-        op = EqualOperator(String(u"qué hora es?"), BoolVar())
-        eq_(unicode(op), u'EqualOperator(Variable bool, "qué hora es?")')
-        eq_(str(op), 'EqualOperator(Variable bool, "qu\xc3\xa9 hora es?")')
+        op = Equal(String(u"qué hora es?"), BoolVar())
+        eq_(unicode(op), u'Equal(Variable bool, "qué hora es?")')
+        eq_(str(op), 'Equal(Variable bool, "qu\xc3\xa9 hora es?")')
 
 
-class TestEqualOperator():
+class TestEqual():
     """Tests for the Equality operator."""
     
     def test_constants_evaluation(self):
-        operation1 = EqualOperator(String("hola"), String("hola"))
-        operation2 = EqualOperator(String("hola"), String("chao"))
+        operation1 = Equal(String("hola"), String("hola"))
+        operation2 = Equal(String("hola"), String("chao"))
         ok_(operation1())
         assert_false(operation2())
     
     def test_variables_evaluation(self):
-        operation = EqualOperator(PedestriansCrossingRoad(),
+        operation = Equal(PedestriansCrossingRoad(),
                                      DriversAwaitingGreenLightVar())
         
         # The pedestrians awaiting the green light to cross the street are
@@ -496,7 +494,7 @@ class TestEqualOperator():
         assert_false(operation(**helpers))
     
     def test_mixed_evaluation(self):
-        operation = EqualOperator(
+        operation = Equal(
             PedestriansCrossingRoad(),
             Set(String("gustavo"), String("carla"))
         )
@@ -510,17 +508,17 @@ class TestEqualOperator():
         assert_false(operation(**helpers))
 
 
-class TestNotEqualOperator():
+class TestNotEqual():
     """Tests for the "not equal" operator."""
     
     def test_constants_evaluation(self):
-        operation1 = NotEqualOperator(String("hola"), String("chao"))
-        operation2 = NotEqualOperator(String("hola"), String("hola"))
+        operation1 = NotEqual(String("hola"), String("chao"))
+        operation2 = NotEqual(String("hola"), String("hola"))
         ok_(operation1())
         assert_false(operation2())
     
     def test_variables_evaluation(self):
-        operation = NotEqualOperator(PedestriansCrossingRoad(),
+        operation = NotEqual(PedestriansCrossingRoad(),
                                      DriversAwaitingGreenLightVar())
         
         # The pedestrians are different from the drivers... That's my universe!
@@ -539,7 +537,7 @@ class TestNotEqualOperator():
         assert_false(operation(**helpers))
     
     def test_mixed_evaluation(self):
-        operation = NotEqualOperator(
+        operation = NotEqual(
             PedestriansCrossingRoad(),
             Set(String("gustavo"), String("carla"))
         )
@@ -558,7 +556,7 @@ class TestInequalities(object):
     Tests for common functionalities in the inequality operators.
     
     Because we shouldn't the base :class:`_InequalityOperator`, we're going to
-    use one of its subclasses: LessThanOperator.
+    use one of its subclasses: LessThan.
     
     """
     
@@ -566,7 +564,7 @@ class TestInequalities(object):
         """The order must not change when the parameters are constant."""
         l_op = Number(3)
         r_op = Number(4)
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -574,7 +572,7 @@ class TestInequalities(object):
         """The order must not change when the parameters are variables."""
         l_op = PedestriansCrossingRoad()
         r_op = DriversAwaitingGreenLightVar()
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
@@ -586,12 +584,12 @@ class TestInequalities(object):
         """
         l_op = PedestriansCrossingRoad()
         r_op = Number(2)
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
 
 
-class TestLessThanOperator(object):
+class TestLessThan(object):
     """Tests for the evaluation of "less than" operations."""
     
     def test_constructor_with_constant_before_variable(self):
@@ -602,26 +600,26 @@ class TestLessThanOperator(object):
         """
         l_op = Number(2)
         r_op = PedestriansCrossingRoad()
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         eq_(r_op, operation.master_operand)
         eq_(l_op, operation.slave_operand)
     
     def test_identical_values(self):
         l_op = Number(3)
         r_op = Number(3)
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         assert_false(operation())
     
     def test_two_constants(self):
         l_op = Number(3)
         r_op = Number(4)
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         ok_(operation())
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
         r_op = NumVar()
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
         helpers = {
@@ -640,7 +638,7 @@ class TestLessThanOperator(object):
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
         r_op = Number(2)
-        operation = LessThanOperator(l_op, r_op)
+        operation = LessThan(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
         helpers = {'pedestrians_crossroad': ("carla", )}
@@ -651,7 +649,7 @@ class TestLessThanOperator(object):
         assert_false(operation(**helpers))
 
 
-class TestGreaterThanOperator(object):
+class TestGreaterThan(object):
     """Tests for the evaluation of "greater than" operations."""
     
     def test_constructor_with_constant_before_variable(self):
@@ -662,26 +660,26 @@ class TestGreaterThanOperator(object):
         """
         l_op = Number(2)
         r_op = PedestriansCrossingRoad()
-        operation = GreaterThanOperator(l_op, r_op)
+        operation = GreaterThan(l_op, r_op)
         eq_(r_op, operation.master_operand)
         eq_(l_op, operation.slave_operand)
     
     def test_identical_values(self):
         l_op = Number(3)
         r_op = Number(3)
-        operation = GreaterThanOperator(l_op, r_op)
+        operation = GreaterThan(l_op, r_op)
         assert_false(operation())
     
     def test_two_constants(self):
         l_op = Number(4)
         r_op = Number(3)
-        operation = GreaterThanOperator(l_op, r_op)
+        operation = GreaterThan(l_op, r_op)
         ok_(operation())
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
         r_op = NumVar()
-        operation = GreaterThanOperator(l_op, r_op)
+        operation = GreaterThan(l_op, r_op)
         
         # |{"carla", "yolmary"}| > 1   <=>   2 > 1
         helpers = {
@@ -700,7 +698,7 @@ class TestGreaterThanOperator(object):
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
         r_op = Number(2)
-        operation = GreaterThanOperator(l_op, r_op)
+        operation = GreaterThan(l_op, r_op)
         
         # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
         helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
@@ -711,25 +709,25 @@ class TestGreaterThanOperator(object):
         assert_false(operation(**helpers))
 
 
-class TestLessEqualOperator(object):
+class TestLessEqual(object):
     """Tests for the evaluation of "less than or equal to" operations."""
     
     def test_identical_values(self):
         l_op = Number(3)
         r_op = Number(3)
-        operation = LessEqualOperator(l_op, r_op)
+        operation = LessEqual(l_op, r_op)
         ok_(operation())
     
     def test_two_constants(self):
         l_op = Number(3)
         r_op = Number(4)
-        operation = LessEqualOperator(l_op, r_op)
+        operation = LessEqual(l_op, r_op)
         ok_(operation())
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
         r_op = NumVar()
-        operation = LessEqualOperator(l_op, r_op)
+        operation = LessEqual(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
         helpers = {
@@ -748,7 +746,7 @@ class TestLessEqualOperator(object):
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
         r_op = Number(2)
-        operation = LessEqualOperator(l_op, r_op)
+        operation = LessEqual(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
         helpers = {'pedestrians_crossroad': ("carla", )}
@@ -759,25 +757,25 @@ class TestLessEqualOperator(object):
         assert_false(operation(**helpers))
 
 
-class TestGreaterEqualOperator(object):
+class TestGreaterEqual(object):
     """Tests for the evaluation of "greater than or equal to" operations."""
     
     def test_identical_values(self):
         l_op = Number(3)
         r_op = Number(3)
-        operation = GreaterEqualOperator(l_op, r_op)
+        operation = GreaterEqual(l_op, r_op)
         ok_(operation())
     
     def test_two_constants(self):
         l_op = Number(4)
         r_op = Number(3)
-        operation = GreaterEqualOperator(l_op, r_op)
+        operation = GreaterEqual(l_op, r_op)
         ok_(operation())
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
         r_op = NumVar()
-        operation = GreaterEqualOperator(l_op, r_op)
+        operation = GreaterEqual(l_op, r_op)
         
         # |{"carla", "yolmary"}| > 1   <=>   2 > 1
         helpers = {
@@ -796,7 +794,7 @@ class TestGreaterEqualOperator(object):
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
         r_op = Number(2)
-        operation = GreaterEqualOperator(l_op, r_op)
+        operation = GreaterEqual(l_op, r_op)
         
         # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
         helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
@@ -807,31 +805,31 @@ class TestGreaterEqualOperator(object):
         assert_false(operation(**helpers))
 
 
-class TestContainsOperator(object):
+class TestContains(object):
     """Tests for the ``∈`` set operator."""
     
     def test_item_and_set(self):
         item = Number(3)
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = ContainsOperator(item, set_)
+        operation = Contains(item, set_)
         eq_(operation.master_operand, set_)
         eq_(operation.slave_operand, item)
     
     def test_item_and_non_set(self):
         item = String("Paris")
         set_ = String("France")
-        assert_raises(InvalidOperationError, ContainsOperator, item, set_)
+        assert_raises(InvalidOperationError, Contains, item, set_)
     
     def test_constant_evaluation(self):
         item = Number(3)
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = ContainsOperator(item, set_)
+        operation = Contains(item, set_)
         ok_(operation())
     
     def test_variable_evaluation(self):
         item = NumVar()
         set_ = PedestriansCrossingRoad()
-        operation = ContainsOperator(item, set_)
+        operation = Contains(item, set_)
         
         # 4 ∈ {"madrid", 4}
         helpers = {
@@ -848,31 +846,31 @@ class TestContainsOperator(object):
         assert_false(operation(**helpers))
 
 
-class TestSubsetOperator(object):
+class TestIsSubset(object):
     """Tests for the ``⊂`` set operator."""
     
     def test_set_and_set(self):
         subset = Set(Number(2), Number(4))
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = SubsetOperator(subset, set_)
+        operation = IsSubset(subset, set_)
         eq_(operation.master_operand, set_)
         eq_(operation.slave_operand, subset)
     
     def test_non_set_and_non_set(self):
         subset = String("Paris")
         set_ = String("France")
-        assert_raises(InvalidOperationError, SubsetOperator, subset, set_)
+        assert_raises(InvalidOperationError, IsSubset, subset, set_)
     
     def test_constant_evaluation(self):
         subset = Set(Number(3), Number(1), Number(7))
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = SubsetOperator(subset, set_)
+        operation = IsSubset(subset, set_)
         ok_(operation())
     
     def test_variable_evaluation(self):
         subset = DriversAwaitingGreenLightVar()
         set_ = PedestriansCrossingRoad()
-        operation = SubsetOperator(subset, set_)
+        operation = IsSubset(subset, set_)
         
         # {"carla"} ⊂ {"carla", "andreina"}
         helpers = {

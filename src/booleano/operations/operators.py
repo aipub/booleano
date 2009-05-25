@@ -34,10 +34,8 @@ from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError
 
-__all__ = ["TruthOperator", "NotOperator", "AndOperator", "OrOperator",
-           "XorOperator", "EqualOperator", "NotEqualOperator",
-           "LessThanOperator", "GreaterThanOperator", "LessEqualOperator",
-           "GreaterEqualOperator", "ContainsOperator", "SubsetOperator"]
+__all__ = ("Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
+    "GreaterThan", "LessEqual", "GreaterEqual", "Contains", "IsSubset", )
 
 
 class Operator(ParseTreeNode):
@@ -198,12 +196,12 @@ class BinaryOperator(Operator):
         truth operation will be ignored in the representation.
         
         """
-        if isinstance(self.master_operand, TruthOperator):
+        if isinstance(self.master_operand, Truth):
             master_operand = self.master_operand.operand
         else:
             master_operand = self.master_operand
             
-        if isinstance(self.slave_operand, TruthOperator):
+        if isinstance(self.slave_operand, Truth):
             slave_operand = self.slave_operand.operand
         else:
             slave_operand = self.slave_operand
@@ -215,7 +213,7 @@ class BinaryOperator(Operator):
 #{ Unary operators
 
 
-class TruthOperator(UnaryOperator):
+class Truth(UnaryOperator):
     """
     The truth function.
     
@@ -238,7 +236,7 @@ class TruthOperator(UnaryOperator):
         
         """
         operand.check_operation("boolean")
-        super(TruthOperator, self).__init__(operand)
+        super(Truth, self).__init__(operand)
     
     def __call__(self, **helpers):
         """Return the logical value of the operand."""
@@ -261,7 +259,7 @@ class TruthOperator(UnaryOperator):
         return operand
 
 
-class NotOperator(UnaryOperator):
+class Not(UnaryOperator):
     """
     The logical negation (``~``).
     
@@ -271,15 +269,15 @@ class NotOperator(UnaryOperator):
     
     def __init__(self, operand):
         """Turn ``operand`` into a truth operator before storing it."""
-        operand = TruthOperator.convert(operand)
-        super(NotOperator, self).__init__(operand)
+        operand = Truth.convert(operand)
+        super(Not, self).__init__(operand)
     
     def __call__(self, **helpers):
         """Return the negate of the truth value for the operand."""
         return not self.operand(**helpers)
     
     def __unicode__(self):
-        if isinstance(self.operand, TruthOperator):
+        if isinstance(self.operand, Truth):
             operand = unicode(self.operand.operand)
         else:
             operand = unicode(self.operand)
@@ -302,12 +300,12 @@ class _ConnectiveOperator(BinaryOperator):
         logic value easily and then store them.
         
         """
-        left_operand = TruthOperator.convert(left_operand)
-        right_operand = TruthOperator.convert(right_operand)
+        left_operand = Truth.convert(left_operand)
+        right_operand = Truth.convert(right_operand)
         super(_ConnectiveOperator, self).__init__(left_operand, right_operand)
 
 
-class AndOperator(_ConnectiveOperator):
+class And(_ConnectiveOperator):
     """
     The logical conjunction (``AND``).
     
@@ -315,7 +313,7 @@ class AndOperator(_ConnectiveOperator):
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    boolean operation (see :class:`Truth`) so that they can be evaluated
     as an operation.
     
     """
@@ -325,7 +323,7 @@ class AndOperator(_ConnectiveOperator):
         return self.master_operand(**helpers) and self.slave_operand(**helpers)
 
 
-class OrOperator(_ConnectiveOperator):
+class Or(_ConnectiveOperator):
     """
     The logical inclusive disjunction (``OR``).
     
@@ -334,7 +332,7 @@ class OrOperator(_ConnectiveOperator):
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    boolean operation (see :class:`Truth`) so that they can be evaluated
     as an operation.
     
     """
@@ -344,7 +342,7 @@ class OrOperator(_ConnectiveOperator):
         return self.master_operand(**helpers) or self.slave_operand(**helpers)
 
 
-class XorOperator(_ConnectiveOperator):
+class Xor(_ConnectiveOperator):
     """
     The logical exclusive disjunction (``XOR``).
     
@@ -353,7 +351,7 @@ class XorOperator(_ConnectiveOperator):
     
     With this binary operator, the operands can be actual operands or
     operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`TruthOperator`) so that they can be evaluated
+    boolean operation (see :class:`Truth`) so that they can be evaluated
     as an operation.
     
     """
@@ -363,7 +361,7 @@ class XorOperator(_ConnectiveOperator):
         return self.master_operand(**helpers) ^ self.slave_operand(**helpers)
 
 
-class EqualOperator(BinaryOperator):
+class Equal(BinaryOperator):
     """
     The equality operator (``==``).
     
@@ -375,7 +373,7 @@ class EqualOperator(BinaryOperator):
     
     def __init__(self, left_operand, right_operand):
         """Check that the master operand supports equality operations."""
-        super(EqualOperator, self).__init__(left_operand, right_operand)
+        super(Equal, self).__init__(left_operand, right_operand)
         self.master_operand.check_operation("equality")
     
     def __call__(self, **helpers):
@@ -383,7 +381,7 @@ class EqualOperator(BinaryOperator):
         return self.master_operand.equals(value, **helpers)
 
 
-class NotEqualOperator(NotOperator):
+class NotEqual(Not):
     """
     The "not equal to" operator (``!=``).
     
@@ -395,8 +393,8 @@ class NotEqualOperator(NotOperator):
     
     def __init__(self, left_operand, right_operand):
         """Check that the master operand supports equality operations."""
-        equals = EqualOperator(left_operand, right_operand)
-        super(NotEqualOperator, self).__init__(equals)
+        equals = Equal(left_operand, right_operand)
+        super(NotEqual, self).__init__(equals)
 
 
 class _InequalityOperator(BinaryOperator):
@@ -456,7 +454,7 @@ class _InequalityOperator(BinaryOperator):
         return self.master_operand.less_than(value, **helpers)
 
 
-class LessThanOperator(_InequalityOperator):
+class LessThan(_InequalityOperator):
     """
     The "less than" operator (``<``).
     
@@ -465,10 +463,10 @@ class LessThanOperator(_InequalityOperator):
     """
     
     def __init__(self, left_operand, right_operand):
-        super(LessThanOperator, self).__init__(left_operand, right_operand, "<")
+        super(LessThan, self).__init__(left_operand, right_operand, "<")
 
 
-class GreaterThanOperator(_InequalityOperator):
+class GreaterThan(_InequalityOperator):
     """
     The "greater than" operator (``>``).
     
@@ -477,11 +475,11 @@ class GreaterThanOperator(_InequalityOperator):
     """
     
     def __init__(self, left_operand, right_operand):
-        super(GreaterThanOperator, self).__init__(left_operand, right_operand,
+        super(GreaterThan, self).__init__(left_operand, right_operand,
                                                   ">")
 
 
-class LessEqualOperator(NotOperator):
+class LessEqual(Not):
     """
     The "less than or equal to" operator (``<=``).
     
@@ -491,11 +489,11 @@ class LessEqualOperator(NotOperator):
     
     def __init__(self, left_operand, right_operand):
         # (x <= y) <=> ~(x > y)
-        greater_than = GreaterThanOperator(left_operand, right_operand)
-        super(LessEqualOperator, self).__init__(greater_than)
+        greater_than = GreaterThan(left_operand, right_operand)
+        super(LessEqual, self).__init__(greater_than)
 
 
-class GreaterEqualOperator(NotOperator):
+class GreaterEqual(Not):
     """
     The "greater than or equal to" operator (``>=``).
     
@@ -505,8 +503,8 @@ class GreaterEqualOperator(NotOperator):
     
     def __init__(self, left_operand, right_operand):
         # (x >= y) <=> ~(x < y)
-        less_than = LessThanOperator(left_operand, right_operand)
-        super(GreaterEqualOperator, self).__init__(less_than)
+        less_than = LessThan(left_operand, right_operand)
+        super(GreaterEqual, self).__init__(less_than)
 
 
 class _SetOperator(BinaryOperator):
@@ -528,7 +526,7 @@ class _SetOperator(BinaryOperator):
         return (right_operand, left_operand)
 
 
-class ContainsOperator(_SetOperator):
+class Contains(_SetOperator):
     """
     The "belongs to" operator (``∈``).
     
@@ -541,7 +539,7 @@ class ContainsOperator(_SetOperator):
         return self.master_operand.contains(value, **helpers)
 
 
-class SubsetOperator(_SetOperator):
+class IsSubset(_SetOperator):
     """
     The "is a subset of" operator (``⊂``).
     

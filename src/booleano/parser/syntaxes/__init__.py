@@ -39,12 +39,9 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
     Regex, Literal, delimitedList)
 
-from booleano.operations.operators import (TruthOperator, NotOperator,
-    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
-    LessThanOperator, GreaterThanOperator, LessEqualOperator,
-    GreaterEqualOperator, ContainsOperator, SubsetOperator)
-from booleano.operations.operands import (String, Number, Set, Variable,
-                                          Function)
+from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    String, Number, Set, Variable, Function)
 
 
 __all__ = ["GenericGrammar"]
@@ -75,12 +72,12 @@ class _GrammarMeta(type):
         ge = CaselessLiteral(tokens['T_GE'])
         relationals = eq | ne | lt | gt | le | ge
         cls.__operations__ = {
-            tokens['T_EQ']: EqualOperator,
-            tokens['T_NE']: NotEqualOperator,
-            tokens['T_LT']: LessThanOperator,
-            tokens['T_GT']: GreaterThanOperator,
-            tokens['T_LE']: LessEqualOperator,
-            tokens['T_GE']: GreaterEqualOperator,
+            tokens['T_EQ']: Equal,
+            tokens['T_NE']: NotEqual,
+            tokens['T_LT']: LessThan,
+            tokens['T_GT']: GreaterThan,
+            tokens['T_LE']: LessEqual,
+            tokens['T_GE']: GreaterEqual,
         }
         
         # Making the logical connectives:
