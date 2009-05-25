@@ -35,7 +35,15 @@ using the classes provided by this package.
 
 """
 
-__all__ = ["OPERATIONS", "ParseTreeNode"]
+__all__ = (
+    # Operands:
+    "Variable", "Function", "String", "Number", "Set",
+    # Operators:
+    "TruthOperator", "NotOperator", "AndOperator", "OrOperator",
+    "XorOperator", "EqualOperator", "NotEqualOperator",
+    "LessThanOperator", "GreaterThanOperator", "LessEqualOperator",
+    "GreaterEqualOperator", "ContainsOperator", "SubsetOperator"
+)
 
 
 # Byte flag for the base operations:
@@ -123,3 +131,12 @@ class ParseTreeNode(object):
         raise NotImplementedError("Node %s doesn't have an Unicode "
                                   "representation" % type(self))
 
+
+# Importing the built-in operands and operators so they can be available from
+# this namespace:
+from booleano.operations.operands import (String, Number, Set, Variable,
+    Function)
+from booleano.operations.operators import (TruthOperator, NotOperator,
+    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
+    LessThanOperator, GreaterThanOperator, LessEqualOperator,
+    GreaterEqualOperator, ContainsOperator, SubsetOperator)

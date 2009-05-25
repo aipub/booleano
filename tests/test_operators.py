@@ -32,10 +32,11 @@ Tests for the operands.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations.operators import (TruthOperator, NotOperator,
-    AndOperator, OrOperator, XorOperator, EqualOperator, NotEqualOperator,
+from booleano.operations import (TruthOperator, NotOperator, AndOperator,
+    OrOperator, XorOperator, EqualOperator, NotEqualOperator,
     LessThanOperator, GreaterThanOperator, LessEqualOperator,
-    GreaterEqualOperator, ContainsOperator, SubsetOperator, Operator)
+    GreaterEqualOperator, ContainsOperator, SubsetOperator)
+from booleano.operations.operators import Operator
 from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
 

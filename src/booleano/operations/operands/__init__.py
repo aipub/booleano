@@ -34,7 +34,7 @@ Booleano operands.
 from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.exc import InvalidOperationError, BadOperandError
 
-__all__ = ["Variable", "Function", "String", "Number", "Set"]
+__all__ = ("Variable", "Function", "String", "Number", "Set")
 
 
 class _OperandMeta(type):
