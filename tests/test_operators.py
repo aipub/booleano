@@ -49,6 +49,12 @@ class TestOperator(object):
         """Evaluations must not be implemented by default."""
         op = Operator()
         assert_raises(NotImplementedError, op)
+    
+    def test_type(self):
+        """Operator nodes must be known as operators."""
+        op = Operator()
+        ok_(op.is_operator())
+        assert_false(op.is_operand())
 
 
 class TestTruth(object):

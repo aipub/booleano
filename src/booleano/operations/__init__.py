@@ -61,6 +61,24 @@ class ParseTreeNode(object):
     
     """
     
+    def is_operand(self):
+        """
+        Check if this node is an operand.
+        
+        :rtype: bool
+        
+        """
+        return isinstance(self, Operand)
+    
+    def is_operator(self):
+        """
+        Check if this node is an operation.
+        
+        :rtype: bool
+        
+        """
+        return isinstance(self, Operator)
+    
     def check_equivalence(self, node):
         """
         Make sure ``node`` and this node are equivalent.
@@ -134,7 +152,7 @@ class ParseTreeNode(object):
 # Importing the built-in operands and operators so they can be available from
 # this namespace:
 from booleano.operations.operands import (String, Number, Set, Variable,
-    Function, VariablePlaceholder, FunctionPlaceholder)
+    Function, VariablePlaceholder, FunctionPlaceholder, Operand)
 from booleano.operations.operators import (Truth, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, Contains,
-    IsSubset)
+    IsSubset, Operator)
