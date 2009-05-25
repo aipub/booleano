@@ -55,6 +55,12 @@ class TestOperator(object):
         op = Operator()
         ok_(op.is_operator())
         assert_false(op.is_operand())
+    
+    def test_node_type(self):
+        """Operators are all branch nodes."""
+        op = Operator()
+        ok_(op.is_branch())
+        assert_false(op.is_leaf())
 
 
 class TestTruth(object):

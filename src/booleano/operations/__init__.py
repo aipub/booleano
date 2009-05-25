@@ -61,6 +61,35 @@ class ParseTreeNode(object):
     
     """
     
+    def is_leaf(self):
+        """
+        Check if this is a leaf node.
+        
+        :rtype: bool
+        
+        Leaf nodes are those that don't contain other nodes (operands or
+        operators): :class:`String`, :class:`Number`, :class:`Variable` and
+        :class:`VariablePlaceholder`.
+        
+        """
+        if (self.is_operator() or self.__class__ in (Set, FunctionPlaceholder)
+            or isinstance(self, Function)):
+            return False
+        return True
+    
+    def is_branch(self):
+        """
+        Check if this is a branch node.
+        
+        :rtype: bool
+        
+        Branch nodes are those that contain other nodes (operands or operators):
+        All the operators, plus :class:`Set`, :class:`Function` and
+        :class:`FunctionPlaceholder`.
+        
+        """
+        return not self.is_leaf()
+    
     def is_operand(self):
         """
         Check if this node is an operand.

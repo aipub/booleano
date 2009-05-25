@@ -253,6 +253,12 @@ class TestOperand(object):
 class TestVariable(object):
     """Tests for variable operands."""
     
+    def test_node_type(self):
+        """Variables are leaf nodes."""
+        var = Variable("greeting")
+        ok_(var.is_leaf())
+        assert_false(var.is_branch())
+    
     def test_no_language_specific_names(self):
         greeting_var = Variable("greeting")
         eq_("greeting", greeting_var.global_name)
@@ -440,6 +446,12 @@ class TestVariable(object):
 
 class TestFunction(object):
     """Tests for the base class of user-defined function operators."""
+    
+    def test_node_type(self):
+        """Functions are branch nodes."""
+        func = PermissiveFunction("greet", String("arg0"))
+        ok_(func.is_branch())
+        assert_false(func.is_leaf())
     
     def test_no_language_specific_names(self):
         func = PermissiveFunction("greeting", String("arg0"))
@@ -791,6 +803,12 @@ class TestString(object):
     
     """
     
+    def test_node_type(self):
+        """Strings are leaf nodes."""
+        string = String("greeting")
+        ok_(string.is_leaf())
+        assert_false(string.is_branch())
+    
     def test_operations(self):
         """String constants must only support equality operations"""
         eq_(String.operations, set(["equality"]))
@@ -852,6 +870,12 @@ class TestNumber(object):
     Tests for :class:`Number` constants.
     
     """
+    
+    def test_node_type(self):
+        """Numbers are leaf nodes."""
+        number = Number(4)
+        ok_(number.is_leaf())
+        assert_false(number.is_branch())
     
     def test_operations(self):
         """
@@ -953,6 +977,12 @@ class TestSet(object):
     Tests for :class:`Set` constants.
     
     """
+    
+    def test_node_type(self):
+        """Sets are branch nodes."""
+        set_ = Set(String("arg0"))
+        ok_(set_.is_branch())
+        assert_false(set_.is_leaf())
     
     def test_operations(self):
         """
@@ -1072,6 +1102,12 @@ class TestSet(object):
 class TestVariablePlaceholder(object):
     """Tests for the VariablePlaceholder."""
     
+    def test_node_type(self):
+        """Variable placeholders are leaf nodes."""
+        var = VariablePlaceholder("greeting")
+        ok_(var.is_leaf())
+        assert_false(var.is_branch())
+    
     def test_constructor(self):
         """
         Variable placeholders should contain an attribute which represents the
@@ -1127,6 +1163,12 @@ class TestVariablePlaceholder(object):
 
 class TestFunctionPlaceholder(object):
     """Tests for the FunctionPlaceholder."""
+    
+    def test_node_type(self):
+        """Function placeholders are branch nodes."""
+        func = FunctionPlaceholder("greet", String("arg0"))
+        ok_(func.is_branch())
+        assert_false(func.is_leaf())
     
     def test_constructor(self):
         """
