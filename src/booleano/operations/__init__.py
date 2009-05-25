@@ -37,7 +37,8 @@ using the classes provided by this package.
 
 __all__ = (
     # Operands:
-    "Variable", "Function", "String", "Number", "Set",
+    "String", "Number", "Set", "Variable", "Function", "VariablePlaceholder",
+    "FunctionPlaceholder",
     # Operators:
     "Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
     "GreaterThan", "LessEqual", "GreaterEqual", "Contains", "IsSubset",
@@ -133,7 +134,7 @@ class ParseTreeNode(object):
 # Importing the built-in operands and operators so they can be available from
 # this namespace:
 from booleano.operations.operands import (String, Number, Set, Variable,
-    Function)
+    Function, VariablePlaceholder, FunctionPlaceholder)
 from booleano.operations.operators import (Truth, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, Contains,
     IsSubset)

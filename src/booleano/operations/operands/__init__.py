@@ -34,7 +34,8 @@ Booleano operands.
 from booleano.operations import OPERATIONS, ParseTreeNode
 from booleano.exc import InvalidOperationError, BadOperandError
 
-__all__ = ("Variable", "Function", "String", "Number", "Set")
+__all__ = ("String", "Number", "Set", "Variable", "Function",
+           "VariablePlaceholder", "FunctionPlaceholder")
 
 
 class _OperandMeta(type):
@@ -219,3 +220,5 @@ class Operand(ParseTreeNode):
 # Importing the built-in operands so they can be available from this namespace:
 from booleano.operations.operands.constants import String, Number, Set
 from booleano.operations.operands.variables import Variable, Function
+from booleano.operations.operands.placeholders import (VariablePlaceholder,
+                                                       FunctionPlaceholder)

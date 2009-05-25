@@ -33,7 +33,8 @@ Tests for the operands.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations import String, Number, Set, Variable, Function
+from booleano.operations import (String, Number, Set, Variable, Function,
+                                 VariablePlaceholder, FunctionPlaceholder)
 from booleano.operations.operands import Operand
 from booleano.exc import (InvalidOperationError, BadOperandError, BadCallError,
                           BadFunctionError)
@@ -239,6 +240,9 @@ class TestOperand(object):
             pass
     
     #}
+
+
+#{ Variables
 
 
 class TestVariable(object):
@@ -773,7 +777,7 @@ class TestFunction(object):
         eq_(str(func), 'perm(arg0="foo", oarg0="b\xc3\xa1r", oarg1=1.0)')
 
 
-#{ Constants tests
+#{ Constants
 
 
 class TestString(object):
@@ -1055,6 +1059,144 @@ class TestSet(object):
         as_unicode = unicode(set_)
         eq_(as_unicode, "{3.0, 5.0}")
         eq_(as_unicode, str(set_))
+
+
+#{ Placeholders
+
+
+class TestVariablePlaceholder(object):
+    """Tests for the VariablePlaceholder."""
+    
+    def test_constructor(self):
+        """
+        Variable placeholders should contain an attribute which represents the
+        name of the variable in question.
+        
+        """
+        var1 = VariablePlaceholder(u"PAÍS")
+        var2 = VariablePlaceholder("country")
+        
+        eq_(var1.name, u"país")
+        eq_(var2.name, "country")
+    
+    def test_no_operations(self):
+        """Variable placeholders don't support operations."""
+        var = VariablePlaceholder("var")
+        assert_raises(InvalidOperationError, var.to_python)
+        assert_raises(InvalidOperationError, var.get_logical_value)
+        assert_raises(InvalidOperationError, var.equals, None)
+        assert_raises(InvalidOperationError, var.less_than, None)
+        assert_raises(InvalidOperationError, var.greater_than, None)
+        assert_raises(InvalidOperationError, var.contains, None)
+        assert_raises(InvalidOperationError, var.is_subset, None)
+    
+    def test_equivalence(self):
+        """
+        Two variable placeholders are equivalent if they have the same name.
+        
+        """
+        var1 = VariablePlaceholder("foo")
+        var2 = VariablePlaceholder("bar")
+        var3 = VariablePlaceholder("Foo")
+        
+        var1.check_equivalence(var3)
+        var3.check_equivalence(var1)
+        
+        assert_raises(AssertionError, var1.check_equivalence, var2)
+        assert_raises(AssertionError, var2.check_equivalence, var1)
+        assert_raises(AssertionError, var2.check_equivalence, var3)
+        assert_raises(AssertionError, var3.check_equivalence, var2)
+        
+        ok_(var1 == var3)
+        ok_(var3 == var1)
+        ok_(var1 != var2)
+        ok_(var2 != var1)
+        ok_(var2 != var3)
+        ok_(var3 != var2)
+    
+    def test_string(self):
+        var = VariablePlaceholder(u"aquí")
+        eq_(unicode(var), u"Variable placeholder aquí")
+        eq_(str(var), "Variable placeholder aqu\xc3\xad")
+
+
+class TestFunctionPlaceholder(object):
+    """Tests for the FunctionPlaceholder."""
+    
+    def test_constructor(self):
+        """
+        Function placeholders should contain an attribute which represents the
+        name of the function in question and another one which represents the
+        arguments passed.
+        
+        """
+        func1 = FunctionPlaceholder(u"PAÍS")
+        eq_(func1.name, u"país")
+        eq_(func1.arguments, ())
+        
+        func2 = FunctionPlaceholder("country", FunctionPlaceholder("city"),
+                                    Number(2))
+        eq_(func2.name, "country")
+        eq_(func2.arguments, (FunctionPlaceholder("city"), Number(2)))
+    
+    def test_non_operands_as_arguments(self):
+        """Function placeholders reject non-operands as arguments."""
+        assert_raises(BadCallError, FunctionPlaceholder, "func", Number(3),
+                      Number(6), 1)
+        assert_raises(BadCallError, FunctionPlaceholder, "func", 2,
+                      Number(6), Number(3))
+        assert_raises(BadCallError, FunctionPlaceholder, "func", Number(6),
+                      3, Number(3))
+    
+    def test_no_operations(self):
+        """Function placeholders don't support operations."""
+        func = FunctionPlaceholder("func")
+        assert_raises(InvalidOperationError, func.to_python)
+        assert_raises(InvalidOperationError, func.get_logical_value)
+        assert_raises(InvalidOperationError, func.equals, None)
+        assert_raises(InvalidOperationError, func.less_than, None)
+        assert_raises(InvalidOperationError, func.greater_than, None)
+        assert_raises(InvalidOperationError, func.contains, None)
+        assert_raises(InvalidOperationError, func.is_subset, None)
+    
+    def test_equivalence(self):
+        """
+        Two function placeholders are equivalent if they have the same name.
+        
+        """
+        func1 = FunctionPlaceholder("foo", String("hi"), Number(4))
+        func2 = FunctionPlaceholder("foo")
+        func3 = FunctionPlaceholder("Foo", String("hi"), Number(4))
+        func4 = FunctionPlaceholder("Foo", Number(4), String("hi"))
+        
+        func1.check_equivalence(func3)
+        func3.check_equivalence(func1)
+        
+        assert_raises(AssertionError, func1.check_equivalence, func2)
+        assert_raises(AssertionError, func1.check_equivalence, func4)
+        assert_raises(AssertionError, func2.check_equivalence, func1)
+        assert_raises(AssertionError, func2.check_equivalence, func3)
+        assert_raises(AssertionError, func2.check_equivalence, func4)
+        assert_raises(AssertionError, func3.check_equivalence, func2)
+        assert_raises(AssertionError, func3.check_equivalence, func4)
+        
+        ok_(func1 == func3)
+        ok_(func3 == func1)
+        ok_(func1 != func2)
+        ok_(func1 != func4)
+        ok_(func2 != func1)
+        ok_(func2 != func3)
+        ok_(func2 != func4)
+        ok_(func3 != func2)
+        ok_(func3 != func4)
+        ok_(func4 != func1)
+        ok_(func4 != func2)
+        ok_(func4 != func3)
+    
+    def test_string(self):
+        func = FunctionPlaceholder(u"aquí", Number(1), Number(2))
+        eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0)")
+        eq_(str(func), "Function placeholder aqu\xc3\xad(1.0, 2.0)")
 
 
 #}
