@@ -288,8 +288,8 @@ class BaseConverter(object):
     
     def convert_function(self, name, *arguments):
         """
-        Convert the function call to the ``name`` using the additional
-        positional arguments as the arguments of the function call.
+        Convert the function call to ``name`` using the additional positional
+        arguments as the arguments of the call.
         
         :param name: The name of the function being called.
         :type name: basestring
