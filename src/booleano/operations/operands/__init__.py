@@ -219,6 +219,6 @@ class Operand(ParseTreeNode):
 
 # Importing the built-in operands so they can be available from this namespace:
 from booleano.operations.operands.constants import String, Number, Set
-from booleano.operations.operands.variables import Variable, Function
+from booleano.operations.operands.identifiers import Variable, Function
 from booleano.operations.operands.placeholders import (VariablePlaceholder,
                                                        FunctionPlaceholder)

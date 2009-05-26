@@ -26,11 +26,11 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Placeholder operands.
+Identifier placeholders.
 
-A placeholder operand is one whose evaluation is not done by Booleano (i.e.,
-the parse tree is handled directly). As a consequence, the Booleano parser
-won't verify its existence.
+A placeholder operand is an identifier whose evaluation is not done by Booleano
+(i.e., the parse tree is handled directly). As a consequence, the Booleano
+parser won't verify its existence.
 
 """
 from booleano.operations import OPERATIONS

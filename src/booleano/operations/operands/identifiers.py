@@ -26,7 +26,7 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Variable operands.
+Identifier operands.
 
 """
 from booleano.operations.operands import Operand, _OperandMeta
@@ -35,27 +35,27 @@ from booleano.exc import BadOperandError, BadCallError, BadFunctionError
 __all__ = ["Variable", "Function"]
 
 
-class _VariableMeta(_OperandMeta):
-    """Metaclass for the translatable nodes."""
+class _IdentifierMeta(_OperandMeta):
+    """Metaclass for the identifiers."""
     
     def __init__(cls, name, bases, ns):
         """Lower-case the default names for the node."""
-        _OperandMeta.__init__(cls, name, bases, ns)
+        super(_IdentifierMeta, cls).__init__(name, bases, ns)
         if cls.default_global_name:
             cls.default_global_name = cls.default_global_name.lower()
         for (locale, name) in cls.default_names.items():
             cls.default_names[locale] = name.lower()
 
 
-class Variable(Operand):
+class Identifier(Operand):
     """
-    Developer-defined variable.
+    Base class for identifiers.
     
     """
     
-    __metaclass__ = _VariableMeta
+    __metaclass__ = _IdentifierMeta
     
-    # Only actual variables should be checked.
+    # Only actual identifiers should be checked.
     bypass_operation_check = True
     
     default_global_name = None
@@ -64,15 +64,15 @@ class Variable(Operand):
     
     def __init__(self, global_name=None, **names):
         """
-        Create the variable using ``global_name`` as it's default name.
+        Create the identifier using ``global_name`` as it's default name.
         
-        :param global_name: The global name used by this variable; if not set,
+        :param global_name: The global name used by this identifier; if not set,
             the :attr:`default_global_name` will be used.
         :type global_name: basestring
-        :raises BadOperandError: If the variable class doesn't set a default
+        :raises BadOperandError: If the identifier class doesn't set a default
             global name and ``global_name`` is not set either.
         
-        Additional keyword arguments represent the other names this variable
+        Additional keyword arguments represent the other names this identifier
         can take in different languages.
         
         .. note::
@@ -95,21 +95,31 @@ class Variable(Operand):
     
     def check_equivalence(self, node):
         """
-        Make sure variable ``node`` and this variable are equivalent.
+        Make sure identifier ``node`` and this identifier are equivalent.
         
-        :param node: The other variable which may be equivalent to this one.
-        :type node: Variable
+        :param node: The other identifier which may be equivalent to this one.
+        :type node: Identifier
         :raises AssertionError: If the nodes don't share the same class or
             don't share the same global and localized names.
         
         """
-        super(Variable, self).check_equivalence(node)
+        super(Identifier, self).check_equivalence(node)
         assert node.global_name == self.global_name, \
-               u'Translatable nodes %s and %s have different global names' % \
+               u'Identifiers %s and %s have different global names' % \
                (self, node)
         assert node.names == self.names, \
-               u'Translatable nodes %s and %s have different translations' % \
+               u'Identifiers %s and %s have different translations' % \
                (self, node)
+
+
+class Variable(Identifier):
+    """
+    Developer-defined variable.
+    
+    """
+    
+    # Only actual variables should be checked.
+    bypass_operation_check = True
     
     def __unicode__(self):
         """Return the Unicode representation of this variable."""
@@ -124,7 +134,7 @@ class Variable(Operand):
         return "<Variable %s>" % names
 
 
-class _FunctionMeta(_VariableMeta):
+class _FunctionMeta(_IdentifierMeta):
     """
     Pre-process user-defined functions right after they've been defined.
     
@@ -163,7 +173,7 @@ class _FunctionMeta(_VariableMeta):
         super(_FunctionMeta, cls).__init__(name, bases, ns)
 
 
-class Function(Variable):
+class Function(Identifier):
     """
     Base class for developer-defined, n-ary functions.
     
