@@ -31,7 +31,7 @@ Exceptions raised by :mod:`booleano`.
 """
 
 __all__ = ["InvalidOperationError", "BadCallError", "BadOperandError",
-           "BadFunctionError"]
+           "BadFunctionError", "ConversionError"]
 
 
 class BooleanoException(Exception):
@@ -84,6 +84,18 @@ class BadFunctionError(BadOperandError):
     
     Because it's aimed at developers, its message doesn't have to be
     translatable.
+    
+    """
+    pass
+
+
+#{ Conversion-related exceptions
+
+
+class ConversionError(BooleanoException):
+    """
+    Exception raised when trying to convert a parse tree, but an invalid node
+    was passed.
     
     """
     pass
