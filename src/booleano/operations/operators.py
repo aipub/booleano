@@ -425,7 +425,8 @@ class Equal(BinaryOperator):
         return self.master_operand.equals(value, **helpers)
 
 
-class NotEqual(Not):
+# (x <> y) <=> ~(x == y)
+class NotEqual(Equal):
     """
     The "not equal to" operator (``!=``).
     
@@ -435,10 +436,8 @@ class NotEqual(Not):
     
     """
     
-    def __init__(self, left_operand, right_operand):
-        """Check that the master operand supports equality operations."""
-        equals = Equal(left_operand, right_operand)
-        super(NotEqual, self).__init__(equals)
+    def __call__(self, **helpers):
+        return not super(NotEqual, self).__call__(**helpers)
 
 
 class _InequalityOperator(BinaryOperator):
@@ -523,7 +522,8 @@ class GreaterThan(_InequalityOperator):
                                                   ">")
 
 
-class LessEqual(Not):
+# (x <= y) <=> ~(x > y)
+class LessEqual(GreaterThan):
     """
     The "less than or equal to" operator (``<=``).
     
@@ -531,13 +531,12 @@ class LessEqual(Not):
     
     """
     
-    def __init__(self, left_operand, right_operand):
-        # (x <= y) <=> ~(x > y)
-        greater_than = GreaterThan(left_operand, right_operand)
-        super(LessEqual, self).__init__(greater_than)
+    def __call__(self, **helpers):
+        return not super(LessEqual, self).__call__(**helpers)
 
 
-class GreaterEqual(Not):
+# (x >= y) <=> ~(x < y)
+class GreaterEqual(LessThan):
     """
     The "greater than or equal to" operator (``>=``).
     
@@ -545,10 +544,8 @@ class GreaterEqual(Not):
     
     """
     
-    def __init__(self, left_operand, right_operand):
-        # (x >= y) <=> ~(x < y)
-        less_than = LessThan(left_operand, right_operand)
-        super(GreaterEqual, self).__init__(less_than)
+    def __call__(self, **helpers):
+        return not super(GreaterEqual, self).__call__(**helpers)
 
 
 class _SetOperator(BinaryOperator):
