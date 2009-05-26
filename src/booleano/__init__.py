@@ -32,8 +32,7 @@ Evaluation of boolean expressions in natural languages.
 
 class ExpressionsManager(object):
     
-    def __init__(self, variables=[], var_containers={}, functions=[],
-                 language=None):
+    def __init__(self, scope, language=None):
         self.cache = {}
     
     def evaluate(self, expression, **helpers):
