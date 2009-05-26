@@ -176,6 +176,15 @@ class ParseTreeNode(object):
         """
         raise NotImplementedError("Node %s doesn't have an Unicode "
                                   "representation" % type(self))
+    
+    def __repr__(self):
+        """
+        Raise a NotImplementedError to force descendants to set the 
+        representation explicitly.
+        
+        """
+        raise NotImplementedError("Node %s doesn't have an "
+                                  "representation" % type(self))
 
 
 # Importing the built-in operands and operators so they can be available from

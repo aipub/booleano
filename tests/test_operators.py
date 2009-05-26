@@ -108,11 +108,15 @@ class TestTruth(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
+    def test_string_representation(self):
         op = Truth(BoolVar())
         as_unicode = unicode(op)
         eq_(as_unicode, "Truth(Variable bool)")
         eq_(as_unicode, str(op))
+    
+    def test_representation(self):
+        op = Truth(BoolVar())
+        eq_(repr(op), '<Truth <Variable "bool">>')
 
 
 class TestNot(object):
@@ -166,7 +170,7 @@ class TestNot(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
+    def test_string_representation(self):
         op1 = Not(BoolVar())
         op2 = Not(And(BoolVar(), BoolVar()))
         as_unicode1 = unicode(op1)
@@ -176,6 +180,12 @@ class TestNot(object):
         eq_(as_unicode2,
             "Not(And(Variable bool, Variable bool))")
         eq_(as_unicode2, str(op2))
+    
+    def test_representation(self):
+        op1 = Not(BoolVar())
+        op2 = Not(And(BoolVar(), BoolVar()))
+        eq_(repr(op1), '<Not <Variable "bool">>')
+        eq_(repr(op2), '<Not <And <Variable "bool"> <Variable "bool">>>')
 
 
 class TestAnd(object):
@@ -245,11 +255,23 @@ class TestAnd(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
+    def test_string_representation(self):
         op = And(BoolVar(), BoolVar())
         as_unicode = unicode(op)
         eq_(as_unicode, "And(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
+        
+        # Now with operators as operands:
+        op = And(Not(BoolVar()), Not(BoolVar()))
+        eq_(unicode(op), "And(Not(Variable bool), Not(Variable bool))")
+    
+    def test_representation(self):
+        op = And(BoolVar(), BoolVar())
+        eq_(repr(op), '<And <Variable "bool"> <Variable "bool">>')
+        
+        # Now with operators as operands:
+        op = And(Not(BoolVar()), Not(BoolVar()))
+        eq_(repr(op), '<And <Not <Variable "bool">> <Not <Variable "bool">>>')
 
 
 class TestOr(object):
@@ -323,11 +345,23 @@ class TestOr(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
+    def test_string_representation(self):
         op = Or(BoolVar(), BoolVar())
         as_unicode = unicode(op)
         eq_(as_unicode, "Or(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
+        
+        # Now with operators as operands:
+        op = Or(Not(BoolVar()), Not(BoolVar()))
+        eq_(unicode(op), "Or(Not(Variable bool), Not(Variable bool))")
+    
+    def test_representation(self):
+        op = Or(BoolVar(), BoolVar())
+        eq_(repr(op), '<Or <Variable "bool"> <Variable "bool">>')
+        
+        # Now with operators as operands:
+        op = Or(Not(BoolVar()), Not(BoolVar()))
+        eq_(repr(op), '<Or <Not <Variable "bool">> <Not <Variable "bool">>>')
 
 
 class TestXor(object):
@@ -389,11 +423,24 @@ class TestXor(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
+    def test_string_representation(self):
         op = Xor(BoolVar(), BoolVar())
         as_unicode = unicode(op)
         eq_(as_unicode, "Xor(Variable bool, Variable bool)")
         eq_(as_unicode, str(op))
+        eq_(as_unicode, str(op))
+        
+        # Now with an operators as operands:
+        op = Xor(Not(BoolVar()), Not(BoolVar()))
+        eq_(unicode(op), "Xor(Not(Variable bool), Not(Variable bool))")
+    
+    def test_representation(self):
+        op = Xor(BoolVar(), BoolVar())
+        eq_(repr(op), '<Xor <Variable "bool"> <Variable "bool">>')
+        
+        # Now with operators as operands:
+        op = Xor(Not(BoolVar()), Not(BoolVar()))
+        eq_(repr(op), '<Xor <Not <Variable "bool">> <Not <Variable "bool">>>')
 
 
 class TestNonConnectiveBinaryOperators(object):
@@ -471,10 +518,14 @@ class TestNonConnectiveBinaryOperators(object):
         ok_(op3 != op1)
         ok_(op3 != op2)
     
-    def test_string(self):
-        op = Equal(String(u"qué hora es?"), BoolVar())
-        eq_(unicode(op), u'Equal(Variable bool, "qué hora es?")')
-        eq_(str(op), 'Equal(Variable bool, "qu\xc3\xa9 hora es?")')
+    def test_string_representation(self):
+        op = Equal(String(u"¿qué hora es?"), BoolVar())
+        eq_(unicode(op), u'Equal(Variable bool, "¿qué hora es?")')
+        eq_(str(op), 'Equal(Variable bool, "¿qué hora es?")')
+    
+    def test_representation(self):
+        op = Equal(String(u"¿qué hora es?"), BoolVar())
+        eq_(repr(op), '<Equal <Variable "bool"> <String "¿qué hora es?">>')
 
 
 class TestEqual():

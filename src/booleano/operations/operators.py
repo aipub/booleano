@@ -95,6 +95,11 @@ class UnaryOperator(Operator):
         """
         operand = unicode(self.operand)
         return u"%s(%s)" % (self.__class__.__name__, operand)
+    
+    def __repr__(self):
+        """Return the representation for this operator and its operand."""
+        operand = repr(self.operand)
+        return "<%s %s>" % (self.__class__.__name__, operand)
 
 
 class BinaryOperator(Operator):
@@ -208,6 +213,28 @@ class BinaryOperator(Operator):
         
         return u"%s(%s, %s)" % (self.__class__.__name__, master_operand,
                                 slave_operand)
+    
+    def __repr__(self):
+        """
+        Return the representation for this binary operator, including its
+        operands.
+        
+        If one of the operands is wrapped around a truth operation, such a 
+        truth operation will be ignored in the representation.
+        
+        """
+        if isinstance(self.master_operand, Truth):
+            master_operand = self.master_operand.operand
+        else:
+            master_operand = self.master_operand
+            
+        if isinstance(self.slave_operand, Truth):
+            slave_operand = self.slave_operand.operand
+        else:
+            slave_operand = self.slave_operand
+        
+        return "<%s %s %s>" % (self.__class__.__name__, repr(master_operand),
+                               repr(slave_operand))
 
 
 #{ Unary operators
@@ -277,11 +304,28 @@ class Not(UnaryOperator):
         return not self.operand(**helpers)
     
     def __unicode__(self):
+        """
+        Return the Unicode representation for this operator and its operand,
+        removing the Truth function if present.
+        
+        """
         if isinstance(self.operand, Truth):
             operand = unicode(self.operand.operand)
         else:
             operand = unicode(self.operand)
         return u"%s(%s)" % (self.__class__.__name__, operand)
+    
+    def __repr__(self):
+        """
+        Return the representation for this operator and its operand,
+        removing the Truth function if present.
+        
+        """
+        if isinstance(self.operand, Truth):
+            operand = repr(self.operand.operand)
+        else:
+            operand = repr(self.operand)
+        return "<%s %s>" % (self.__class__.__name__, operand)
 
 
 #{ Binary operators

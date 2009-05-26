@@ -114,15 +114,14 @@ class Variable(Operand):
     def __unicode__(self):
         """Return the Unicode representation of this variable."""
         return "Variable %s" % self.global_name
-    '''
+    
     def __repr__(self):
         """Represent this variable, including its translations."""
-        translations = ['%s="%s"' % (locale, name) for (locale, name)
-                        in self.names]
-        translations = " ".join(translations)
-        return "<Variable %s %s>" % (self.global_name, translations)
-    '''
-
+        names = ['%s="%s"' % (locale, name.encode("utf-8")) for (locale, name)
+                 in self.names.items()]
+        names.insert(0, '"%s"' % self.global_name.encode("utf-8"))
+        names = " ".join(names)
+        return "<Variable %s>" % names
 
 
 class _FunctionMeta(_VariableMeta):
@@ -307,4 +306,10 @@ class Function(Variable):
         args = [u'%s=%s' % (k, v) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
         return "%s(%s)" % (self.global_name, args)
+    
+    def __repr__(self):
+        """Return the representation for this function."""
+        args = ['%s=%s' % (k, repr(v)) for (k, v) in self.arguments.items()]
+        args = ", ".join(args)
+        return "<Function %s(%s)>" % (self.global_name.encode("utf-8"), args)
 

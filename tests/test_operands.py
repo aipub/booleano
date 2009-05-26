@@ -79,6 +79,10 @@ class TestOperand(object):
         """Operands must not have a default Unicode representation."""
         assert_raises(NotImplementedError, unicode, self.op)
     
+    def test_no_repr_by_default(self):
+        """Operands must not have a default representation."""
+        assert_raises(NotImplementedError, repr, self.op)
+    
     #{ Operations support
     
     def test_checking_valid_operations(self):
@@ -442,6 +446,13 @@ class TestVariable(object):
         as_unicode = unicode(var)
         eq_("Variable the_var", as_unicode)
         eq_(str(var), as_unicode)
+    
+    def test_representation(self):
+        var = TrafficLightVar("the_var", es=u"la_variablé")
+        eq_(repr(var), '<Variable "the_var" es="la_variablé">')
+        # With the global name in Unicode:
+        var = TrafficLightVar(u"the_vár", es="la_variable")
+        eq_(repr(var), '<Variable "the_vár" es="la_variable">')
 
 
 class TestFunction(object):
@@ -788,10 +799,19 @@ class TestFunction(object):
         ok_(func7 != func5)
         ok_(func7 != func6)
     
-    def test_string(self):
+    def test_string_representation(self):
         func = PermissiveFunction("perm", String("foo"), String(u"bár"))
         eq_(unicode(func), u'perm(arg0="foo", oarg0="bár", oarg1=1.0)')
-        eq_(str(func), 'perm(arg0="foo", oarg0="b\xc3\xa1r", oarg1=1.0)')
+        eq_(str(func), 'perm(arg0="foo", oarg0="bár", oarg1=1.0)')
+    
+    def test_representation(self):
+        func = PermissiveFunction("perm", String("foo"), String(u"báz"))
+        eq_(repr(func), '<Function perm(arg0=<String "foo">, '
+                        'oarg0=<String "báz">, oarg1=<Number 1.0>)>')
+        # With global name in Unicode:
+        func = PermissiveFunction(u"pérm", String(u"báz"))
+        eq_(repr(func), '<Function pérm(arg0=<String "báz">, '
+                        'oarg0=<Set>, oarg1=<Number 1.0>)>')
 
 
 #{ Constants
@@ -859,10 +879,18 @@ class TestString(object):
         ok_(text2 != text3)
         ok_(text3 != text2)
     
-    def test_string(self):
+    def test_string_representation(self):
         string = String(u"caña")
         eq_(unicode(string), u'"caña"')
-        eq_(str(string), '"ca\xc3\xb1a"')
+        eq_(str(string), '"caña"')
+    
+    def test_representation(self):
+        # With Unicode:
+        string = String(u"caña")
+        eq_(repr(string), '<String "caña">')
+        # With ASCII
+        string = String("cana")
+        eq_(repr(string), '<String "cana">')
 
 
 class TestNumber(object):
@@ -966,10 +994,14 @@ class TestNumber(object):
         ok_(number2 != number3)
         ok_(number3 != number2)
     
-    def test_string(self):
+    def test_string_representation(self):
         number = Number(4)
         eq_(unicode(number), "4.0")
         eq_(str(number), "4.0")
+    
+    def test_representation(self):
+        number = Number(4)
+        eq_(repr(number), "<Number 4.0>")
 
 
 class TestSet(object):
@@ -1089,11 +1121,18 @@ class TestSet(object):
         ok_(set4 != set2)
         ok_(set4 != set3)
     
-    def test_string(self):
+    def test_string_representation(self):
         set_ = Set(Number(3), Number(5))
         as_unicode = unicode(set_)
         eq_(as_unicode, "{3.0, 5.0}")
         eq_(as_unicode, str(set_))
+    
+    def test_representation(self):
+        set_ = Set(Number(3), Number(5))
+        eq_(repr(set_), "<Set <Number 3.0>, <Number 5.0>>")
+        # Now with an empty set:
+        set_ = Set()
+        eq_(repr(set_), "<Set>")
 
 
 #{ Placeholders
@@ -1155,10 +1194,18 @@ class TestVariablePlaceholder(object):
         ok_(var2 != var3)
         ok_(var3 != var2)
     
-    def test_string(self):
+    def test_string_representation(self):
         var = VariablePlaceholder(u"aquí")
         eq_(unicode(var), u"Variable placeholder aquí")
-        eq_(str(var), "Variable placeholder aqu\xc3\xad")
+        eq_(str(var), "Variable placeholder aquí")
+    
+    def test_representation(self):
+        # With Unicode
+        var = VariablePlaceholder(u"aquí")
+        eq_(repr(var), '<Variable placeholder "aquí">')
+        # With ASCII
+        var = VariablePlaceholder("here")
+        eq_(repr(var), '<Variable placeholder "here">')
 
 
 class TestFunctionPlaceholder(object):
@@ -1240,10 +1287,20 @@ class TestFunctionPlaceholder(object):
         ok_(func4 != func2)
         ok_(func4 != func3)
     
-    def test_string(self):
+    def test_string_representation(self):
         func = FunctionPlaceholder(u"aquí", Number(1), Number(2))
         eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0)")
-        eq_(str(func), "Function placeholder aqu\xc3\xad(1.0, 2.0)")
+        eq_(str(func), "Function placeholder aquí(1.0, 2.0)")
+    
+    def test_representation(self):
+        # With Unicode:
+        func = FunctionPlaceholder(u"aquí", Number(1), String("hi"))
+        eq_('<Function placeholder aquí(<Number 1.0>, <String "hi">)>',
+            repr(func))
+        # With ASCII:
+        func = FunctionPlaceholder("here", Number(1), String("hi"))
+        eq_(u'<Function placeholder here(<Number 1.0>, <String "hi">)>',
+            repr(func))
 
 
 #}

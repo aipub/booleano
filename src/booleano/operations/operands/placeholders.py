@@ -103,6 +103,10 @@ class VariablePlaceholder(PlaceholderOperand):
     def __unicode__(self):
         """Return the Unicode representation for this variable placeholder."""
         return "Variable placeholder %s" % self.name
+    
+    def __repr__(self):
+        """Return the representation for this variable placeholder."""
+        return '<Variable placeholder "%s">' % self.name.encode("utf-8")
 
 
 class FunctionPlaceholder(PlaceholderOperand):
@@ -155,4 +159,11 @@ class FunctionPlaceholder(PlaceholderOperand):
         args = [unicode(arg) for arg in self.arguments]
         args = ", ".join(args)
         return "Function placeholder %s(%s)" % (self.name, args)
+    
+    def __repr__(self):
+        """Return the representation for this function placeholder."""
+        args = [repr(arg) for arg in self.arguments]
+        args = ", ".join(args)
+        return "<Function placeholder %s(%s)>" % (self.name.encode("utf-8"),
+                                                  args)
 

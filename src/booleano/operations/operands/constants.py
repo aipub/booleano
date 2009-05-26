@@ -88,11 +88,6 @@ class Constant(Operand):
         assert node.constant_value == self.constant_value, \
                u'Constants %s and %s represent different values' % (self,
                                                                     node)
-    '''
-    def __repr__(self):
-        """Represent this constant."""
-        return "<Constant %s>" % unicode(self)
-    '''
 
 
 class String(Constant):
@@ -144,6 +139,10 @@ class String(Constant):
     def __unicode__(self):
         """Return the Unicode representation of this constant string."""
         return u'"%s"' % self.constant_value
+    
+    def __repr__(self):
+        """Return the representation for this constant string."""
+        return '<String "%s">' % self.constant_value.encode("utf-8")
 
 
 class Number(Constant):
@@ -209,6 +208,10 @@ class Number(Constant):
     def __unicode__(self):
         """Return the Unicode representation of this constant number."""
         return unicode(self.constant_value)
+    
+    def __repr__(self):
+        """Return the representation for this constant number."""
+        return '<Number %s>' % self.constant_value
 
 
 class Set(Constant):
@@ -343,4 +346,12 @@ class Set(Constant):
         elements = [unicode(element) for element in self.constant_value]
         elements = u", ".join(elements)
         return "{%s}" % elements
+    
+    def __repr__(self):
+        """Return the representation for this constant set."""
+        elements = [repr(element) for element in self.constant_value]
+        elements = u", ".join(elements)
+        if elements:
+            elements = " " + elements
+        return '<Set%s>' % elements
 
