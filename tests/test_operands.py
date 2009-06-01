@@ -916,7 +916,7 @@ class TestNumber(object):
         op = Number(22)
         eq_(op.to_python(), 22.00)
     
-    def test_equality_with_integer_constant(self):
+    def test_equality(self):
         # With an integer constant:
         op = Number(10)
         ok_(op.equals(10))
@@ -943,6 +943,8 @@ class TestNumber(object):
         ok_(op.greater_than(9))
         ok_(op.greater_than(9.99999))
         assert_false(op.greater_than(10.00001))
+        # With everything but a number:
+        assert_raises(InvalidOperationError, op.greater_than, "ten")
     
     def test_less_than(self):
         # With an integer constant:
@@ -955,6 +957,8 @@ class TestNumber(object):
         ok_(op.less_than(11))
         ok_(op.less_than(10.00001))
         assert_false(op.less_than(9.99999))
+        # With everything but a number:
+        assert_raises(InvalidOperationError, op.less_than, "ten")
     
     def test_string_support(self):
         """Numbers given as strings must be converted first"""

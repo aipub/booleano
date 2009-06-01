@@ -171,39 +171,55 @@ class Number(Constant):
         """
         Check if this numeric constant equals ``value``.
         
-        ``value`` will be turned into a float prior to the comparison, to 
-        support strings.
-        
         :raises InvalidOperationError: If ``value`` can't be turned into a
             float.
         
-        """
-        try:
-            value = float(value)
-        except ValueError:
-            raise InvalidOperationError('"%s" is not a number' % value)
+        ``value`` will be turned into a float prior to the comparison, to 
+        support strings.
         
-        return super(Number, self).equals(value, **helpers)
+        """
+        return super(Number, self).equals(self._to_number(value), **helpers)
     
     def greater_than(self, value, **helpers):
         """
         Check if this numeric constant is greater than ``value``.
         
+        :raises InvalidOperationError: If ``value`` can't be turned into a
+            float.
+        
         ``value`` will be turned into a float prior to the comparison, to
         support strings.
         
         """
-        return self.constant_value > float(value)
+        return self.constant_value > self._to_number(value)
     
     def less_than(self, value, **helpers):
         """
         Check if this numeric constant is less than ``value``.
         
+        :raises InvalidOperationError: If ``value`` can't be turned into a
+            float.
+        
         ``value`` will be turned into a float prior to the comparison, to
         support strings.
         
         """
-        return self.constant_value < float(value)
+        return self.constant_value < self._to_number(value)
+    
+    def _to_number(self, value):
+        """
+        Convert ``value`` to a Python float and return the new value.
+        
+        :param value: The value to be converted into float.
+        :return: The value as a float.
+        :rtype: float
+        :raises InvalidOperationError: If ``value`` can't be converted.
+        
+        """
+        try:
+            return float(value)
+        except ValueError:
+            raise InvalidOperationError('"%s" is not a number' % value)
     
     def __unicode__(self):
         """Return the Unicode representation of this constant number."""
