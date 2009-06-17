@@ -137,12 +137,17 @@ class GenericGrammar(object):
     T_GROUP_START = "("
     T_GROUP_END = ")"
     
+    # Marks related to function arguments:
+    T_ARGUMENTS_START = "("
+    T_ARGUMENTS_END = ")"
+    T_ARGUMENTS_SEPARATOR = ","
+    
     # Signed numbers:
     T_POSITIVE_SIGN = "+"
     T_NEGATIVE_SIGN = "-"
     
     # Miscellaneous tokens:
-    T_VARIABLE_SPACING = "_"
+    T_NAME_SPACING = "_"
     T_DECIMAL_SEPARATOR = "."
     T_THOUSANDS_SEPARATOR = ","
     
@@ -176,8 +181,10 @@ class GenericGrammar(object):
         :meth:`T_SET_END` and :meth:`T_ELEMENT_SEPARATOR`.
         
         """
+        object_name = cls.define_name()
         operand = Forward()
         
+        # Defining the sets:
         set_start = Suppress(cls.T_SET_START)
         set_end = Suppress(cls.T_SET_END)
         elements = delimitedList(operand, delim=cls.T_ELEMENT_SEPARATOR)
@@ -185,7 +192,20 @@ class GenericGrammar(object):
         set_.setParseAction(cls.make_set)
         set_.setName("set")
         
-        operand << (cls.define_variable() | cls.define_number() | \
+        # Defining the variables:
+        variable = object_name.setName("variable")
+        variable.addParseAction(cls.make_variable)
+        
+        # Defining the functions:
+        function_name = object_name.setName("function_name")
+        args_start = Suppress(cls.T_ARGUMENTS_START)
+        args_end = Suppress(cls.T_ARGUMENTS_END)
+        args_sep = cls.T_ARGUMENTS_SEPARATOR
+        arguments = Optional(delimitedList(operand, delim=args_sep))
+        function = Group(function_name + args_start + arguments + args_end)
+        function.setParseAction(cls.make_function)
+        
+        operand << (variable | cls.define_number() | \
                     cls.define_string() | set_)
         
         return operand
@@ -238,20 +258,20 @@ class GenericGrammar(object):
         return number
     
     @classmethod
-    def define_variable(cls):
+    def define_name(cls):
         """
-        Return the syntax definition for a variable.
+        Return the syntax definition for an object name.
         
         """
         def first_not_a_number(tokens):
             if tokens[0][0].isdigit():
-                raise ParseException('Variable "%s" must not start by a '
-                                     'number' % tokens[0])
-        space_char = re.escape(cls.T_VARIABLE_SPACING)
-        variable = Regex("[\w%s]+" % space_char, re.UNICODE)
-        variable.setParseAction(first_not_a_number, cls.make_variable)
-        variable.setName("variable")
-        return variable
+                raise ParseException('"%s" must not start by a number for it '
+                                     'to be an object name' % tokens[0])
+        space_char = re.escape(cls.T_NAME_SPACING)
+        object_name = Regex("[\w%s]+" % space_char, re.UNICODE)
+        object_name.setParseAction(first_not_a_number)
+        object_name.setName("object")
+        return object_name
     
     #{ Parse actions
     
@@ -269,6 +289,11 @@ class GenericGrammar(object):
     def make_variable(cls, tokens):
         """Make a Variable using the token passed."""
         return Variable(tokens[0])
+    
+    @classmethod
+    def make_function(cls, tokens):
+        """Make a Function using the token passed."""
+        return Function(tokens[0])
     
     @classmethod
     def make_set(cls, tokens):
