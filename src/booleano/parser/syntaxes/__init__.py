@@ -286,40 +286,5 @@ class GenericGrammar(object):
         
         return operation(left_op, right_op)
     
-    #{ Translators
-    
-    def represent_operand(self, operand):
-        """
-        Return the string representation of ``operand``.
-        
-        :param operand: The operand to be represented as a string.
-        :type operand: :class:`booleano.operations.operands.Operand`
-        :return: ``operand`` as a string.
-        :rtype: unicode
-        
-        """
-        if isinstance(operand, String):
-            return self.represent_string(operand.constant_value)
-        if isinstance(operand, Number):
-            return self.represent_number(operand.constant_value)
-    
-    def represent_string(self, string):
-        """
-        Return ``string`` as a string quoted with ``T_STRING_START`` and
-        ``T_STRING_END``.
-        
-        """
-        return u'%s%s%s' % (self.T_STRING_START, string, self.T_STRING_END)
-    
-    def represent_number(self, number):
-        """
-        Return float ``number`` as a string and remove the decimals if it's
-        an integer.
-        
-        """
-        if not hasattr(number, "is_integer") or number.is_integer():
-            number = int(number)
-        return str(number)
-    
     #}
 

@@ -30,8 +30,6 @@ Test suite for the generic grammar.
 
 """
 
-from nose.tools import eq_, ok_, assert_false, assert_raises
-
 from booleano.parser.syntaxes import GenericGrammar
 from booleano.parser.testutils import BaseParseTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
@@ -152,32 +150,4 @@ class TestParsing(BaseParseTest):
         "-",
         "this is definitely not an operand",
     )
-
-
-class TestTranslations(object):
-    
-    grammar = GenericGrammar()
-    
-    strings = {
-        'hola amigos': '"hola amigos"',
-        'arepa': '"arepa"',
-        '2': '"2"',
-    }
-    
-    numbers = {
-        4: "4",
-        4.0: "4",
-        4.3: "4.3",
-        3.20: "3.2",
-    }
-    
-    def test_string(self):
-        for (original, translation) in self.strings.items():
-            representation = self.grammar.represent_operand(String(original))
-            eq_(representation, translation)
-    
-    def test_number(self):
-        for (original, translation) in self.numbers.items():
-            representation = self.grammar.represent_operand(Number(original))
-            eq_(representation, translation)
 
