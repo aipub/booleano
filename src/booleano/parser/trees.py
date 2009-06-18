@@ -84,6 +84,14 @@ class EvaluableParseTree(ParseTree):
         
         """
         return self.root_node(**helpers)
+    
+    def __unicode__(self):
+        """Return the Unicode representation for this tree."""
+        return "Evaluable parse tree (%s)" % unicode(self.root_node)
+    
+    def __repr__(self):
+        """Return the representation for this tree."""
+        return "<Parse tree (evaluable) %s>" % repr(self.root_node)
 
 
 class ConvertibleParseTree(ParseTree):
@@ -102,3 +110,11 @@ class ConvertibleParseTree(ParseTree):
         
         """
         return converter(self.root_node)
+    
+    def __unicode__(self):
+        """Return the Unicode representation for this tree."""
+        return "Convertible parse tree (%s)" % unicode(self.root_node)
+    
+    def __repr__(self):
+        """Return the representation for this tree."""
+        return "<Parse tree (convertible) %s>" % repr(self.root_node)

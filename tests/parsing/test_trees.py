@@ -36,7 +36,7 @@ from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import And, String, VariablePlaceholder
 from booleano.exc import InvalidOperationError
 
-from tests import (TrafficLightVar, PedestriansCrossingRoad,
+from tests import (TrafficLightVar, PedestriansCrossingRoad, BoolVar,
                    DriversAwaitingGreenLightVar, AntiConverter)
 
 
@@ -72,6 +72,19 @@ class TestEvaluableTrees(object):
         helpers = {'pedestrians_crossroad': (),
                    'drivers_traffic_light': ()}
         assert_false(tree(**helpers))
+    
+    def test_string(self):
+        tree = EvaluableParseTree(BoolVar())
+        as_unicode = unicode(tree)
+        expected = "Evaluable parse tree (Truth(Unbound variable BoolVar))"
+        eq_(as_unicode, expected)
+    
+    def test_representation(self):
+        var = BoolVar()
+        tree = EvaluableParseTree(var)
+        expected = "<Parse tree (evaluable) <Truth " \
+                   "<Unbound variable BoolVar at %s>>>" % id(var)
+        eq_(repr(tree), expected)
 
 
 class TestConvertibleTrees(object):
@@ -84,4 +97,17 @@ class TestConvertibleTrees(object):
         converter = AntiConverter()
         conversion = tree(converter)
         eq_(operand, conversion)
+    
+    def test_string(self):
+        tree = ConvertibleParseTree(BoolVar())
+        as_unicode = unicode(tree)
+        expected = "Convertible parse tree (Unbound variable BoolVar)"
+        eq_(as_unicode, expected)
+    
+    def test_representation(self):
+        var = BoolVar()
+        tree = ConvertibleParseTree(var)
+        expected = "<Parse tree (convertible) " \
+                   "<Unbound variable BoolVar at %s>>" % id(var)
+        eq_(repr(tree), expected)
 
