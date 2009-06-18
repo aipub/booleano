@@ -25,7 +25,6 @@
 # Except as contained in this notice, the name(s) of the above copyright
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
-
 """
 Test suite for Booleano.
 
@@ -33,7 +32,11 @@ This module contains utilities shared among the whole test suite.
 
 """
 
-from booleano.operations.operands import String, Number, Set, Variable, Function
+from booleano.converters import BaseConverter
+from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    String, Number, Set, Variable, Function, VariablePlaceholder,
+    FunctionPlaceholder)
 from booleano.exc import InvalidOperationError, BadCallError
 
 
@@ -78,9 +81,6 @@ class VariableSet(Variable):
     """
     
     operations = set(("equality", "inequality", "boolean", "membership"))
-    
-    def __init__(self, **names):
-        super(VariableSet, self).__init__(self.required_helpers[0], **names)
     
     def to_python(self, **helpers):
         set_ = set(helpers[self.required_helpers[0]])
@@ -182,5 +182,72 @@ class TrafficViolationFunc(Function):
         # It's the drivers' light.
         return helpers['drivers_light'] == "red" and \
                len(helpers['cars_crossing'])
+
+
+#{ Miscellaneous stuff
+
+
+class AntiConverter(BaseConverter):
+    """
+    A parse tree converter that returns the original parse tree.
+    
+    This is the simplest way to check the converter.
+    
+    """
+    
+    def convert_truth(self, operand):
+        return Truth(operand)
+    
+    def convert_not(self, operand):
+        return Not(operand)
+    
+    def convert_and(self, master_operand, slave_operand):
+        return And(master_operand, slave_operand)
+    
+    def convert_or(self, master_operand, slave_operand):
+        return Or(master_operand, slave_operand)
+    
+    def convert_xor(self, master_operand, slave_operand):
+        return Xor(master_operand, slave_operand)
+    
+    def convert_equal(self, master_operand, slave_operand):
+        return Equal(master_operand, slave_operand)
+    
+    def convert_not_equal(self, master_operand, slave_operand):
+        return NotEqual(master_operand, slave_operand)
+    
+    def convert_less_than(self, master_operand, slave_operand):
+        return LessThan(master_operand, slave_operand)
+    
+    def convert_greater_than(self, master_operand, slave_operand):
+        return GreaterThan(master_operand, slave_operand)
+    
+    def convert_less_equal(self, master_operand, slave_operand):
+        return LessEqual(master_operand, slave_operand)
+    
+    def convert_greater_equal(self, master_operand, slave_operand):
+        return GreaterEqual(master_operand, slave_operand)
+    
+    def convert_contains(self, master_operand, slave_operand):
+        return Contains(slave_operand, master_operand,)
+    
+    def convert_is_subset(self, master_operand, slave_operand):
+        return IsSubset(slave_operand, master_operand)
+    
+    def convert_string(self, operand):
+        return String(operand)
+    
+    def convert_number(self, operand):
+        return Number(operand)
+    
+    def convert_set(self, *operands):
+        return Set(*operands)
+    
+    def convert_variable(self, name):
+        return VariablePlaceholder(name)
+    
+    def convert_function(self, name, *arguments):
+        return FunctionPlaceholder(name, *arguments)
+
 
 #}

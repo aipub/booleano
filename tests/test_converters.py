@@ -37,6 +37,8 @@ from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
 from booleano.exc import ConversionError
 
+from tests import AntiConverter
+
 
 #{ The tests themselves
 
@@ -138,69 +140,6 @@ class TestActualConverter(object):
 
 
 #{ Test utilities
-
-
-class AntiConverter(BaseConverter):
-    """
-    A parse tree converter that returns the original parse tree.
-    
-    This is the simplest way to check the converter.
-    
-    """
-    
-    def convert_truth(self, operand):
-        return Truth(operand)
-    
-    def convert_not(self, operand):
-        return Not(operand)
-    
-    def convert_and(self, master_operand, slave_operand):
-        return And(master_operand, slave_operand)
-    
-    def convert_or(self, master_operand, slave_operand):
-        return Or(master_operand, slave_operand)
-    
-    def convert_xor(self, master_operand, slave_operand):
-        return Xor(master_operand, slave_operand)
-    
-    def convert_equal(self, master_operand, slave_operand):
-        return Equal(master_operand, slave_operand)
-    
-    def convert_not_equal(self, master_operand, slave_operand):
-        return NotEqual(master_operand, slave_operand)
-    
-    def convert_less_than(self, master_operand, slave_operand):
-        return LessThan(master_operand, slave_operand)
-    
-    def convert_greater_than(self, master_operand, slave_operand):
-        return GreaterThan(master_operand, slave_operand)
-    
-    def convert_less_equal(self, master_operand, slave_operand):
-        return LessEqual(master_operand, slave_operand)
-    
-    def convert_greater_equal(self, master_operand, slave_operand):
-        return GreaterEqual(master_operand, slave_operand)
-    
-    def convert_contains(self, master_operand, slave_operand):
-        return Contains(slave_operand, master_operand,)
-    
-    def convert_is_subset(self, master_operand, slave_operand):
-        return IsSubset(slave_operand, master_operand)
-    
-    def convert_string(self, operand):
-        return String(operand)
-    
-    def convert_number(self, operand):
-        return Number(operand)
-    
-    def convert_set(self, *operands):
-        return Set(*operands)
-    
-    def convert_variable(self, name):
-        return VariablePlaceholder(name)
-    
-    def convert_function(self, name, *arguments):
-        return FunctionPlaceholder(name, *arguments)
 
 
 anti_converter = AntiConverter()
