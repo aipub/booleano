@@ -26,9 +26,9 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Identifier placeholders.
+Class instance placeholders.
 
-A placeholder operand is an identifier whose evaluation is not done by Booleano
+A placeholder operand is an object whose evaluation is not done by Booleano
 (i.e., the parse tree is handled directly). As a consequence, the Booleano
 parser won't verify its existence.
 

@@ -43,6 +43,36 @@ from booleano.exc import InvalidOperationError, BadCallError
 #{ Mock variables
 
 
+class BoolVar(Variable):
+    """
+    Mock variable which represents the boolean value stored in a helper called
+    ``bool``.
+    
+    """
+    operations = set(("boolean", "equality"))
+    
+    required_helpers = ("bool", )
+    
+    def __init__(self):
+        self.evaluated = False
+        super(BoolVar, self).__init__()
+    
+    def to_python(self, **helpers):
+        """Return the value of the ``bool`` helper"""
+        self.evaluated = True
+        return helpers['bool']
+    
+    def equals(self, value, **helpers):
+        """Does ``value`` equal this boolean variable?"""
+        self.evaluated = True
+        return helpers['bool'] == value
+    
+    def get_logical_value(self, **helpers):
+        """Does the value of helper ``bool`` evaluate to True?"""
+        self.evaluated = True
+        return bool(helpers['bool'])
+
+
 class TrafficLightVar(Variable):
     """
     Variable that represents a traffic light.

@@ -39,7 +39,7 @@ from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad,
-                   DriversAwaitingGreenLightVar)
+                   DriversAwaitingGreenLightVar, BoolVar)
 
 
 class TestOperator(object):
@@ -67,7 +67,7 @@ class TestTruth(object):
     """Tests for the :class:`Truth`."""
     
     def test_constructor_with_boolean_operand(self):
-        traffic_light = TrafficLightVar("traffic-light")
+        traffic_light = TrafficLightVar()
         Truth(traffic_light)
     
     @raises(InvalidOperationError)
@@ -78,7 +78,7 @@ class TestTruth(object):
     
     def test_evaluation(self):
         # Setup:
-        traffic_light = TrafficLightVar("traffic-light")
+        traffic_light = TrafficLightVar()
         operation = Truth(traffic_light)
         # Evaluation:
         ok_(operation( **dict(traffic_light="green") ))
@@ -111,24 +111,25 @@ class TestTruth(object):
     def test_string_representation(self):
         op = Truth(BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "Truth(Variable bool)")
+        eq_(as_unicode, "Truth(Unbound variable BoolVar)")
         eq_(as_unicode, str(op))
     
     def test_representation(self):
-        op = Truth(BoolVar())
-        eq_(repr(op), '<Truth <Variable "bool">>')
+        op0 = BoolVar()
+        op = Truth(op0)
+        eq_(repr(op), '<Truth <Unbound variable BoolVar at %s>>' % id(op0))
 
 
 class TestNot(object):
     """Tests for the :class:`Not`."""
     
     def test_constructor_with_boolean_operand(self):
-        traffic_light = TrafficLightVar("traffic-light")
+        traffic_light = TrafficLightVar()
         Not(traffic_light)
     
     def test_constructor_with_operator(self):
         """The Not operator must also support operators as operands"""
-        traffic_light = TrafficLightVar("traffic-light")
+        traffic_light = TrafficLightVar()
         Not(Truth(traffic_light))
     
     @raises(InvalidOperationError)
@@ -139,7 +140,7 @@ class TestNot(object):
     
     def test_evaluation(self):
         # Setup:
-        traffic_light = TrafficLightVar("traffic-light")
+        traffic_light = TrafficLightVar()
         operation = Not(traffic_light)
         # Evaluation:
         ok_(operation( **dict(traffic_light="") ))
@@ -175,17 +176,25 @@ class TestNot(object):
         op2 = Not(And(BoolVar(), BoolVar()))
         as_unicode1 = unicode(op1)
         as_unicode2 = unicode(op2)
-        eq_(as_unicode1, "Not(Variable bool)")
+        eq_(as_unicode1, "Not(Unbound variable BoolVar)")
         eq_(as_unicode1, str(op1))
         eq_(as_unicode2,
-            "Not(And(Variable bool, Variable bool))")
+            "Not(And(Unbound variable BoolVar, Unbound variable BoolVar))")
         eq_(as_unicode2, str(op2))
     
     def test_representation(self):
-        op1 = Not(BoolVar())
-        op2 = Not(And(BoolVar(), BoolVar()))
-        eq_(repr(op1), '<Not <Variable "bool">>')
-        eq_(repr(op2), '<Not <And <Variable "bool"> <Variable "bool">>>')
+        # With an operand:
+        op0 = BoolVar()
+        op = Not(op0)
+        eq_(repr(op), '<Not <Unbound variable BoolVar at %s>>' % id(op0))
+        # With an operation:
+        op1 = BoolVar()
+        op2 = BoolVar()
+        op = Not(And(op1, op2))
+        expected = "<Not <And <Unbound variable BoolVar at %s> " \
+                             "<Unbound variable BoolVar at %s>>>" % (id(op1),
+                                                                     id(op2))
+        eq_(repr(op), expected)
 
 
 class TestAnd(object):
@@ -193,33 +202,30 @@ class TestAnd(object):
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        And(BoolVar(), TrafficLightVar("traffic-light"))
+        And(BoolVar(), TrafficLightVar())
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        And(
-            Not(BoolVar()),
-            Not(TrafficLightVar("traffic-light"))
-        )
+        And(Not(BoolVar()), Not(TrafficLightVar()))
     
     def test_constructor_with_mixed_operands(self):
         """
         The constructor must support operators and actual operands as arguments.
         
         """
-        And(BoolVar(), Not(TrafficLightVar("traffic-light")))
-        And(Not(BoolVar()), TrafficLightVar("traffic-light"))
+        And(BoolVar(), Not(TrafficLightVar()))
+        And(Not(BoolVar()), TrafficLightVar())
     
     def test_with_both_results_as_true(self):
-        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar())
         ok_(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar())
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = And(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = And(BoolVar(), TrafficLightVar())
         assert_false(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
@@ -258,20 +264,29 @@ class TestAnd(object):
     def test_string_representation(self):
         op = And(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "And(Variable bool, Variable bool)")
+        eq_("And(Unbound variable BoolVar, Unbound variable BoolVar)",
+            as_unicode)
         eq_(as_unicode, str(op))
         
         # Now with operators as operands:
         op = And(Not(BoolVar()), Not(BoolVar()))
-        eq_(unicode(op), "And(Not(Variable bool), Not(Variable bool))")
+        eq_("And(Not(Unbound variable BoolVar), Not(Unbound variable BoolVar))",
+            unicode(op))
     
     def test_representation(self):
-        op = And(BoolVar(), BoolVar())
-        eq_(repr(op), '<And <Variable "bool"> <Variable "bool">>')
+        op1 = BoolVar()
+        op2 = BoolVar()
+        op = And(op1, op2)
+        expected = "<And <Unbound variable BoolVar at %s> " \
+                        "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = And(Not(BoolVar()), Not(BoolVar()))
-        eq_(repr(op), '<And <Not <Variable "bool">> <Not <Variable "bool">>>')
+        op = And(Not(op1), Not(op2))
+        expected = "<And <Not <Unbound variable BoolVar at %s>> " \
+                        "<Not <Unbound variable BoolVar at %s>>>" % (id(op1),
+                                                                     id(op2))
+        eq_(repr(op), expected)
 
 
 class TestOr(object):
@@ -279,33 +294,30 @@ class TestOr(object):
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        Or(BoolVar(), TrafficLightVar("traffic-light"))
+        Or(BoolVar(), TrafficLightVar())
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        Or(
-            Not(BoolVar()),
-            Not(TrafficLightVar("traffic-light"))
-        )
+        Or(Not(BoolVar()), Not(TrafficLightVar()))
     
     def test_constructor_with_mixed_operands(self):
         """
         The constructor must support operators and actual operands as arguments.
         
         """
-        Or(BoolVar(), Not(TrafficLightVar("traffic-light")))
-        Or(Not(BoolVar()), TrafficLightVar("traffic-light"))
+        Or(BoolVar(), Not(TrafficLightVar()))
+        Or(Not(BoolVar()), TrafficLightVar())
     
     def test_with_both_results_as_true(self):
-        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar())
         ok_(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar())
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = Or(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Or(BoolVar(), TrafficLightVar())
         ok_(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
@@ -348,20 +360,30 @@ class TestOr(object):
     def test_string_representation(self):
         op = Or(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "Or(Variable bool, Variable bool)")
+        expected = "Or(Unbound variable BoolVar, Unbound variable BoolVar)"
+        eq_(as_unicode, expected)
         eq_(as_unicode, str(op))
         
         # Now with operators as operands:
         op = Or(Not(BoolVar()), Not(BoolVar()))
-        eq_(unicode(op), "Or(Not(Variable bool), Not(Variable bool))")
+        expected = "Or(Not(Unbound variable BoolVar), " \
+                      "Not(Unbound variable BoolVar))"
+        eq_(unicode(op), expected)
     
     def test_representation(self):
-        op = Or(BoolVar(), BoolVar())
-        eq_(repr(op), '<Or <Variable "bool"> <Variable "bool">>')
+        op1 = BoolVar()
+        op2 = BoolVar()
+        op = Or(op1, op2)
+        expected = "<Or <Unbound variable BoolVar at %s> " \
+                       "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = Or(Not(BoolVar()), Not(BoolVar()))
-        eq_(repr(op), '<Or <Not <Variable "bool">> <Not <Variable "bool">>>')
+        op = Or(Not(op1), Not(op2))
+        expected = "<Or <Not <Unbound variable BoolVar at %s>> " \
+                       "<Not <Unbound variable BoolVar at %s>>>" % (id(op1),
+                                                                    id(op2))
+        eq_(repr(op), expected)
 
 
 class TestXor(object):
@@ -369,33 +391,30 @@ class TestXor(object):
     
     def test_constructor_with_operands(self):
         """The constructor must support actual operands as arguments"""
-        Xor(BoolVar(), TrafficLightVar("traffic-light"))
+        Xor(BoolVar(), TrafficLightVar())
     
     def test_constructor_with_operators(self):
         """The constructor must support operators as arguments."""
-        Xor(
-            Not(BoolVar()),
-            Not(TrafficLightVar("traffic-light"))
-        )
+        Xor(Not(BoolVar()), Not(TrafficLightVar()))
     
     def test_constructor_with_mixed_operands(self):
         """
         The constructor must support operators and actual operands as arguments.
         
         """
-        Xor(BoolVar(), Not(TrafficLightVar("traffic-light")))
-        Xor(Not(BoolVar()), TrafficLightVar("traffic-light"))
+        Xor(BoolVar(), Not(TrafficLightVar()))
+        Xor(Not(BoolVar()), TrafficLightVar())
     
     def test_with_both_results_as_true(self):
-        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar())
         assert_false(operation( **dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
-        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar())
         assert_false(operation( **dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
-        operation = Xor(BoolVar(), TrafficLightVar("traffic-light"))
+        operation = Xor(BoolVar(), TrafficLightVar())
         ok_(operation( **dict(bool=False, traffic_light="red") ))
     
     def test_equivalent(self):
@@ -426,21 +445,28 @@ class TestXor(object):
     def test_string_representation(self):
         op = Xor(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "Xor(Variable bool, Variable bool)")
-        eq_(as_unicode, str(op))
+        eq_("Xor(Unbound variable BoolVar, Unbound variable BoolVar)",
+            as_unicode)
         eq_(as_unicode, str(op))
         
         # Now with an operators as operands:
         op = Xor(Not(BoolVar()), Not(BoolVar()))
-        eq_(unicode(op), "Xor(Not(Variable bool), Not(Variable bool))")
+        eq_("Xor(Not(Unbound variable BoolVar), Not(Unbound variable BoolVar))",
+            unicode(op))
     
     def test_representation(self):
-        op = Xor(BoolVar(), BoolVar())
-        eq_(repr(op), '<Xor <Variable "bool"> <Variable "bool">>')
+        op1 = BoolVar()
+        op2 = BoolVar()
+        op = Xor(op1, op2)
+        expected = "<Xor <Unbound variable BoolVar at %s> " \
+                   "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = Xor(Not(BoolVar()), Not(BoolVar()))
-        eq_(repr(op), '<Xor <Not <Variable "bool">> <Not <Variable "bool">>>')
+        op = Xor(Not(op1), Not(op2))
+        expected = "<Xor <Not <Unbound variable BoolVar at %s>> "\
+                   "<Not <Unbound variable BoolVar at %s>>>" % (id(op1), id(op2))
+        eq_(repr(op), expected)
 
 
 class TestNonConnectiveBinaryOperators(object):
@@ -520,12 +546,15 @@ class TestNonConnectiveBinaryOperators(object):
     
     def test_string_representation(self):
         op = Equal(String(u"¿qué hora es?"), BoolVar())
-        eq_(unicode(op), u'Equal(Variable bool, "¿qué hora es?")')
-        eq_(str(op), 'Equal(Variable bool, "¿qué hora es?")')
+        eq_(unicode(op), u'Equal(Unbound variable BoolVar, "¿qué hora es?")')
+        eq_(str(op), 'Equal(Unbound variable BoolVar, "¿qué hora es?")')
     
     def test_representation(self):
-        op = Equal(String(u"¿qué hora es?"), BoolVar())
-        eq_(repr(op), '<Equal <Variable "bool"> <String "¿qué hora es?">>')
+        var = BoolVar()
+        op = Equal(String(u"¿qué hora es?"), var)
+        expected = '<Equal <Unbound variable BoolVar at %s> ' \
+                          '<String "¿qué hora es?">>' % id(var)
+        eq_(repr(op), expected)
 
 
 class TestEqual():
@@ -953,36 +982,6 @@ class TestIsSubset(object):
 #{ Mock objects
 
 
-class BoolVar(Variable):
-    """
-    Mock variable which represents the boolean value stored in a helper called
-    ``bool``.
-    
-    """
-    operations = set(("boolean", "equality"))
-    
-    required_helpers = ("bool", )
-    
-    def __init__(self, **names):
-        self.evaluated = False
-        super(BoolVar, self).__init__("bool", **names)
-    
-    def to_python(self, **helpers):
-        """Return the value of the ``bool`` helper"""
-        self.evaluated = True
-        return helpers['bool']
-    
-    def equals(self, value, **helpers):
-        """Does ``value`` equal this boolean variable?"""
-        self.evaluated = True
-        return helpers['bool'] == value
-    
-    def get_logical_value(self, **helpers):
-        """Does the value of helper ``bool`` evaluate to True?"""
-        self.evaluated = True
-        return bool(helpers['bool'])
-
-
 class NumVar(Variable):
     """
     Mock variable which represents a numeric value stored in a helper called
@@ -993,9 +992,6 @@ class NumVar(Variable):
     operations = set(["equality", "inequality"])
     
     required_helpers = ("num", )
-    
-    def __init__(self, **names):
-        super(NumVar, self).__init__("num", **names)
     
     def to_python(self, **helpers):
         return helpers['num']

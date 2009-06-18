@@ -108,7 +108,7 @@ class _OperandMeta(type):
 
 class Operand(ParseTreeNode):
     """
-    Base class for operands.
+    Base class for *unbound* operands.
     
     .. attribute:: operations = set()
         The set of operations supported by this operand.
@@ -219,6 +219,6 @@ class Operand(ParseTreeNode):
 
 # Importing the built-in operands so they can be available from this namespace:
 from booleano.operations.operands.constants import String, Number, Set
-from booleano.operations.operands.identifiers import Variable, Function
+from booleano.operations.operands.classes import Variable, Function
 from booleano.operations.operands.placeholders import (VariablePlaceholder,
                                                        FunctionPlaceholder)

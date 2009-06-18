@@ -26,7 +26,13 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Identifier operands.
+Booleano classes.
+
+There are two types of Booleano classes:
+ - Variable.
+ - Function.
+
+**Python classes and Booleano classes are two different things!**
 
 """
 from booleano.operations.operands import Operand, _OperandMeta
@@ -35,84 +41,31 @@ from booleano.exc import BadOperandError, BadCallError, BadFunctionError
 __all__ = ["Variable", "Function"]
 
 
-class _IdentifierMeta(_OperandMeta):
-    """Metaclass for the identifiers."""
-    
-    def __init__(cls, name, bases, ns):
-        """Lower-case the default names for the node."""
-        super(_IdentifierMeta, cls).__init__(name, bases, ns)
-        if cls.default_global_name:
-            cls.default_global_name = cls.default_global_name.lower()
-        for (locale, name) in cls.default_names.items():
-            cls.default_names[locale] = name.lower()
-
-
-class Identifier(Operand):
+class Class(Operand):
     """
-    Base class for identifiers.
+    Base class for Booleano classes.
     
     """
     
-    __metaclass__ = _IdentifierMeta
-    
-    # Only actual identifiers should be checked.
+    # Only actual classes should be checked.
     bypass_operation_check = True
     
-    default_global_name = None
+    def to_string(self, global_name=None, namespace=None):
+        raise NotImplementedError()
     
-    default_names = {}
+    def to_repr(self, global_name=None, names={}, namespace=None):
+        raise NotImplementedError()
     
-    def __init__(self, global_name=None, **names):
-        """
-        Create the identifier using ``global_name`` as it's default name.
-        
-        :param global_name: The global name used by this identifier; if not set,
-            the :attr:`default_global_name` will be used.
-        :type global_name: basestring
-        :raises BadOperandError: If the identifier class doesn't set a default
-            global name and ``global_name`` is not set either.
-        
-        Additional keyword arguments represent the other names this identifier
-        can take in different languages.
-        
-        .. note::
-            ``global_name`` does *not* have to be an English/ASCII string.
-        
-        """
-        if global_name:
-            self.global_name = global_name.lower()
-        elif self.default_global_name:
-            self.global_name = self.default_global_name
-        else:
-            raise BadOperandError("%s doesn't have a default global name; set "
-                                  "one explicitly" % self.__class__.__name__)
-        self.names = self.default_names.copy()
-        # Convert the ``names`` to lower-case, before updating the resulting
-        # names:
-        for (locale, name) in names.items():
-            names[locale] = name.lower()
-        self.names.update(names)
+    def __unicode__(self):
+        """Return the Unicode representation of this class."""
+        return self.to_string()
     
-    def check_equivalence(self, node):
-        """
-        Make sure identifier ``node`` and this identifier are equivalent.
-        
-        :param node: The other identifier which may be equivalent to this one.
-        :type node: Identifier
-        :raises AssertionError: If the nodes don't share the same class or
-            don't share the same global and localized names.
-        
-        """
-        super(Identifier, self).check_equivalence(node)
-        assert node.global_name == self.global_name, \
-               u'Identifiers %s and %s have different global names' % \
-               (self, node)
-        assert node.names == self.names, \
-               u'Identifiers %s and %s have different translations' % \
-               (self, node)
+    def __repr__(self):
+        """Represent this class, including its translations."""
+        return self.to_repr()
 
 
-class Variable(Identifier):
+class Variable(Class):
     """
     Developer-defined variable.
     
@@ -121,20 +74,31 @@ class Variable(Identifier):
     # Only actual variables should be checked.
     bypass_operation_check = True
     
-    def __unicode__(self):
+    def to_string(self, global_name=None, namespace=None):
         """Return the Unicode representation of this variable."""
-        return "Variable %s" % self.global_name
+        if not global_name:
+            return "Unbound variable %s" % self.__class__.__name__
+        name = global_name
+        if namespace:
+            namespace = u":".join(namespace)
+            name = name + " (in %s)" % namespace
+        return u"Variable %s" % name
     
-    def __repr__(self):
+    def to_repr(self, global_name=None, names={}, namespace=None):
         """Represent this variable, including its translations."""
+        if not global_name:
+            return "<Unbound variable %s at %s>" % (self.__class__.__name__,
+                                                    id(self))
         names = ['%s="%s"' % (locale, name.encode("utf-8")) for (locale, name)
-                 in self.names.items()]
-        names.insert(0, '"%s"' % self.global_name.encode("utf-8"))
+                 in names.items()]
+        names.insert(0, self.global_name.encode("utf-8"))
         names = " ".join(names)
+        if namespace:
+            names = names + " (in %s)" % namespace
         return "<Variable %s>" % names
 
 
-class _FunctionMeta(_IdentifierMeta):
+class _FunctionMeta(_OperandMeta):
     """
     Pre-process user-defined functions right after they've been defined.
     
@@ -173,9 +137,13 @@ class _FunctionMeta(_IdentifierMeta):
         super(_FunctionMeta, cls).__init__(name, bases, ns)
 
 
-class Function(Identifier):
+class Function(Class):
     """
     Base class for developer-defined, n-ary functions.
+    
+    A Booleano function is a `factory object
+    <http://en.wikipedia.org/wiki/Factory_object>`_ because it always returns
+    a Booleano operand.
     
     Subclasses must override :meth:`check_arguments` to verify the validity of
     the arguments, or to do nothing if it's not necessary.
@@ -244,23 +212,16 @@ class Function(Identifier):
     
     optional_arguments = {}
     
-    def __init__(self, global_name=None, *arguments, **names):
+    def __init__(self, *arguments):
         """
         Store the ``arguments`` and validate them.
         
-        :param global_name: The global name for this function; if not set,
-            the :attr:`default_global_name` will be used..
         :raises BadCallError: If :meth:`check_arguments` finds that the
             ``arguments`` are invalid, or if few arguments are passed, or
             if too much arguments are passed.
-        :raises BadOperandError: If the function class doesn't set a default
-            global name and ``global_name`` is not set either.
-        
-        Additional keyword arguments will be used to find the alternative names
-        for this functions in various grammars.
         
         """
-        super(Function, self).__init__(global_name, **names)
+        super(Function, self).__init__()
         # Checking the amount of arguments received:
         argn = len(arguments)
         if argn < len(self.required_arguments):
@@ -311,15 +272,37 @@ class Function(Identifier):
                "Functions %s and %s were called with different arguments" % \
                (node, self)
     
-    def __unicode__(self):
-        """Return the Unicode representation for this function."""
+    def to_string(self, global_name=None, namespace=None):
+        """Return the Unicode representation of this function."""
         args = [u'%s=%s' % (k, v) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
-        return "%s(%s)" % (self.global_name, args)
+        
+        if not global_name:
+            return "Unbound function %s(%s)" % (self.__class__.__name__, args)
+        
+        name = global_name
+        if namespace:
+            namespace = u":".join(namespace)
+            name = name + " (in %s)" % namespace
+        return u"Function %s" % name
     
-    def __repr__(self):
-        """Return the representation for this function."""
+    def to_repr(self, global_name=None, names={}, namespace=None):
+        """
+        Represent this function, including its translations.
+        
+        """
         args = ['%s=%s' % (k, repr(v)) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
-        return "<Function %s(%s)>" % (self.global_name.encode("utf-8"), args)
+        
+        if not global_name:
+            return "<Unbound function %s(%s) at %s>" % (self.__class__.__name__,
+                                                        args, id(self))
+        
+        names = ['%s="%s"' % (locale, name.encode("utf-8")) for (locale, name)
+                 in names.items()]
+        names.insert(0, self.global_name.encode("utf-8"))
+        names = " ".join(names)
+        if namespace:
+            names = names + " (in %s)" % namespace
+        return "<Function %s>" % names
 

@@ -25,9 +25,8 @@
 # Except as contained in this notice, the name(s) of the above copyright
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
-
 """
-Tests for the operands.
+Tests for unbounded operands.
 
 """
 
@@ -39,7 +38,8 @@ from booleano.operations.operands import Operand
 from booleano.exc import (InvalidOperationError, BadOperandError, BadCallError,
                           BadFunctionError)
 
-from tests import TrafficLightVar, PermissiveFunction, TrafficViolationFunc
+from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
+                   BoolVar)
 
 
 class TestOperand(object):
@@ -259,27 +259,9 @@ class TestVariable(object):
     
     def test_node_type(self):
         """Variables are leaf nodes."""
-        var = Variable("greeting")
+        var = BoolVar()
         ok_(var.is_leaf())
         assert_false(var.is_branch())
-    
-    def test_no_language_specific_names(self):
-        greeting_var = Variable("greeting")
-        eq_("greeting", greeting_var.global_name)
-        eq_({}, greeting_var.names)
-    
-    def test_with_language_specific_names(self):
-        """
-        There are no language-specific names defined by default.
-        
-        """
-        names = {
-            'fr': "bonjour",
-            'en': "hi",
-            'es': "hello",
-        }
-        greeting_var = Variable("greeting", **names)
-        eq_(names, greeting_var.names)
     
     def test_checking_supported_operations(self):
         class GreetingVariable(Variable):
@@ -303,156 +285,36 @@ class TestVariable(object):
             def to_python(self, **helpers):
                 pass
     
-    def test_with_default_language_specific_names(self):
-        """
-        Variables can be created with default names in any language.
-        
-        """
-        class GreetingVariable(Variable):
-            bypass_operation_check = True
-            default_names = {'fr': "bonjour"}
-        
-        # Appending names:
-        greeting_var = GreetingVariable("greet", en="hi", es="hola")
-        eq_({'fr': "bonjour", 'en': "hi", 'es': "hola"}, greeting_var.names)
-        # Appending and replacing names:
-        greeting_var = GreetingVariable("greet", fr="salut", es="hola")
-        eq_({'fr': "salut", 'es': "hola"}, greeting_var.names)
-    
-    def test_with_default_case_insensitive_names(self):
-        """
-        The default names are case insensitive.
-        
-        """
-        class GreetingVariable(Variable):
-            bypass_operation_check = True
-            default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
-        
-        greeting_var = GreetingVariable("GREET")
-        eq_(greeting_var.global_name, "greet")
-        eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
-            GreetingVariable.default_names)
-    
-    def test_with_default_global_names(self):
-        """
-        Variables can be created with a default global name.
-        
-        """
-        class GreetingVariable(Variable):
-            bypass_operation_check = True
-            default_global_name = "greeting"
-        
-        # Using the default global name:
-        greeting_var = GreetingVariable()
-        eq_("greeting", greeting_var.global_name)
-        # Overriding the global name:
-        greeting_var = GreetingVariable("greet")
-        eq_("greet", greeting_var.global_name)
-    
-    def test_without_global_name(self):
-        """
-        Variables cannot be created without a global name.
-        
-        """
-        class GreetingVariable(Variable):
-            bypass_operation_check = True
-        assert_raises(BadOperandError, GreetingVariable)
-    
-    def test_with_default_case_insensitive_global_names(self):
-        """The default global names are case insensitive."""
-        class GreetingVariable(Variable):
-            bypass_operation_check = True
-            default_global_name = "GREETING"
-        
-        eq_(GreetingVariable.default_global_name, "greeting")
-        # Using the default global name:
-        greeting_var = GreetingVariable()
-        eq_("greeting", greeting_var.global_name)
-        # Overriding the global name:
-        greeting_var = GreetingVariable("GREET")
-        eq_("greet", greeting_var.global_name)
-    
     def test_equivalence(self):
-        """Two variables are equivalent if they have the same names."""
-        var1 = TrafficLightVar("traffic_light", es=u"semáforo")
-        var2 = TrafficLightVar("traffic_light")
-        var3 = TrafficLightVar("semaphore", fr=u"carrefour à feux")
-        var4 = TrafficLightVar("traffic_light", es=u"semáforo")
-        var5 = TrafficLightVar("TRAFFIC_LIGHT", es=u"SEMÁFORO")
-        var6 = TrafficLightVar("TRAFFIC_LIGHT")
+        """Two variables are equivalent if they share the same class."""
+        var1 = TrafficLightVar()
+        var2 = TrafficLightVar()
+        var3 = BoolVar()
         
-        var1.check_equivalence(var4)
-        var1.check_equivalence(var5)
-        var2.check_equivalence(var6)
-        var4.check_equivalence(var1)
-        var4.check_equivalence(var5)
-        var5.check_equivalence(var1)
-        var5.check_equivalence(var4)
-        var6.check_equivalence(var2)
-        assert_raises(AssertionError, var1.check_equivalence, var2)
+        var1.check_equivalence(var2)
+        var2.check_equivalence(var1)
+        
         assert_raises(AssertionError, var1.check_equivalence, var3)
-        assert_raises(AssertionError, var1.check_equivalence, var6)
-        assert_raises(AssertionError, var2.check_equivalence, var1)
         assert_raises(AssertionError, var2.check_equivalence, var3)
-        assert_raises(AssertionError, var2.check_equivalence, var5)
         assert_raises(AssertionError, var3.check_equivalence, var1)
-        assert_raises(AssertionError, var3.check_equivalence, var2)
-        assert_raises(AssertionError, var3.check_equivalence, var5)
-        assert_raises(AssertionError, var3.check_equivalence, var6)
-        assert_raises(AssertionError, var4.check_equivalence, var2)
-        assert_raises(AssertionError, var4.check_equivalence, var3)
-        assert_raises(AssertionError, var4.check_equivalence, var6)
-        assert_raises(AssertionError, var5.check_equivalence, var2)
-        assert_raises(AssertionError, var5.check_equivalence, var3)
-        assert_raises(AssertionError, var5.check_equivalence, var6)
-        assert_raises(AssertionError, var6.check_equivalence, var1)
-        assert_raises(AssertionError, var6.check_equivalence, var3)
-        assert_raises(AssertionError, var6.check_equivalence, var4)
-        assert_raises(AssertionError, var6.check_equivalence, var5)
+        assert_raises(AssertionError, var3.check_equivalence, var1)
         
-        ok_(var1 == var4)
-        ok_(var1 == var5)
-        ok_(var2 == var6)
-        ok_(var4 == var1)
-        ok_(var4 == var5)
-        ok_(var5 == var1)
-        ok_(var5 == var4)
-        ok_(var6 == var2)
-        ok_(var1 != var2)
+        ok_(var1 == var2)
+        ok_(var2 == var1)
         ok_(var1 != var3)
-        ok_(var1 != var6)
-        ok_(var2 != var1)
         ok_(var2 != var3)
-        ok_(var2 != var4)
-        ok_(var2 != var5)
         ok_(var3 != var1)
         ok_(var3 != var2)
-        ok_(var3 != var4)
-        ok_(var3 != var5)
-        ok_(var3 != var6)
-        ok_(var4 != var2)
-        ok_(var4 != var3)
-        ok_(var4 != var6)
-        ok_(var5 != var2)
-        ok_(var5 != var3)
-        ok_(var5 != var6)
-        ok_(var6 != var1)
-        ok_(var6 != var3)
-        ok_(var6 != var4)
-        ok_(var6 != var5)
     
     def test_string_representation(self):
-        var = TrafficLightVar("the_var", es="la_variable")
+        var = TrafficLightVar()
         as_unicode = unicode(var)
-        eq_("Variable the_var", as_unicode)
+        eq_("Unbound variable TrafficLightVar", as_unicode)
         eq_(str(var), as_unicode)
     
     def test_representation(self):
-        var = TrafficLightVar("the_var", es=u"la_variablé")
-        eq_(repr(var), '<Variable "the_var" es="la_variablé">')
-        # With the global name in Unicode:
-        var = TrafficLightVar(u"the_vár", es="la_variable")
-        eq_(repr(var), '<Variable "the_vár" es="la_variable">')
+        var = TrafficLightVar()
+        eq_(repr(var), '<Unbound variable TrafficLightVar at %s>' % id(var))
 
 
 class TestFunction(object):
@@ -460,92 +322,9 @@ class TestFunction(object):
     
     def test_node_type(self):
         """Functions are branch nodes."""
-        func = PermissiveFunction("greet", String("arg0"))
+        func = PermissiveFunction(String("arg0"))
         ok_(func.is_branch())
         assert_false(func.is_leaf())
-    
-    def test_no_language_specific_names(self):
-        func = PermissiveFunction("greeting", String("arg0"))
-        eq_("greeting", func.global_name)
-        eq_({}, func.names)
-    
-    def test_with_language_specific_names(self):
-        """
-        There are no language-specific names defined by default.
-        
-        """
-        names = {
-            'fr': "bonjour",
-            'en': "hi",
-            'es': "hello",
-        }
-        func = PermissiveFunction("greeting", String("arg0"), **names)
-        eq_(names, func.names)
-    
-    def test_with_default_language_specific_names(self):
-        """
-        Functions can be created with default names in any language.
-        
-        """
-        class GreetingFunction(PermissiveFunction):
-            default_names = {'fr': "bonjour"}
-        
-        # Appending names:
-        func = GreetingFunction("greet", String("arg0"), en="hi", es="hola")
-        eq_({'fr': "bonjour", 'en': "hi", 'es': "hola"}, func.names)
-        # Appending and replacing names:
-        func = GreetingFunction("greet", String("arg0"), fr="salut", es="hola")
-        eq_({'fr': "salut", 'es': "hola"}, func.names)
-    
-    def test_with_default_case_insensitive_names(self):
-        """
-        The default names are case insensitive.
-        
-        """
-        class GreetingFunction(PermissiveFunction):
-            default_names = {'fr': "BONJOUR", 'es': "HOLA", 'en': "hello"}
-        
-        func = GreetingFunction("GREET", String("arg0"))
-        eq_(func.global_name, "greet")
-        eq_({'fr': "bonjour", 'en': "hello", 'es': "hola"},
-            GreetingFunction.default_names)
-    
-    def test_with_default_global_names(self):
-        """
-        Functions can be created with a default global name.
-        
-        """
-        class GreetingFunction(PermissiveFunction):
-            default_global_name = "greeting"
-        
-        # Using the default global name:
-        greeting_func = GreetingFunction(None, String("arg0"))
-        eq_("greeting", greeting_func.global_name)
-        # Overriding the global name:
-        greeting_func = GreetingFunction("greet", String("arg0"))
-        eq_("greet", greeting_func.global_name)
-    
-    def test_without_global_name(self):
-        """
-        Functions cannot be created without a global name.
-        
-        """
-        class GreetingFunction(PermissiveFunction):
-            bypass_operation_check = True
-        assert_raises(BadOperandError, GreetingFunction, None, String("arg0"))
-    
-    def test_with_default_case_insensitive_global_names(self):
-        """The default global names are case insensitive."""
-        class GreetingFunction(PermissiveFunction):
-            default_global_name = "GREETING"
-        
-        eq_(GreetingFunction.default_global_name, "greeting")
-        # Using the default global name:
-        greeting_func = GreetingFunction(None, String("arg0"))
-        eq_("greeting", greeting_func.global_name)
-        # Overriding the global name:
-        greeting_func = GreetingFunction("GREET", String("arg0"))
-        eq_("greet", greeting_func.global_name)
     
     def test_checking_supported_operations(self):
         class GreetingFunction(Function):
@@ -570,7 +349,7 @@ class TestFunction(object):
                 pass
     
     def test_constructor_with_minimum_arguments(self):
-        func = PermissiveFunction("permissive", String("this-is-arg0"))
+        func = PermissiveFunction(String("this-is-arg0"))
         args = {
             'arg0': String("this-is-arg0"),
             'oarg0': Set(),
@@ -579,7 +358,7 @@ class TestFunction(object):
         eq_(func.arguments, args)
     
     def test_constructor_with_one_optional_argument(self):
-        func = PermissiveFunction("permissive", String("this-is-arg0"),
+        func = PermissiveFunction(String("this-is-arg0"),
                                   String("this-is-oarg0"))
         args = {
             'arg0': String("this-is-arg0"),
@@ -589,7 +368,7 @@ class TestFunction(object):
         eq_(func.arguments, args)
     
     def test_constructor_with_all_arguments(self):
-        func = PermissiveFunction("permissive",
+        func = PermissiveFunction(
             String("this-is-arg0"),
             String("this-is-oarg0"),
             String("this-is-oarg1"),
@@ -603,11 +382,11 @@ class TestFunction(object):
     
     @raises(BadCallError)
     def test_constructor_with_few_arguments(self):
-        PermissiveFunction("permissive", )
+        PermissiveFunction()
     
     @raises(BadCallError)
     def test_constructor_with_many_arguments(self):
-        PermissiveFunction("permissive",
+        PermissiveFunction(
             Number(0),
             Number(1),
             Number(2),
@@ -622,8 +401,8 @@ class TestFunction(object):
     
     def test_constructor_accepts_operands(self):
         """Only operands are valid function arguments."""
-        PermissiveFunction("permissive", Number(0), Number(1))
-        assert_raises(BadCallError, PermissiveFunction, "permissive", 0, 1)
+        PermissiveFunction(Number(0), Number(1))
+        assert_raises(BadCallError, PermissiveFunction, 0, 1)
     
     def test_no_argument_validation_by_default(self):
         """
@@ -634,7 +413,7 @@ class TestFunction(object):
         """
         class MockFunction(Function):
             bypass_operation_check = True
-        assert_raises(NotImplementedError, MockFunction, "mock")
+        assert_raises(NotImplementedError, MockFunction)
     
     def test_arity(self):
         """
@@ -692,8 +471,8 @@ class TestFunction(object):
     
     def test_equivalence(self):
         """
-        Two functions are equivalent if they share the name, the required
-        and optional arguments, and the actual arguments passed.
+        Two functions are equivalent not only if they share the same class,
+        but also if their arguments are equivalent.
         
         """
         class FooFunction(Function):
@@ -702,116 +481,68 @@ class TestFunction(object):
             optional_arguments = {"xyz": String("123")}
             def check_arguments(self): pass
         
-        func1 = FooFunction("foo", String("whatever"))
-        func2 = FooFunction("foo", String("whatever"))
-        func3 = TrafficViolationFunc("traffic_violation", String("pedestrians"),
-                                     es=u"peatón")
-        func4 = PermissiveFunction("permissive", String("foo"))
-        func5 = FooFunction("foo", String("something"))
-        func6 = FooFunction("bar", String("whatever"))
-        func7 = TrafficViolationFunc("TRAFFIC_VIOLATION", String("pedestrians"),
-                                     es=u"PEATÓN")
+        func1 = FooFunction(String("whatever"))
+        func2 = FooFunction(String("whatever"))
+        func3 = TrafficViolationFunc(String("pedestrians"))
+        func4 = PermissiveFunction(String("foo"))
+        func5 = FooFunction(String("something"))
         
         func1.check_equivalence(func2)
         func2.check_equivalence(func1)
-        func3.check_equivalence(func7)
-        func7.check_equivalence(func3)
         
         assert_raises(AssertionError, func1.check_equivalence, func3)
         assert_raises(AssertionError, func1.check_equivalence, func4)
         assert_raises(AssertionError, func1.check_equivalence, func5)
-        assert_raises(AssertionError, func1.check_equivalence, func6)
-        assert_raises(AssertionError, func1.check_equivalence, func7)
         assert_raises(AssertionError, func2.check_equivalence, func3)
         assert_raises(AssertionError, func2.check_equivalence, func4)
         assert_raises(AssertionError, func2.check_equivalence, func5)
-        assert_raises(AssertionError, func2.check_equivalence, func6)
-        assert_raises(AssertionError, func2.check_equivalence, func7)
         assert_raises(AssertionError, func3.check_equivalence, func1)
         assert_raises(AssertionError, func3.check_equivalence, func2)
         assert_raises(AssertionError, func3.check_equivalence, func4)
         assert_raises(AssertionError, func3.check_equivalence, func5)
-        assert_raises(AssertionError, func3.check_equivalence, func6)
         assert_raises(AssertionError, func4.check_equivalence, func1)
         assert_raises(AssertionError, func4.check_equivalence, func2)
         assert_raises(AssertionError, func4.check_equivalence, func3)
         assert_raises(AssertionError, func4.check_equivalence, func5)
-        assert_raises(AssertionError, func4.check_equivalence, func6)
-        assert_raises(AssertionError, func4.check_equivalence, func7)
         assert_raises(AssertionError, func5.check_equivalence, func1)
         assert_raises(AssertionError, func5.check_equivalence, func2)
         assert_raises(AssertionError, func5.check_equivalence, func3)
         assert_raises(AssertionError, func5.check_equivalence, func4)
-        assert_raises(AssertionError, func5.check_equivalence, func6)
-        assert_raises(AssertionError, func5.check_equivalence, func7)
-        assert_raises(AssertionError, func6.check_equivalence, func1)
-        assert_raises(AssertionError, func6.check_equivalence, func2)
-        assert_raises(AssertionError, func6.check_equivalence, func3)
-        assert_raises(AssertionError, func6.check_equivalence, func4)
-        assert_raises(AssertionError, func6.check_equivalence, func5)
-        assert_raises(AssertionError, func6.check_equivalence, func7)
-        assert_raises(AssertionError, func7.check_equivalence, func1)
-        assert_raises(AssertionError, func7.check_equivalence, func2)
-        assert_raises(AssertionError, func7.check_equivalence, func4)
-        assert_raises(AssertionError, func7.check_equivalence, func5)
-        assert_raises(AssertionError, func7.check_equivalence, func6)
         
         ok_(func1 == func2)
         ok_(func2 == func1)
-        ok_(func3 == func7)
-        ok_(func7 == func3)
         ok_(func1 != func3)
         ok_(func1 != func4)
         ok_(func1 != func5)
-        ok_(func1 != func6)
-        ok_(func1 != func7)
         ok_(func2 != func3)
         ok_(func2 != func4)
         ok_(func2 != func5)
-        ok_(func2 != func6)
-        ok_(func2 != func7)
         ok_(func3 != func1)
         ok_(func3 != func2)
         ok_(func3 != func4)
         ok_(func3 != func5)
-        ok_(func3 != func6)
         ok_(func4 != func1)
         ok_(func4 != func2)
         ok_(func4 != func3)
         ok_(func4 != func5)
-        ok_(func4 != func6)
-        ok_(func4 != func7)
         ok_(func5 != func1)
         ok_(func5 != func2)
         ok_(func5 != func3)
         ok_(func5 != func4)
-        ok_(func5 != func6)
-        ok_(func5 != func7)
-        ok_(func6 != func1)
-        ok_(func6 != func2)
-        ok_(func6 != func3)
-        ok_(func6 != func4)
-        ok_(func6 != func5)
-        ok_(func6 != func7)
-        ok_(func7 != func1)
-        ok_(func7 != func2)
-        ok_(func7 != func4)
-        ok_(func7 != func5)
-        ok_(func7 != func6)
     
     def test_string_representation(self):
-        func = PermissiveFunction("perm", String("foo"), String(u"bár"))
-        eq_(unicode(func), u'perm(arg0="foo", oarg0="bár", oarg1=1.0)')
-        eq_(str(func), 'perm(arg0="foo", oarg0="bár", oarg1=1.0)')
+        func = PermissiveFunction(String("foo"), String(u"bár"))
+        expected = u'Unbound function PermissiveFunction(arg0="foo", ' \
+                   u'oarg0="bár", oarg1=1.0)'
+        eq_(unicode(func), expected)
+        eq_(str(func), expected.encode("utf-8"))
     
     def test_representation(self):
-        func = PermissiveFunction("perm", String("foo"), String(u"báz"))
-        eq_(repr(func), '<Function perm(arg0=<String "foo">, '
-                        'oarg0=<String "báz">, oarg1=<Number 1.0>)>')
-        # With global name in Unicode:
-        func = PermissiveFunction(u"pérm", String(u"báz"))
-        eq_(repr(func), '<Function pérm(arg0=<String "báz">, '
-                        'oarg0=<Set>, oarg1=<Number 1.0>)>')
+        func = PermissiveFunction(String("foo"), String(u"báz"))
+        expected = '<Unbound function PermissiveFunction' \
+                   '(arg0=<String "foo">, oarg0=<String "báz">, ' \
+                   'oarg1=<Number 1.0>) at %s>' % id(func)
+        eq_(repr(func), expected)
 
 
 #{ Constants
