@@ -121,7 +121,8 @@ class ParseTreeNode(object):
         
         """
         error_msg = 'Nodes "%s" and "%s" are not equivalent'
-        assert isinstance(node, self.__class__), error_msg % (node, self)
+        assert isinstance(node, self.__class__), error_msg % (repr(node),
+                                                              repr(self))
     
     def __eq__(self, other):
         """
