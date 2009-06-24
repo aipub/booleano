@@ -30,8 +30,8 @@ Exceptions raised by :mod:`booleano`.
 
 """
 
-__all__ = ["InvalidOperationError", "BadCallError", "BadOperandError",
-           "BadFunctionError", "ConversionError"]
+__all__ = ("InvalidOperationError", "BadCallError", "BadOperandError",
+           "BadFunctionError", "ScopeError", "ConversionError")
 
 
 class BooleanoException(Exception):
@@ -86,6 +86,22 @@ class BadFunctionError(BadOperandError):
     translatable.
     
     """
+    pass
+
+
+#{ Parsing-related exceptions
+
+
+class ParsingException(BooleanoException):
+    """
+    Exception raised when something goes wrong with the parser.
+    
+    """
+    pass
+
+
+class ScopeError(ParsingException):
+    """Exception raised when a scope-related item is defined incorrectly."""
     pass
 
 
