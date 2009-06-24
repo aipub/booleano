@@ -134,13 +134,14 @@ class Bind(Identifier):
         """
         Check that the ``other`` binding is equivalent to this one.
         
-        Two bindings are equivalent if they are equivalent identifiers
-        (:meth:`Identifier.__eq__`) and wrap the same operand.
+        Two bindings are equivalent if they have the same names, even though
+        they don't wrap the same operand.
         
         """
         same_id = super(Bind, self).__eq__(other)
-        return (same_id and hasattr(other, "operand") and
-                other.operand == self.operand)
+        # We have to make sure ``other`` is a binding; otherwise, a namespace
+        # with the same names would equal this binding:
+        return (same_id and isinstance(other, Bind))
     
     def __unicode__(self):
         """
