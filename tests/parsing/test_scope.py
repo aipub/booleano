@@ -36,7 +36,8 @@ from booleano.parser.scope import Bind, Namespace, SymbolTable
 from booleano.operations import String, Number
 from booleano.exc import ScopeError
 
-from tests import TrafficLightVar, PermissiveFunction, TrafficViolationFunc
+from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
+                   BoolVar)
 
 
 class TestBind(object):
@@ -313,6 +314,206 @@ class TestNamespace(object):
         ns0 = Namespace("foo", [])
         Namespace("global", [], [ns0])
         assert_raises(ScopeError, Namespace, "bar", [], [ns0])
+    
+    def test_checking_valid_namespace(self):
+        ns = Namespace("global",
+            # Bindings/global objects:
+            (
+             Bind("bool", BoolVar(), es="booleano"),
+             Bind("traffic", TrafficLightVar(), es=u"tráfico"),
+            ),
+            # Sub-namespaces:
+            (
+             Namespace("maths",
+                (
+                 Bind("pi", Number(3.1416)),
+                 Bind("e", Number(2.7183)),
+                ),
+             ),
+            )
+        )
+        eq_(ns.validate_scope(), None)
+    
+    def test_checking_object_and_subnamespace_sharing_global_name(self):
+        """
+        It's valid for an object and a subnamespace to share the global name.
+        
+        """
+        ns = Namespace("global",
+            (
+                Bind("today", BoolVar()),
+            ),
+            (
+                Namespace("today", ()),
+            )
+        )
+        eq_(ns.validate_scope(), None)
+    
+    def test_checking_object_and_subnamespace_sharing_localized_name(self):
+        """
+        It's valid for an object and a subnamespace to share the localized name.
+        
+        """
+        ns1 = Namespace("global",
+            (
+                Bind("current_day", BoolVar(), es="hoy"),
+            ),
+            (
+                Namespace("today", (), es="hoy"),
+            )
+        )
+        ns2 = Namespace("global",
+            (
+                Bind("current_day", BoolVar(), es="hoy"),
+            ),
+            (
+                # This namespace will be called "hoy" in Spanish too:
+                Namespace("hoy", ()),
+            )
+        )
+        eq_(ns1.validate_scope(), None)
+        eq_(ns2.validate_scope(), None)
+    
+    def test_namespace_with_duplicate_object_global_names(self):
+        """
+        Two objects cannot have the same global names in the same namespace.
+        
+        """
+        ns = Namespace("global",
+            (
+                Bind("e", Number(2.7183), es_VE=u"número e"),
+                Bind("pi", Number(3.1416)),
+                Bind("e", Number(2.71828), es_ES=u"número e"),
+            ),
+        )
+        assert_raises(ScopeError, ns.validate_scope)
+    
+    def test_namespace_with_duplicate_object_global_names(self):
+        """
+        Two objects cannot have the same global names in the same namespace.
+        
+        """
+        ns = Namespace("global",
+            (
+                Bind("e", Number(2.7183), es_VE=u"número e"),
+                Bind("pi", Number(3.1416)),
+                Bind("e", Number(2.71828), es_ES=u"número e"),
+            ),
+        )
+        assert_raises(ScopeError, ns.validate_scope)
+    
+    def test_namespace_with_duplicate_object_localized_names(self):
+        """
+        Two objects cannot have the same localized names in the same namespace.
+        
+        """
+        ns1 = Namespace("global",
+            (
+                Bind("e", Number(2.7183), es_VE=u"número e"),
+                Bind("pi", Number(3.1416)),
+                Bind("eulers-number", Number(2.71828), es_VE=u"número e"),
+            ),
+        )
+        ns2 = Namespace("global",
+            (
+                Bind("e", Number(2.7183), es_VE=u"número e"),
+                Bind("pi", Number(3.1416)),
+                # These object will be called "número e" in Spanish too:
+                Bind(u"número e", Number(2.71828)),
+            ),
+        )
+        assert_raises(ScopeError, ns1.validate_scope)
+        assert_raises(ScopeError, ns2.validate_scope)
+    
+    def test_namespace_with_duplicate_namespace_global_names(self):
+        """
+        Two subnamespaces cannot have the same global names in the same
+        parent namespace.
+        
+        """
+        ns = Namespace("global",
+            (),
+            (
+                Namespace("maths", ()),
+                Namespace("computing", ()),
+                Namespace("maths", (), es=u"matemática"),
+            )
+        )
+        assert_raises(ScopeError, ns.validate_scope)
+    
+    def test_namespace_with_duplicate_namespace_localized_names(self):
+        """
+        Two subnamespaces cannot have the same global names in the same
+        parent namespace.
+        
+        """
+        ns1 = Namespace("global",
+            (),
+            (
+                Namespace("maths", (), es=u"matemática"),
+                Namespace("computing", ()),
+                Namespace("mathematics", (), es=u"matemática"),
+            )
+        )
+        ns2 = Namespace("global",
+            (),
+            (
+                Namespace("maths", (), es=u"matemática"),
+                Namespace("computing", ()),
+                # This namespace will be called "matemática" in Spanish too:
+                Namespace(u"matemática", ()),
+            )
+        )
+        assert_raises(ScopeError, ns1.validate_scope)
+        assert_raises(ScopeError, ns2.validate_scope)
+    
+    def test_name_clash_in_grand_children(self):
+        """
+        The scope must be validated even inside the subnamespaces.
+        
+        """
+        sciences_ns1 = Namespace("sciences",
+            (),
+            (
+                Namespace("maths", (), es=u"matemática"),
+                Namespace("computing", ()),
+                Namespace("maths", ()),
+            )
+        )
+        sciences_ns2 = Namespace("sciences",
+            (),
+            (
+                Namespace("maths", (), es=u"matemática"),
+                Namespace("computing", ()),
+                Namespace("mathematics", (), es=u"matemática"),
+            )
+        )
+        sciences_ns3 = Namespace("sciences",
+            (),
+            (
+                Namespace("maths", (), es=u"matemática"),
+                Namespace("computing", ()),
+                # This namespace will be called "matemática" in Spanish too:
+                Namespace(u"matemática", ()),
+            )
+        )
+        # Now a name clash at the objects level:
+        sciences_ns4 = Namespace("global",
+            (
+                Bind("foo", BoolVar()),
+                Bind("foo", TrafficLightVar(), es="bar"),
+            )
+        )
+        
+        ns1 = Namespace("global", (), (sciences_ns1, Namespace("society", ())))
+        ns2 = Namespace("global", (), (sciences_ns2, Namespace("society", ())))
+        ns3 = Namespace("global", (), (sciences_ns3, Namespace("society", ())))
+        ns4 = Namespace("global", (), (sciences_ns4, ))
+        
+        assert_raises(ScopeError, ns1.validate_scope)
+        assert_raises(ScopeError, ns2.validate_scope)
+        assert_raises(ScopeError, ns3.validate_scope)
+        assert_raises(ScopeError, ns4.validate_scope)
     
     def test_equivalence(self):
         objects1 = lambda: [Bind("dish", String("cachapa")),

@@ -232,6 +232,71 @@ class Namespace(Identifier):
         subnamespace.namespace = self
         self.subnamespaces.add(subnamespace)
     
+    def validate_scope(self):
+        """
+        Make sure there's no name clash in the namespace.
+        
+        :raise ScopeError: If a name clash in found, either in the global names
+            or with the localized names.
+        
+        Users may want to run this in their test suite, instead of in
+        production, for performance reasons.
+        
+        Note that it's perfectly valid for one object and one subnamespace to
+        have the same name in the parent namespace.
+        
+        """
+        # <--- Checking that there's no name clash among the global names
+        
+        unique_objects = set([obj.global_name for obj in self.objects])
+        if len(unique_objects) != len(self.objects):
+            raise ScopeError("Two or more objects in %s share the same global "
+                             "name" % self)
+        
+        unique_namespaces = set([ns.global_name for ns in self.subnamespaces])
+        if len(unique_namespaces) != len(self.subnamespaces):
+            raise ScopeError("Two or more subnamespaces in %s share the same "
+                             "global name" % self)
+        
+        # <--- Checking that there's no name clash in the sub-namespaces
+        for ns in self.subnamespaces:
+            ns.validate_scope()
+        
+        # <--- Checking that there's no name clash among the localized names
+        
+        # Collecting all the locales used:
+        locales = set()
+        for id_ in (self.objects | self.subnamespaces):
+            locales |= set(id_.names.keys())
+        
+        # Now let's see if any of them are duplicate:
+        for locale in locales:
+            # Checking the objects:
+            used_object_names = set()
+            for obj in self.objects:
+                if locale in obj.names:
+                    name = obj.names[locale]
+                else:
+                    name = obj.global_name
+                if name in used_object_names:
+                    raise ScopeError('The name "%s" is shared by two or more '
+                                     'bindings in %s (locale: %s)' %
+                                     (name, self, locale))
+                used_object_names.add(name)
+            
+            # Checking the subnamespaces:
+            used_ns_names = set()
+            for ns in self.subnamespaces:
+                if locale in ns.names:
+                    name = ns.names[locale]
+                else:
+                    name = ns.global_name
+                if name in used_ns_names:
+                    raise ScopeError('The name "%s" is shared by two or more '
+                                     'sub-namespaces in %s (locale: %s)' %
+                                     (name, self, locale))
+                used_ns_names.add(name)
+    
     def get_symbol_table(self, locale=None):
         objects = self._extract_items(self.objects, locale)
         subtables = self._extract_items(self.subnamespaces, locale)
