@@ -262,16 +262,17 @@ class TestNamespace(object):
         eq_(ns.objects, set(objects))
     
     def test_constructor_with_namespaces(self):
-        namespaces = set([
+        namespaces = [
             Namespace("sub1", []),
             Namespace(
                 "sub2",
                 [],
-                [Namespace("sub2.sub1", []), Namespace("sub2.sub2", [])]
+                Namespace("sub2.sub1", []),
+                Namespace("sub2.sub2", [])
             ),
-        ])
-        ns = Namespace("global", [], namespaces)
-        eq_(ns.subnamespaces, namespaces)
+        ]
+        ns = Namespace("global", [], *namespaces)
+        eq_(ns.subnamespaces, set(namespaces))
     
     def test_duplicate_objects(self):
         """There must be no duplicate object."""
@@ -293,11 +294,11 @@ class TestNamespace(object):
         subnamespaces1 = [Namespace("foo", ()),
                           Namespace("bar", ()),
                           Namespace("foo", ())]
-        assert_raises(ScopeError, Namespace, "global", (), subnamespaces1)
+        assert_raises(ScopeError, Namespace, "global", (), *subnamespaces1)
         # Post-instantiation:
         subnamespaces2 = [Namespace("foo", ()),
                           Namespace("bar", ())]
-        ns = Namespace("global", [], subnamespaces2)
+        ns = Namespace("global", [], *subnamespaces2)
         assert_raises(ScopeError, ns.add_namespace, Namespace("bar", []))
     
     def test_unreusable_bindings(self):
@@ -312,8 +313,8 @@ class TestNamespace(object):
         assert_raises(ScopeError, Namespace, "baz", [bind])
         # A namespace:
         ns0 = Namespace("foo", [])
-        Namespace("global", [], [ns0])
-        assert_raises(ScopeError, Namespace, "bar", [], [ns0])
+        Namespace("global", [], ns0)
+        assert_raises(ScopeError, Namespace, "bar", [], ns0)
     
     def test_checking_valid_namespace(self):
         ns = Namespace("global",
@@ -323,14 +324,12 @@ class TestNamespace(object):
              Bind("traffic", TrafficLightVar(), es=u"tráfico"),
             ),
             # Sub-namespaces:
-            (
-             Namespace("maths",
+            Namespace("maths",
                 (
                  Bind("pi", Number(3.1416)),
                  Bind("e", Number(2.7183)),
                 ),
-             ),
-            )
+            ),
         )
         eq_(ns.validate_scope(), None)
     
@@ -343,9 +342,7 @@ class TestNamespace(object):
             (
                 Bind("today", BoolVar()),
             ),
-            (
-                Namespace("today", ()),
-            )
+            Namespace("today", ()),
         )
         eq_(ns.validate_scope(), None)
     
@@ -358,18 +355,14 @@ class TestNamespace(object):
             (
                 Bind("current_day", BoolVar(), es="hoy"),
             ),
-            (
-                Namespace("today", (), es="hoy"),
-            )
+            Namespace("today", (), es="hoy"),
         )
         ns2 = Namespace("global",
             (
                 Bind("current_day", BoolVar(), es="hoy"),
             ),
-            (
-                # This namespace will be called "hoy" in Spanish too:
-                Namespace("hoy", ()),
-            )
+            # This namespace will be called "hoy" in Spanish too:
+            Namespace("hoy", ()),
         )
         eq_(ns1.validate_scope(), None)
         eq_(ns2.validate_scope(), None)
@@ -433,11 +426,9 @@ class TestNamespace(object):
         """
         ns = Namespace("global",
             (),
-            (
-                Namespace("maths", ()),
-                Namespace("computing", ()),
-                Namespace("maths", (), es=u"matemática"),
-            )
+            Namespace("maths", ()),
+            Namespace("computing", ()),
+            Namespace("maths", (), es=u"matemática"),
         )
         assert_raises(ScopeError, ns.validate_scope)
     
@@ -449,20 +440,16 @@ class TestNamespace(object):
         """
         ns1 = Namespace("global",
             (),
-            (
-                Namespace("maths", (), es=u"matemática"),
-                Namespace("computing", ()),
-                Namespace("mathematics", (), es=u"matemática"),
-            )
+            Namespace("maths", (), es=u"matemática"),
+            Namespace("computing", ()),
+            Namespace("mathematics", (), es=u"matemática"),
         )
         ns2 = Namespace("global",
             (),
-            (
-                Namespace("maths", (), es=u"matemática"),
-                Namespace("computing", ()),
-                # This namespace will be called "matemática" in Spanish too:
-                Namespace(u"matemática", ()),
-            )
+            Namespace("maths", (), es=u"matemática"),
+            Namespace("computing", ()),
+            # This namespace will be called "matemática" in Spanish too:
+            Namespace(u"matemática", ()),
         )
         assert_raises(ScopeError, ns1.validate_scope)
         assert_raises(ScopeError, ns2.validate_scope)
@@ -474,28 +461,22 @@ class TestNamespace(object):
         """
         sciences_ns1 = Namespace("sciences",
             (),
-            (
-                Namespace("maths", (), es=u"matemática"),
-                Namespace("computing", ()),
-                Namespace("maths", ()),
-            )
+            Namespace("maths", (), es=u"matemática"),
+            Namespace("computing", ()),
+            Namespace("maths", ()),
         )
         sciences_ns2 = Namespace("sciences",
             (),
-            (
-                Namespace("maths", (), es=u"matemática"),
-                Namespace("computing", ()),
-                Namespace("mathematics", (), es=u"matemática"),
-            )
+            Namespace("maths", (), es=u"matemática"),
+            Namespace("computing", ()),
+            Namespace("mathematics", (), es=u"matemática"),
         )
         sciences_ns3 = Namespace("sciences",
             (),
-            (
-                Namespace("maths", (), es=u"matemática"),
-                Namespace("computing", ()),
-                # This namespace will be called "matemática" in Spanish too:
-                Namespace(u"matemática", ()),
-            )
+            Namespace("maths", (), es=u"matemática"),
+            Namespace("computing", ()),
+            # This namespace will be called "matemática" in Spanish too:
+            Namespace(u"matemática", ()),
         )
         # Now a name clash at the objects level:
         sciences_ns4 = Namespace("global",
@@ -505,10 +486,10 @@ class TestNamespace(object):
             )
         )
         
-        ns1 = Namespace("global", (), (sciences_ns1, Namespace("society", ())))
-        ns2 = Namespace("global", (), (sciences_ns2, Namespace("society", ())))
-        ns3 = Namespace("global", (), (sciences_ns3, Namespace("society", ())))
-        ns4 = Namespace("global", (), (sciences_ns4, ))
+        ns1 = Namespace("global", (), sciences_ns1, Namespace("society", ()))
+        ns2 = Namespace("global", (), sciences_ns2, Namespace("society", ()))
+        ns3 = Namespace("global", (), sciences_ns3, Namespace("society", ()))
+        ns4 = Namespace("global", (), sciences_ns4)
         
         assert_raises(ScopeError, ns1.validate_scope)
         assert_raises(ScopeError, ns2.validate_scope)
@@ -523,9 +504,9 @@ class TestNamespace(object):
         objects3 = lambda: [Bind("pi", Number(3.1416))]
         
         ns1 = Namespace("foo", objects1())
-        ns2 = Namespace("foo", objects1(), ())
+        ns2 = Namespace("foo", objects1())
         ns3 = Namespace("foo", objects1(), es="fulano")
-        ns4 = Namespace("foo", objects1(), [], es="fulano")
+        ns4 = Namespace("foo", objects1(), es="fulano")
         ns5 = Namespace("foo", objects2())
         ns6 = Namespace("foo", objects3())
         ns7 = Namespace("foo", objects2(), es="fulano")
@@ -533,12 +514,12 @@ class TestNamespace(object):
         ns9 = Namespace("bar", objects1())
         ns10 = Namespace("foo", objects1())
         ns11 = Namespace(
-            "foo", objects1(), [Namespace("bar", []), Namespace("baz", [])])
+            "foo", objects1(), Namespace("bar", []), Namespace("baz", []))
         ns12 = Namespace(
-            "foo", objects1(), [Namespace("baz", []), Namespace("bar", [])])
+            "foo", objects1(), Namespace("baz", []), Namespace("bar", []))
         
         # Moving ns10 into the "baz" namespace:
-        Namespace("baz", [], [ns10])
+        Namespace("baz", [], ns10)
         
         ok_(ns1 == ns2)
         ok_(ns1 == ns5)
@@ -678,15 +659,15 @@ class TestNamespace(object):
     def test_string(self):
         # With ASCII names:
         ns2 = Namespace("grand-child", [])
-        ns1 = Namespace("parent", (), [ns2])
-        ns0 = Namespace("global", (), [ns1])
+        ns1 = Namespace("parent", (), ns2)
+        ns0 = Namespace("global", (), ns1)
         eq_(str(ns0), "Namespace global")
         eq_(str(ns1), "Namespace global:parent")
         eq_(str(ns2), "Namespace global:parent:grand-child")
         # With Unicode characters:
         ns2 = Namespace(u"gránd-chíld", [])
-        ns1 = Namespace(u"párênt", (), [ns2])
-        ns0 = Namespace(u"glòbál", (), [ns1])
+        ns1 = Namespace(u"párênt", (), ns2)
+        ns0 = Namespace(u"glòbál", (), ns1)
         eq_(str(ns0), "Namespace glòbál")
         eq_(str(ns1), "Namespace glòbál:párênt")
         eq_(str(ns2), "Namespace glòbál:párênt:gránd-chíld")
@@ -694,15 +675,15 @@ class TestNamespace(object):
     def test_unicode(self):
         # With ASCII names:
         ns2 = Namespace("grand-child", [])
-        ns1 = Namespace("parent", (), [ns2])
-        ns0 = Namespace("global", (), [ns1])
+        ns1 = Namespace("parent", (), ns2)
+        ns0 = Namespace("global", (), ns1)
         eq_(unicode(ns0), "Namespace global")
         eq_(unicode(ns1), "Namespace global:parent")
         eq_(unicode(ns2), "Namespace global:parent:grand-child")
         # With Unicode characters:
         ns2 = Namespace(u"gránd-chíld", [])
-        ns1 = Namespace(u"párênt", (), [ns2])
-        ns0 = Namespace(u"glòbál", (), [ns1])
+        ns1 = Namespace(u"párênt", (), ns2)
+        ns0 = Namespace(u"glòbál", (), ns1)
         eq_(unicode(ns0), u"Namespace glòbál")
         eq_(unicode(ns1), u"Namespace glòbál:párênt")
         eq_(unicode(ns2), u"Namespace glòbál:párênt:gránd-chíld")

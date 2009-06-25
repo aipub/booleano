@@ -164,7 +164,7 @@ class Namespace(Identifier):
     
     """
     
-    def __init__(self, global_name, objects, namespaces=[], **names):
+    def __init__(self, global_name, objects, *subnamespaces, **names):
         """
         Create a new namespace called ``global_name``.
         
@@ -173,8 +173,9 @@ class Namespace(Identifier):
         :type global_name: basestring
         :param objects: List of bound operands available in this namespace.
         :type objects: list
-        :param namespaces: List of sub-namespaces.
-        :type namespaces: list
+        
+        Additional positional arguments represent the sub-namespaces of this
+        namespace.
         
         Additional keyword arguments represent the other names this namespace
         can take in different locales.
@@ -185,7 +186,7 @@ class Namespace(Identifier):
         self.subnamespaces = set()
         for obj in objects:
             self.add_object(obj)
-        for ns in namespaces:
+        for ns in subnamespaces:
             self.add_namespace(ns)
     
     def add_object(self, obj):
