@@ -841,3 +841,68 @@ class TestNamespace(object):
         eq_(unicode(ns1), u"Namespace glòbál:párênt")
         eq_(unicode(ns2), u"Namespace glòbál:párênt:gránd-chíld")
 
+
+class TestSymbolTable(object):
+    """Tests for the symbol tables."""
+    
+    def test_subtables_are_optional(self):
+        """Symbol tables may not have subtables."""
+        st = SymbolTable(objects={})
+        eq_(st.subtables, {})
+    
+    def test_retrieving_existing_global_object(self):
+        objects = {
+            'bool': BoolVar(),
+            'traffic': TrafficLightVar(),
+        }
+        st = SymbolTable(objects)
+        requested_object = st.get_object("bool")
+        eq_(requested_object, BoolVar())
+    
+    def test_retrieving_existing_2nd_level_object(self):
+        sub_objects = {
+            'bool': BoolVar(),
+            'traffic': TrafficLightVar(),
+        }
+        global_objects = {
+            'foo': TrafficLightVar(),
+        }
+        sub_table = {'sub1': SymbolTable(sub_objects)}
+        st = SymbolTable(global_objects, sub_table)
+        requested_object = st.get_object("bool", ["sub1"])
+        eq_(requested_object, BoolVar())
+    
+    def test_retrieving_existing_3rd_level_object(self):
+        third_level_objects = {
+            'bool': BoolVar(),
+        }
+        second_level_objects = {
+            'traffic': TrafficLightVar(),
+        }
+        global_objects = {
+            'foo': TrafficLightVar(),
+            'traffic-violation': TrafficViolationFunc(String("pedestrians")),
+        }
+        third_level_tables = {'sub2': SymbolTable(third_level_objects)}
+        second_level_tables = {
+            'sub1': SymbolTable(second_level_objects, third_level_tables)}
+        st = SymbolTable(global_objects, second_level_tables)
+        requested_object = st.get_object("bool", ["sub1", "sub2"])
+        eq_(requested_object, BoolVar())
+    
+    def test_retrieving_object_in_non_existing_subtable(self):
+        global_objects = {
+            'foo': TrafficLightVar(),
+            'traffic-violation': TrafficViolationFunc(String("pedestrians")),
+        }
+        st = SymbolTable(global_objects,)
+        assert_raises(ScopeError, st.get_object, "foo", ["doesn't", "exist"])
+    
+    def test_retrieving_non_existing_object(self):
+        global_objects = {
+            'foo': TrafficLightVar(),
+            'traffic-violation': TrafficViolationFunc(String("pedestrians")),
+        }
+        st = SymbolTable(global_objects,)
+        assert_raises(ScopeError, st.get_object, "bool")
+

@@ -469,29 +469,59 @@ class SymbolTable(object):
     
     """
     
-    def __init__(self, objects, subtables):
+    def __init__(self, objects, subtables={}):
+        """
+        Create a symbol table made up of ``objects``.
+        
+        :param objects: The objects that belong to the table.
+        :type objects: dict
+        :param subtables: The symbol tables under this table, if any.
+        :type subtables: dict
+        
+        """
         self.objects = objects
         self.subtables = subtables
     
-    def get_object(self, object_name, namespace=None):
+    def get_object(self, object_name, subtable_parts=None):
         """
         Return the object identified by ``object_name``, which is under the
-        namespace ``namespace``.
+        symbol table whose names are ``subtable_parts``.
         
         :param object_name: The name of the object to be returned.
         :type object_name: basestring
-        :param namespace: The namespace under which the object is or ``None``
-            if it's in the global namespace.
-        :type namespace: tuple
+        :param subtable_parts: The symbol table that contains the object
+            identified by ``object_name``, represented by a list of names.
+        :type subtable_parts: list
         :return: The requested object.
         :rtype: Operand
+        :raises ScopeError: If the requested object doesn't exist in the
+            symbol table, or if the symbol table doesn't exist.
         
         """
-        raise NotImplementedError
+        table = self._get_subtable(subtable_parts)
+        if table is None or object_name not in table.objects:
+            msg = u'No such object "%s"' % object_name
+            if subtable_parts:
+                msg = u'%s in %s' % (msg, u":".join(subtable_parts))
+            raise ScopeError(msg)
+        return table.objects[object_name]
     
-    def get_child(self, namespace):
-        namespace_aux = self.namespaces
-        for name in namespace:
-            namespace_aux = namespace_aux[name]
-        return namespace_aux
+    def _get_subtable(self, subtable_parts):
+        """
+        Return the subtable represented by the names in ``subtable_parts``.
+        
+        :param subtable_parts: The names that resolve a subtable in this
+            table.
+        :type subtable_parts: list
+        :return: The symbol table represented by the names in 
+            ``subtable_parts`` or ``None`` if it's not found.
+        :rtype: SymbolTable
+        
+        """
+        if not subtable_parts:
+            return self
+        current_part = subtable_parts.pop(0)
+        if current_part not in self.subtables:
+            return None
+        return self.subtables[current_part]._get_subtable(subtable_parts)
 
