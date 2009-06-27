@@ -32,6 +32,8 @@ This module contains utilities shared among the whole test suite.
 
 """
 
+import logging
+
 from booleano.converters import BaseConverter
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
@@ -215,6 +217,38 @@ class TrafficViolationFunc(Function):
 
 
 #{ Miscellaneous stuff
+
+
+class MockLoggingHandler(logging.Handler):
+    """Mock logging handler to check for expected logs."""
+    
+    def __init__(self, *args, **kwargs):
+        self.reset()
+        logging.Handler.__init__(self, *args, **kwargs)
+
+    def emit(self, record):
+        self.messages[record.levelname.lower()].append(record.getMessage())
+    
+    def reset(self):
+        self.messages = {
+            'debug': [],
+            'info': [],
+            'warning': [],
+            'error': [],
+            'critical': [],
+        }
+
+
+class LoggingHandlerFixture(object):
+    """Manager of the :class:`MockLoggingHandler`s."""
+    
+    def __init__(self):
+        self.logger = logging.getLogger("booleano")
+        self.handler = MockLoggingHandler()
+        self.logger.addHandler(self.handler)
+    
+    def undo(self):
+        self.logger.removeHandler(self.handler)
 
 
 class AntiConverter(BaseConverter):

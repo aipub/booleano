@@ -30,10 +30,15 @@ Booleano scope handling.
 
 """
 
+from logging import getLogger
+
 from booleano.exc import ScopeError
 
 
 __all__ = ("Bind", "Namespace", "SymbolTable")
+
+
+LOGGER = getLogger(__name__)
 
 
 class Identifier(object):
@@ -61,8 +66,37 @@ class Identifier(object):
             names[locale] = name.lower()
         self.names = names
     
-    def get_contents(self):
-        raise NotImplemented()
+    def get_localized_name(self, locale):
+        """
+        Return the localized name of the identifier in ``locale``.
+        
+        :param locale: The locale of the name.
+        :type locale: basestring
+        :return: The name of the identifier in ``locale``; if it's not defined,
+            the global name is returned.
+        :rtype: basestring
+        
+        """
+        if locale in self.names:
+            name = self.names[locale]
+        else:
+            LOGGER.warn("%s doesn't have a name in %s; using the global one",
+                        self, locale)
+            name = self.global_name
+        return name
+    
+    def _get_contents(self, locale):
+        """
+        Return the contents being wrapped, filtered by ``locale`` where
+        relevant.
+        
+        :param locale: The locale used to filter the contents.
+        :param locale: basestring
+        :return: The contents being wrapped; in a binding, it's the operand,
+            while in a namespace, it's the symbol table for the ``locale``.
+        
+        """
+        raise NotImplementedError()
     
     #{ Comparison stuff
     
@@ -129,6 +163,15 @@ class Bind(Identifier):
     def __init__(self, global_name, operand, **names):
         self.operand = operand
         super(Bind, self).__init__(global_name, **names)
+    
+    def _get_contents(self, locale):
+        """
+        Return the operand bound.
+        
+        The ``locale`` does nothing here.
+        
+        """
+        return self.operand
     
     def __eq__(self, other):
         """
@@ -275,10 +318,7 @@ class Namespace(Identifier):
             # Checking the objects:
             used_object_names = set()
             for obj in self.objects:
-                if locale in obj.names:
-                    name = obj.names[locale]
-                else:
-                    name = obj.global_name
+                name = obj.get_localized_name(locale)
                 if name in used_object_names:
                     raise ScopeError('The name "%s" is shared by two or more '
                                      'bindings in %s (locale: %s)' %
@@ -288,10 +328,7 @@ class Namespace(Identifier):
             # Checking the subnamespaces:
             used_ns_names = set()
             for ns in self.subnamespaces:
-                if locale in ns.names:
-                    name = ns.names[locale]
-                else:
-                    name = ns.global_name
+                name = ns.get_localized_name(locale)
                 if name in used_ns_names:
                     raise ScopeError('The name "%s" is shared by two or more '
                                      'sub-namespaces in %s (locale: %s)' %
@@ -299,52 +336,19 @@ class Namespace(Identifier):
                 used_ns_names.add(name)
     
     def get_symbol_table(self, locale=None):
-        objects = self._extract_items(self.objects, locale)
-        subtables = self._extract_items(self.subnamespaces, locale)
+        """
+        Return the symbol table for this namespace in the ``locale``.
         
+        :param locale: The locale of the symbol table; if ``None``, the global
+            names will be used instead.
+        :param locale: basestring
+        :return: The symbol table in ``locale``.
+        :rtype: SymbolTable
+        
+        """
+        objects = self._get_objects(locale)
+        subtables = self._get_subtables(locale)
         return SymbolTable(objects, subtables)
-    
-    def _extract_items(self, items, extractor, locale=None):
-        extracted_items = {}
-        
-        if locale:
-            for item in items:
-                if locale in item.names:
-                    localized_name = item.names[locale]
-                else:
-                    # TODO: Raise warning
-                    localized_name = obj.global_name
-                unbindings[localized_name] = extractor(item, locale)
-        else:
-            for item in items:
-                unbindings[obj.global_name] = extractor(item, locale)
-        
-        if len(extracted_items) != len(items):
-            if locale:
-                msg = u"Two namespaces or bound operands share the same " \
-                       "name in the locale %s at %s" % (locale, self)
-            else:
-                msg = u"Two namespaces or bound operands share the same " \
-                       "global name at %s" % self
-            raise ScopeError(msg)
-        
-        return extracted_items
-    
-    def _get_ancestors_global_names(self):
-        """
-        Return the global names for the ancestors **and** the current namespace.
-        
-        :return: The list of names, from the topmost namespace to the current
-            one.
-        :rtype: list
-        
-        """
-        if self.namespace:
-            ancestors = self.namespace._get_ancestors_global_names()
-        else:
-            ancestors = []
-        ancestors.append(self.global_name)
-        return ancestors
     
     def __unicode__(self):
         """
@@ -370,6 +374,86 @@ class Namespace(Identifier):
                 hasattr(other, "objects") and 
                 other.subnamespaces == self.subnamespaces and
                 self.objects == other.objects)
+    
+    def _get_contents(self, locale):
+        """Return the symbol table for this namespace in ``locale``."""
+        return self.get_symbol_table(locale)
+    
+    def _get_objects(self, locale):
+        """
+        Return the objects available in this namespace.
+        
+        :param locale: The locale to be used while resolving the names of the
+            objects.
+        :type locale: basestring
+        :return: The operands in this namespace, in a dictionary whose keys
+            are the names of the objects in ``locale``.
+        :rtype: dict
+        
+        """
+        objects = self.__extract_items__(self.objects, locale)
+        return objects
+    
+    def _get_subtables(self, locale):
+        """
+        Return the sub-namespaces available under this namespace turned into
+        symbol tables for the ``locale``.
+        
+        :param locale: The locale to be used while resolving the names of the
+            sub-namespaces.
+        :type locale: basestring
+        :return: The symbol tables for the sub-namespaces under this namespace,
+            in a dictionary whose keys are the names of the tables in
+            ``locale``.
+        :rtype: dict
+        
+        """
+        subtables = self.__extract_items__(self.subnamespaces, locale)
+        return subtables
+    
+    def __extract_items__(self, items, locale):
+        """
+        Filter the contents of the ``items`` identifiers based on the
+        ``locale``.
+        
+        :param items: A list of identifiers whose contents should be extracted.
+        :type items: list
+        :param locale: The locale to be used to filter the contents.
+        :type locale: basestring or ``None``
+        :return: The contents of each item in ``items``, in a dictionary whose
+            keys are the names of such items in the ``locale``.
+        :rtype: dict
+        
+        """
+        extracted_items = {}
+        
+        if locale:
+            # The items have to be extracted by their localized names:
+            for item in items:
+                localized_name = item.get_localized_name(locale)
+                extracted_items[localized_name] = item._get_contents(locale)
+        else:
+            # We have to extract the items by their global names:
+            for item in items:
+                extracted_items[item.global_name] = item._get_contents(locale)
+        
+        return extracted_items
+    
+    def _get_ancestors_global_names(self):
+        """
+        Return the global names for the ancestors **and** the current namespace.
+        
+        :return: The list of names, from the topmost namespace to the current
+            one.
+        :rtype: list
+        
+        """
+        if self.namespace:
+            ancestors = self.namespace._get_ancestors_global_names()
+        else:
+            ancestors = []
+        ancestors.append(self.global_name)
+        return ancestors
 
 
 class SymbolTable(object):
@@ -385,8 +469,8 @@ class SymbolTable(object):
     
     """
     
-    def __init__(self, global_objects, subtables):
-        self.global_objects = global_objects
+    def __init__(self, objects, subtables):
+        self.objects = objects
         self.subtables = subtables
     
     def get_object(self, object_name, namespace=None):

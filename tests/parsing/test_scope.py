@@ -32,12 +32,25 @@ Scope handling tests.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.parser.scope import Bind, Namespace, SymbolTable
+from booleano.parser.scope import Bind, Namespace, SymbolTable, Identifier
 from booleano.operations import String, Number
 from booleano.exc import ScopeError
 
 from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
-                   BoolVar)
+                   BoolVar, LoggingHandlerFixture)
+
+
+class TestIdentifiers(object):
+    """Tests for the base :class:`Identifiers`."""
+    
+    def test_no_identifier_contents_by_default(self):
+        """Identifiers must not return any contents by default."""
+        id_ = Identifier("name")
+        assert_raises(NotImplementedError, id_._get_contents, None)
+    
+    def test_no_unicode_representation_by_default(self):
+        id_ = Identifier("name")
+        assert_raises(NotImplementedError, unicode, id_)
 
 
 class TestBind(object):
@@ -69,6 +82,27 @@ class TestBind(object):
         bind2 = Bind("bar", operand, **names1)
         eq_(bind2.names, names0)
     
+    def test_retrieving_existing_localized_names(self):
+        bind = Bind("foo", String("hey"), es="fulano")
+        eq_(bind.get_localized_name("es"), "fulano")
+    
+    def test_retrieving_non_existing_localized_names(self):
+        """
+        When a non-existing localized name is requested, a warning must be 
+        issued and the global name returned.
+        
+        """
+        bind = Bind("foo", String("hey"), es="fulano")
+        logging_fixture = LoggingHandlerFixture()
+        eq_(bind.get_localized_name("fr"), "foo")
+        # Checking for the the warning:
+        eq_(len(logging_fixture.handler.messages["warning"]), 1)
+        warning = logging_fixture.handler.messages["warning"][0]
+        eq_(warning, 'Operand "hey" bound as "foo" doesn\'t have a name in fr; '
+                     'using the global one')
+        # Undoing it:
+        logging_fixture.undo()
+    
     def test_no_default_namespace(self):
         """Operand bindings must not be in a namespace by default."""
         bind = Bind("foo", String("whatever"))
@@ -85,6 +119,12 @@ class TestBind(object):
         instance = TrafficLightVar()
         bound_instance = Bind("da_variable", instance)
         eq_(bound_instance.operand, instance)
+    
+    def test_contents_retrieval(self):
+        """Bindings must return bound operand as its contents."""
+        op = BoolVar()
+        bind = Bind("bool", op)
+        eq_(op, bind._get_contents(None))
     
     def test_equality(self):
         """Two bindings are equivalent if they have the same names."""
@@ -495,6 +535,119 @@ class TestNamespace(object):
         assert_raises(ScopeError, ns2.validate_scope)
         assert_raises(ScopeError, ns3.validate_scope)
         assert_raises(ScopeError, ns4.validate_scope)
+    
+    def test_retrieving_symbol_table_with_children(self):
+        """
+        A symbol table should have subtables for the sub-namespaces of the
+        original namespace.
+        
+        """
+        bool_var = BoolVar()
+        traffic = TrafficLightVar()
+        ns = Namespace("global",
+            (
+                Bind("bool", bool_var, es="booleano"),
+                Bind("traffic", traffic, es=u"tráfico")
+            ),
+            Namespace("foo",
+                (
+                    Bind("bar", bool_var, es="fulano"),
+                    Bind("baz", traffic, es="mengano"),
+                ),
+            ),
+        )
+        
+        # Checking the symbol tables:
+        global_symbol_table = ns.get_symbol_table()
+        eq_(len(global_symbol_table.subtables), 1)
+        global_subtable = global_symbol_table.subtables["foo"]
+        global_subtable_objects = {
+            'bar': bool_var,
+            'baz': traffic,
+        }
+        eq_(global_subtable.objects, global_subtable_objects)
+        
+        # Checking the symbol table in Castilian:
+        castilian_symbol_table = ns.get_symbol_table("es")
+        eq_(len(castilian_symbol_table.subtables), 1)
+        castilian_subtable = castilian_symbol_table.subtables["foo"]
+        castilian_subtable_objects = {
+            'fulano': bool_var,
+            'mengano': traffic,
+        }
+        eq_(castilian_subtable.objects, castilian_subtable_objects)
+    
+    def test_retrieving_symbol_table_with_untranslated_contents(self):
+        """
+        When a symbol table is requested in a locale which is not available,
+        the global symbol table should be returned instead.
+        
+        """
+        bool_var = BoolVar()
+        traffic = TrafficLightVar()
+        ns = Namespace("global",
+            (
+                Bind("bool", BoolVar(), es="booleano"),
+                Bind("traffic", TrafficLightVar(), es=u"tráfico")
+            ),
+            Namespace("foo",
+                (
+                    Bind("bar", bool_var, es="fulano"),
+                    Bind("baz", traffic, es="mengano"),
+                ),
+            ),
+        )
+        
+        # Checking the symbol tables:
+        symbol_table = ns.get_symbol_table("fr")
+        eq_(len(symbol_table.subtables), 1)
+        subtable = symbol_table.subtables["foo"]
+        subtable_objects = {
+            'bar': bool_var,
+            'baz': traffic,
+        }
+        eq_(subtable.objects, subtable_objects)
+        expected_unbound_objects_global = {
+            'bool': BoolVar(),
+            'traffic': TrafficLightVar(),
+        }
+        eq_(symbol_table.objects, expected_unbound_objects_global)
+    
+    def test_retrieving_symbol_table_with_partially_untranslated_contents(self):
+        """
+        When a symbol table is requested in a locale in which not all items are
+        available, the global symbol table should be returned instead.
+        
+        """
+        bool_var = BoolVar()
+        traffic = TrafficLightVar()
+        ns = Namespace("global",
+            (
+                Bind("bool", BoolVar(), es="booleano", fr=u"booléen"),
+                Bind("traffic", TrafficLightVar(), es=u"tráfico")
+            ),
+            Namespace("foo",
+                (
+                    Bind("bar", bool_var, es="fulano"),
+                    Bind("baz", traffic, es="mengano", fr="bonjour"),
+                ),
+            ),
+        )
+        
+        # Checking the symbol tables:
+        symbol_table = ns.get_symbol_table("fr")
+        eq_(len(symbol_table.subtables), 1)
+        subtable = symbol_table.subtables["foo"]
+        subtable_objects = {
+            'bar': bool_var,
+            'bonjour': traffic,
+        }
+        eq_(subtable.objects, subtable_objects)
+        expected_unbound_objects_global = {
+            u'booléen': BoolVar(),
+            'traffic': TrafficLightVar(),
+        }
+        eq_(symbol_table.objects, expected_unbound_objects_global)
     
     def test_equivalence(self):
         objects1 = lambda: [Bind("dish", String("cachapa")),
