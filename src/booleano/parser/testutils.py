@@ -55,32 +55,47 @@ class BaseParseTest(object):
     """
     
     def test_infinitely_recursive_constructs(self):
-        """There must not exist infinitely recursive constructs."""
+        """
+        There must not exist infinitely recursive constructs in the grammar.
+        
+        """
         self.grammar.define_string().validate()
         self.grammar.define_number().validate()
-        self.grammar.define_variable().validate()
+        self.grammar.define_name().validate()
         # Validating all the operands together, including sets:
-        self.grammar.define_operand().validate()
+        self.grammar.define_operand(True).validate()
+        self.grammar.define_operand(False).validate()
         # Finally, validate the whole grammar:
-        self.grammar.grammar.validate()
+        self.grammar.evaluable_grammar.validate()
+        self.grammar.convertible_grammar.validate()
     
-    def test_valid_expressions(self):
-        for expression, expected_node in self.expressions.items():
-            yield (check_expression, self.grammar, expression,
+    def test_contant_expressions(self):
+        """
+        Contants expressions should be represented the same way in evaluable
+        and convertible trees.
+        
+        """
+        for expression, expected_node in self.constant_expressions.items():
+            yield (check_expression, self.grammar.parse_evaluable, expression,
+                   expected_node)
+            yield (check_expression, self.grammar.parse_convertible, expression,
                    expected_node)
     
-    def test_operands_alone(self):
+    def test_constant_operands(self):
         operand_parser = self.grammar.define_operand().parseString
-        for expression, expected_node in self.valid_operands.items():
+        for expression, expected_node in self.constant_operands.items():
             yield (check_operand, operand_parser, expression,
                    expected_node)
+    
+    def test_invalid_operands(self):
+        operand_parser = self.grammar.define_operand().parseString
         for expression in self.invalid_operands:
             yield (check_invalid_operand, operand_parser, expression)
 
 
 def check_expression(parser, expression, expected_node):
-    node = parser(expression)
-    expected_node.check_equivalence(node)
+    tree = parser(expression)
+    expected_node.check_equivalence(tree.root_node)
 
 
 def check_operand(parser, expression, expected_node):

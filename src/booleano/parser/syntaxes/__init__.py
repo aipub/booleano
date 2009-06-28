@@ -39,9 +39,11 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
     Regex, Literal, delimitedList)
 
+from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
-    String, Number, Set, Variable, Function)
+    String, Number, Set, Variable, Function, VariablePlaceholder,
+    FunctionPlaceholder)
 
 
 __all__ = ["GenericGrammar"]
@@ -87,10 +89,13 @@ class _GrammarMeta(type):
         ex_or = CaselessLiteral(tokens['T_XOR'])
         or_ = in_or | ex_or
         
-        operand = cls.define_operand()
+        # TODO: There might be a better way to change the parse action
+        # on-the-fly. Gotta ask in the Pyparsing mailing list.
+        evaluable_operand = cls.define_operand()
+        convertible_operand = cls.define_operand(False)
         
-        grammar = operatorPrecedence(
-            operand,
+        evaluable_grammar = operatorPrecedence(
+            evaluable_operand,
             [
                 (relationals, 2, opAssoc.LEFT, cls.make_relational),
                 #(not_, 1, opAssoc.RIGHT),
@@ -99,7 +104,19 @@ class _GrammarMeta(type):
             ]
         )
         
-        cls.grammar = StringStart() + grammar + StringEnd()
+        convertible_grammar = operatorPrecedence(
+            convertible_operand,
+            [
+                (relationals, 2, opAssoc.LEFT, cls.make_relational),
+                #(not_, 1, opAssoc.RIGHT),
+                (and_, 2, opAssoc.LEFT),
+                (or_, 2, opAssoc.LEFT),
+            ]
+        )
+        
+        cls.evaluable_grammar = StringStart() + evaluable_grammar + StringEnd()
+        cls.convertible_grammar = (StringStart() + convertible_grammar +
+                                   StringEnd())
 
 
 class GenericGrammar(object):
@@ -156,20 +173,42 @@ class GenericGrammar(object):
         self.var_containers = var_containers
         self.functions = functions
     
+    def parse_evaluable(self, expression):
+        """
+        Parse ``expression`` and turn its truth-evaluable parse tree.
+        
+        :param expression: The expression to be parsed.
+        :type expression: basestring
+        :return: The truth-evaluable parse tree.
+        :rtype: EvaluableParseTree
+        
+        """
+        result = self.evaluable_grammar.parseString(expression, parseAll=True)
+        root_node = result[0]
+        return EvaluableParseTree(root_node)
+    
+    def parse_convertible(self, expression):
+        result = self.convertible_grammar.parseString(expression, parseAll=True)
+        root_node = result[0]
+        return ConvertibleParseTree(root_node)
+    
     def __call__(self, expression):
         """
         Parse ``expression`` and return its parse tree.
         
         """
-        node = self.grammar.parseString(expression, parseAll=True)
+        node = self.evaluable_grammar.parseString(expression, parseAll=True)
         return node[0]
     
     #{ Operand generators; used to create the grammar
     
     @classmethod
-    def define_operand(cls):
+    def define_operand(cls, evaluable=True):
         """
         Return the syntax definition for an operand.
+        
+        :param evaluable: Whether the variables and functions should be
+            truth-evaluable; otherwise, they'll be placeholders.
         
         An operand can be a variable, a string, a number or a set. A set
         is made of other operands, including other sets.
@@ -194,7 +233,6 @@ class GenericGrammar(object):
         
         # Defining the variables:
         variable = object_name.setName("variable")
-        variable.addParseAction(cls.make_variable)
         
         # Defining the functions:
         function_name = object_name.setName("function_name")
@@ -203,7 +241,15 @@ class GenericGrammar(object):
         args_sep = cls.T_ARGUMENTS_SEPARATOR
         arguments = Optional(delimitedList(operand, delim=args_sep))
         function = Group(function_name + args_start + arguments + args_end)
-        function.setParseAction(cls.make_function)
+        
+        # Turning the variables and functions into evaluable or placeholder
+        # operands:
+        if evaluable:
+            variable.addParseAction(cls.make_variable)
+            function.setParseAction(cls.make_function)
+        else:
+            variable.addParseAction(cls.make_variable_placeholder)
+            function.setParseAction(cls.make_function_placeholder)
         
         operand << (variable | cls.define_number() | \
                     cls.define_string() | set_)
@@ -291,9 +337,19 @@ class GenericGrammar(object):
         return Variable(tokens[0])
     
     @classmethod
+    def make_variable_placeholder(cls, tokens):
+        """Make a Variable placeholder using the token passed."""
+        return VariablePlaceholder(tokens[0])
+    
+    @classmethod
     def make_function(cls, tokens):
         """Make a Function using the token passed."""
         return Function(tokens[0])
+    
+    @classmethod
+    def make_function_placeholder(cls, tokens):
+        """Make a Function placeholder using the token passed."""
+        return FunctionPlaceholder(tokens[0])
     
     @classmethod
     def make_set(cls, tokens):

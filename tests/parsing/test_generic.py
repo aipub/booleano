@@ -34,7 +34,8 @@ from booleano.parser.syntaxes import GenericGrammar
 from booleano.parser.testutils import BaseParseTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
-    String, Number, Set, Variable, Function)
+    String, Number, Set, Variable, Function, VariablePlaceholder,
+    FunctionPlaceholder)
 
 
 class TestParsing(BaseParseTest):
@@ -44,13 +45,23 @@ class TestParsing(BaseParseTest):
     """
     grammar = GenericGrammar()
     
-    expressions = {
-        '  "a string"     ': String("a string"),
-        '   2   ': Number(2),
-        ' last_night': Variable("last_night"),
-        }
+    # Expressions that don't contain variables or functions:
+    constant_expressions = {
+        '  "a string" == 245    ': Equal(String("a string"), Number(245)),
+        '   2 > 5   ': GreaterThan(Number(2), Number(5)),
+    }
     
-    valid_operands = {
+    # Expressions whose variables and functions are going to be evaluated:
+    # TODO:
+    evaluable_expressions = {
+    }
+    
+    # Expressions whose variables and functions are going to be converted:
+    convertible_expressions = {
+        ' last_night': VariablePlaceholder("last_night"),
+    }
+    
+    constant_operands = {
         # ----- Strings
         '"oneword"': String("oneword"),
         '"double quotes"': String("double quotes"),
@@ -77,25 +88,6 @@ class TestParsing(BaseParseTest):
         '1,000,000.34': Number(1000000.34),
         '+1,000,000.22': Number(1000000.22),
         '-1,000,000.22': Number(-1000000.22),
-        # ----- Variables:
-        'today': Variable("today"),
-        'camelCase': Variable("camelCase"),
-        'with_underscore': Variable("with_underscore"),
-        ' v1 ': Variable("v1"),
-        'var1_here': Variable("var1_here"),
-        u'résumé': Variable(u"résumé"),
-        u'有容乃大': Variable(u"有容乃大"),
-        '    spaces': Variable("spaces"),
-        'spaces    ': Variable("spaces"),
-        '  spaces  ': Variable("spaces"),
-        '_protected_var': Variable("_protected_var"),
-        '__private_var': Variable("__private_var"),
-        'one_underscore': Variable("one_underscore"),
-        'two__underscores__here': Variable("two__underscores__here"),
-        'case_insensitive_var': Variable("CASE_INSENSITIVE_VAR"),
-        'CASE_INSENSITIVE_VAR': Variable("case_insensitive_var"),
-        'cAsE_iNsEnSiTiVe_VaR': Variable("CaSe_InSeNsItIvE_vAr"),
-        u'MAYÚSCULA_minúscula_AQUÍ': Variable(u"mayúscula_MINÚSCULA_aquí"),
         # ----- Sets:
         ' {} ': Set(),
         '{{}, {}}': Set(Set(), Set()),
@@ -103,9 +95,6 @@ class TestParsing(BaseParseTest):
         '{1,234,567}': Set(Number(1234567)),
         '{23,24,25}': Set(Number(23), Number(24), Number(25)),
         '{100, 200, 300}': Set(Number(100), Number(200), Number(300)),
-        '{var1, var2}': Set(Variable("var1"), Variable("var2")),
-        '{var, "string"}': Set(Variable("var"), String("string")),
-        '{3, var, "string"}': Set(Number(3), String("string"), Variable("var")),
         '{1, 2, {"orange", "apple"}, 3}': Set(
             Number(1),
             Number(2),
@@ -121,6 +110,37 @@ class TestParsing(BaseParseTest):
                     Set(String("el trigal"), String("las chimeneas"))
                 ),
             ),
+    }
+    
+    # TODO:
+    evaluable_operands = {}
+    
+    convertible_operands = {
+        # ----- Variables:
+        'today': VariablePlaceholder("today"),
+        'camelCase': VariablePlaceholder("camelCase"),
+        'with_underscore': VariablePlaceholder("with_underscore"),
+        ' v1 ': VariablePlaceholder("v1"),
+        'var1_here': VariablePlaceholder("var1_here"),
+        u'résumé': VariablePlaceholder(u"résumé"),
+        u'有容乃大': VariablePlaceholder(u"有容乃大"),
+        '    spaces': VariablePlaceholder("spaces"),
+        'spaces    ': VariablePlaceholder("spaces"),
+        '  spaces  ': VariablePlaceholder("spaces"),
+        '_protected_var': VariablePlaceholder("_protected_var"),
+        '__private_var': VariablePlaceholder("__private_var"),
+        'one_underscore': VariablePlaceholder("one_underscore"),
+        'two__underscores__here': VariablePlaceholder("two__underscores__here"),
+        'case_insensitive_var': VariablePlaceholder("CASE_INSENSITIVE_VAR"),
+        'CASE_INSENSITIVE_VAR': VariablePlaceholder("case_insensitive_var"),
+        'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr"),
+        u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA"),
+        # ----- Sets:
+        '{var1, var2}': Set(VariablePlaceholder("var1"),
+                            VariablePlaceholder("var2")),
+        '{var, "string"}': Set(VariablePlaceholder("var"), String("string")),
+        '{3, var, "string"}': Set(Number(3), String("string"),
+                                  VariablePlaceholder("var")),
     }
     
     invalid_operands = (
