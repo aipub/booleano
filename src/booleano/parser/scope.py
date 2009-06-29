@@ -41,7 +41,7 @@ __all__ = ("Bind", "Namespace", "SymbolTable")
 LOGGER = getLogger(__name__)
 
 
-class Identifier(object):
+class _Identifier(object):
     """
     Multilingual identifier.
     
@@ -117,7 +117,7 @@ class Identifier(object):
         Two identifiers are equivalent if the have the same names.
         
         """
-        if (isinstance(other, Identifier) and
+        if (isinstance(other, _Identifier) and
             self.global_name == other.global_name and
             self.names == other.names):
             return True
@@ -154,7 +154,7 @@ class Identifier(object):
     #}
 
 
-class Bind(Identifier):
+class Bind(_Identifier):
     """
     Operand binding.
     
@@ -199,7 +199,7 @@ class Bind(Identifier):
         return description
 
 
-class Namespace(Identifier):
+class Namespace(_Identifier):
     """
     Booleano namespace.
     
@@ -365,7 +365,8 @@ class Namespace(Identifier):
         Check that the ``other`` namespace is equivalent to this one.
         
         Two namespaces are equivalent if they are equivalent identifiers
-        (:meth:`Identifier.__eq__`) and wrap the same objects and subnamespaces.
+        (:meth:`_Identifier.__eq__`) and wrap the same objects and
+        subnamespaces.
         
         """
         same_id = super(Namespace, self).__eq__(other)

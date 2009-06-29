@@ -32,7 +32,7 @@ Scope handling tests.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.parser.scope import Bind, Namespace, SymbolTable, Identifier
+from booleano.parser.scope import Bind, Namespace, SymbolTable, _Identifier
 from booleano.operations import String, Number
 from booleano.exc import ScopeError
 
@@ -41,15 +41,15 @@ from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
 
 
 class TestIdentifiers(object):
-    """Tests for the base :class:`Identifiers`."""
+    """Tests for the base :class:`_Identifier`."""
     
     def test_no_identifier_contents_by_default(self):
         """Identifiers must not return any contents by default."""
-        id_ = Identifier("name")
+        id_ = _Identifier("name")
         assert_raises(NotImplementedError, id_._get_contents, None)
     
     def test_no_unicode_representation_by_default(self):
-        id_ = Identifier("name")
+        id_ = _Identifier("name")
         assert_raises(NotImplementedError, unicode, id_)
 
 
