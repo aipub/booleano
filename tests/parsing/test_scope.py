@@ -32,7 +32,7 @@ Scope handling tests.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.parser.scope import Bind, Namespace, SymbolTable, _Identifier
+from booleano.parser.scope import Bind, SymbolTable, Namespace, _Identifier
 from booleano.operations import String, Number
 from booleano.exc import ScopeError
 
@@ -103,10 +103,10 @@ class TestBind(object):
         # Undoing it:
         logging_fixture.undo()
     
-    def test_no_default_namespace(self):
-        """Operand bindings must not be in a namespace by default."""
+    def test_no_default_symbol_table(self):
+        """Operand bindings must not be in a symbol table by default."""
         bind = Bind("foo", String("whatever"))
-        eq_(bind.namespace, None)
+        eq_(bind.symbol_table, None)
     
     def test_constant(self):
         """Constants can be bound."""
@@ -157,7 +157,7 @@ class TestBind(object):
         ok_(bind9 == bind7)
         
         ok_(bind1 != None)
-        ok_(bind1 != Namespace("name1", []))
+        ok_(bind1 != SymbolTable("name1", []))
         
         ok_(bind1 != bind2)
         ok_(bind1 != bind3)
@@ -218,7 +218,7 @@ class TestBind(object):
         ok_(bind9 != bind6)
         ok_(bind9 != bind8)
     
-    def test_string_without_namespace(self):
+    def test_string_without_symbol_table(self):
         # With ASCII characters:
         bind1 = Bind("pi", Number(3.1416))
         bind1_as_unicode = unicode(bind1)
@@ -230,89 +230,89 @@ class TestBind(object):
         eq_(bind2_as_unicode, u'Operand 3.1416 bound as "pí"')
         eq_(str(bind2), 'Operand 3.1416 bound as "pí"')
     
-    def test_string_with_namespace(self):
+    def test_string_with_symbol_table(self):
         # With ASCII characters:
         bind1 = Bind("pi", Number(3.1416))
-        Namespace("global", [bind1])
+        SymbolTable("global", [bind1])
         bind1_as_unicode = unicode(bind1)
-        eq_('Operand 3.1416 bound as "pi" (at Namespace global)',
+        eq_('Operand 3.1416 bound as "pi" (in Symbol table global)',
             bind1_as_unicode)
         eq_(str(bind1), bind1_as_unicode)
         # With non-ASCII characters:
         bind2 = Bind(u"pí", Number(3.1416))
-        Namespace("global", [bind2])
+        SymbolTable("global", [bind2])
         bind2_as_unicode = unicode(bind2)
-        eq_(u'Operand 3.1416 bound as "pí" (at Namespace global)',
+        eq_(u'Operand 3.1416 bound as "pí" (in Symbol table global)',
             bind2_as_unicode)
-        eq_('Operand 3.1416 bound as "pí" (at Namespace global)', str(bind2))
+        eq_('Operand 3.1416 bound as "pí" (in Symbol table global)', str(bind2))
 
 
-class TestNamespace(object):
-    """Tests for the multilingual namespaces."""
+class TestSymbolTable(object):
+    """Tests for the multilingual symbol tables."""
     
     def test_global_names(self):
         """
-        When a namespace is created, its global name must be set accordingly.
+        When a symbol table is created, its global name must be set accordingly.
         
         """
-        ns1 = Namespace("foo", [])
-        ns2 = Namespace("Foo", [])
-        eq_(ns1.global_name, "foo")
-        eq_(ns1.global_name, ns2.global_name)
+        st1 = SymbolTable("foo", [])
+        st2 = SymbolTable("Foo", [])
+        eq_(st1.global_name, "foo")
+        eq_(st1.global_name, st2.global_name)
     
     def test_names(self):
         """
-        When a namespace is created, its multiple names must be set accordingly.
+        When a table is created, its multiple names must be set accordingly.
         
         """
         # No localized names:
-        ns0 = Namespace("foo", [])
-        eq_(ns0.names, {})
+        st0 = SymbolTable("foo", [])
+        eq_(st0.names, {})
         # Lower-case names:
         names0 = {'es_VE': "cartuchera", 'es_ES': "estuche"}
-        ns1 = Namespace("bar", [], **names0)
-        eq_(ns1.names, names0)
+        st1 = SymbolTable("bar", [], **names0)
+        eq_(st1.names, names0)
         # Mixed-case names -- must be converted to lower-case:
         names1 = {'es_VE': "Cartuchera", 'es_ES': "estuche"}
-        ns2 = Namespace("bar", [], **names1)
-        eq_(ns2.names, names0)
+        st2 = SymbolTable("bar", [], **names1)
+        eq_(st2.names, names0)
     
-    def test_no_default_namespace(self):
-        """Namespaces must not have a parent namespace by default."""
-        ns = Namespace("foo", [])
-        eq_(ns.namespace, None)
+    def test_no_default_symbol_table(self):
+        """Tables must not have a parent table by default."""
+        st = SymbolTable("foo", [])
+        eq_(st.symbol_table, None)
     
-    def test_constructor_without_subnamespaces(self):
-        """Sub-namespaces are optional."""
-        ns = Namespace("foo", [])
-        eq_(len(ns.subnamespaces), 0)
+    def test_constructor_without_subtables(self):
+        """Sub-tables are optional."""
+        st = SymbolTable("foo", [])
+        eq_(len(st.subtables), 0)
     
     def test_constructor_without_objects(self):
         """Objects are mandatory, or an empty list must be passed explicitly."""
         # No objects
-        assert_raises(TypeError, Namespace, "foo")
+        assert_raises(TypeError, SymbolTable, "foo")
         # Empty list of objects:
-        ns = Namespace("foo", [])
-        eq_(len(ns.objects), 0)
+        st = SymbolTable("foo", [])
+        eq_(len(st.objects), 0)
     
     def test_constructor_with_objects(self):
         objects = [Bind("greeting", String("hey")),
                    Bind("traffic", TrafficLightVar())]
-        ns = Namespace("global", objects)
-        eq_(ns.objects, set(objects))
+        st = SymbolTable("global", objects)
+        eq_(st.objects, set(objects))
     
-    def test_constructor_with_namespaces(self):
-        namespaces = [
-            Namespace("sub1", []),
-            Namespace(
+    def test_constructor_with_subtables(self):
+        tables = [
+            SymbolTable("sub1", []),
+            SymbolTable(
                 "sub2",
                 [],
-                Namespace("sub2.sub1", []),
-                Namespace("sub2.sub2", [])
+                SymbolTable("sub2.sub1", []),
+                SymbolTable("sub2.sub2", [])
             ),
         ]
-        ns = Namespace("global", [], *namespaces)
-        eq_(ns.subnamespaces, set(namespaces))
+        st = SymbolTable("global", [], *tables)
+        eq_(st.subtables, set(tables))
     
     def test_duplicate_objects(self):
         """There must be no duplicate object."""
@@ -320,134 +320,119 @@ class TestNamespace(object):
         objects1 = [Bind("salutation", String("hey")),
                     Bind("traffic", TrafficLightVar()),
                     Bind("salutation", String("hey"))]
-        assert_raises(ScopeError, Namespace, "global", objects1)
+        assert_raises(ScopeError, SymbolTable, "global", objects1)
         # Post-instantiation:
         objects2 = [Bind("salutation", String("hey")),
                     Bind("traffic", TrafficLightVar())]
-        ns = Namespace("global", objects2)
-        assert_raises(ScopeError, ns.add_object,
+        st = SymbolTable("global", objects2)
+        assert_raises(ScopeError, st.add_object,
                       Bind("salutation", String("hey")))
     
-    def test_duplicate_subnamespaces(self):
-        """There must not be duplicate subnamespaces."""
+    def test_duplicate_subtables(self):
+        """There must not be duplicate sub-tables."""
         # In the constructor:
-        subnamespaces1 = [Namespace("foo", ()),
-                          Namespace("bar", ()),
-                          Namespace("foo", ())]
-        assert_raises(ScopeError, Namespace, "global", (), *subnamespaces1)
+        subtables1 = [SymbolTable("foo", ()),
+                      SymbolTable("bar", ()),
+                      SymbolTable("foo", ())]
+        assert_raises(ScopeError, SymbolTable, "global", (), *subtables1)
         # Post-instantiation:
-        subnamespaces2 = [Namespace("foo", ()),
-                          Namespace("bar", ())]
-        ns = Namespace("global", [], *subnamespaces2)
-        assert_raises(ScopeError, ns.add_namespace, Namespace("bar", []))
+        subtables2 = [SymbolTable("foo", ()), SymbolTable("bar", ())]
+        st = SymbolTable("global", [], *subtables2)
+        assert_raises(ScopeError, st.add_subtable, SymbolTable("bar", []))
     
     def test_unreusable_bindings(self):
         """
-        Operand bindings and namespaces can only be bound to a single parent
-        namespace.
+        Operand bindings and symbol tables can only be bound to a single parent
+        symbol table.
         
         """
         # An operand binding:
         bind = Bind("traffic-light", TrafficLightVar())
-        Namespace("traffic", [bind])
-        assert_raises(ScopeError, Namespace, "baz", [bind])
-        # A namespace:
-        ns0 = Namespace("foo", [])
-        Namespace("global", [], ns0)
-        assert_raises(ScopeError, Namespace, "bar", [], ns0)
+        SymbolTable("traffic", [bind])
+        assert_raises(ScopeError, SymbolTable, "baz", [bind])
+        # A symbol table:
+        st0 = SymbolTable("foo", [])
+        SymbolTable("global", [], st0)
+        assert_raises(ScopeError, SymbolTable, "bar", [], st0)
     
-    def test_checking_valid_namespace(self):
-        ns = Namespace("global",
+    def test_checking_valid_table(self):
+        st = SymbolTable("global",
             # Bindings/global objects:
             (
              Bind("bool", BoolVar(), es="booleano"),
              Bind("traffic", TrafficLightVar(), es=u"tráfico"),
             ),
-            # Sub-namespaces:
-            Namespace("maths",
+            # Sub-tables:
+            SymbolTable("maths",
                 (
                  Bind("pi", Number(3.1416)),
                  Bind("e", Number(2.7183)),
                 ),
             ),
         )
-        eq_(ns.validate_scope(), None)
+        eq_(st.validate_scope(), None)
     
-    def test_checking_object_and_subnamespace_sharing_global_name(self):
+    def test_checking_object_and_subtable_sharing_global_name(self):
         """
-        It's valid for an object and a subnamespace to share the global name.
+        It's valid for an object and a sub-table to share the global name.
         
         """
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (
                 Bind("today", BoolVar()),
             ),
-            Namespace("today", ()),
+            SymbolTable("today", ()),
         )
-        eq_(ns.validate_scope(), None)
+        eq_(st.validate_scope(), None)
     
-    def test_checking_object_and_subnamespace_sharing_localized_name(self):
+    def test_checking_object_and_subtable_sharing_localized_name(self):
         """
-        It's valid for an object and a subnamespace to share the localized name.
+        It's valid for an object and a sub-table to share the localized name.
         
         """
-        ns1 = Namespace("global",
+        st1 = SymbolTable("global",
             (
                 Bind("current_day", BoolVar(), es="hoy"),
             ),
-            Namespace("today", (), es="hoy"),
+            SymbolTable("today", (), es="hoy"),
         )
-        ns2 = Namespace("global",
+        st2 = SymbolTable("global",
             (
                 Bind("current_day", BoolVar(), es="hoy"),
             ),
-            # This namespace will be called "hoy" in Spanish too:
-            Namespace("hoy", ()),
+            # This sub-name will be called "hoy" in Spanish too:
+            SymbolTable("hoy", ()),
         )
-        eq_(ns1.validate_scope(), None)
-        eq_(ns2.validate_scope(), None)
+        eq_(st1.validate_scope(), None)
+        eq_(st2.validate_scope(), None)
     
-    def test_namespace_with_duplicate_object_global_names(self):
+    def test_checking_duplicate_object_global_names(self):
         """
-        Two objects cannot have the same global names in the same namespace.
+        Two objects cannot have the same global names in the same table.
         
         """
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (
                 Bind("e", Number(2.7183), es_VE=u"número e"),
                 Bind("pi", Number(3.1416)),
                 Bind("e", Number(2.71828), es_ES=u"número e"),
             ),
         )
-        assert_raises(ScopeError, ns.validate_scope)
+        assert_raises(ScopeError, st.validate_scope)
     
-    def test_namespace_with_duplicate_object_global_names(self):
+    def test_checking_duplicate_object_localized_names(self):
         """
-        Two objects cannot have the same global names in the same namespace.
+        Two objects cannot have the same localized names in the same table.
         
         """
-        ns = Namespace("global",
-            (
-                Bind("e", Number(2.7183), es_VE=u"número e"),
-                Bind("pi", Number(3.1416)),
-                Bind("e", Number(2.71828), es_ES=u"número e"),
-            ),
-        )
-        assert_raises(ScopeError, ns.validate_scope)
-    
-    def test_namespace_with_duplicate_object_localized_names(self):
-        """
-        Two objects cannot have the same localized names in the same namespace.
-        
-        """
-        ns1 = Namespace("global",
+        st1 = SymbolTable("global",
             (
                 Bind("e", Number(2.7183), es_VE=u"número e"),
                 Bind("pi", Number(3.1416)),
                 Bind("eulers-number", Number(2.71828), es_VE=u"número e"),
             ),
         )
-        ns2 = Namespace("global",
+        st2 = SymbolTable("global",
             (
                 Bind("e", Number(2.7183), es_VE=u"número e"),
                 Bind("pi", Number(3.1416)),
@@ -455,101 +440,127 @@ class TestNamespace(object):
                 Bind(u"número e", Number(2.71828)),
             ),
         )
-        assert_raises(ScopeError, ns1.validate_scope)
-        assert_raises(ScopeError, ns2.validate_scope)
+        assert_raises(ScopeError, st1.validate_scope)
+        assert_raises(ScopeError, st2.validate_scope)
     
-    def test_namespace_with_duplicate_namespace_global_names(self):
+    def test_checking_duplicate_subtable_global_names(self):
         """
-        Two subnamespaces cannot have the same global names in the same
-        parent namespace.
+        Two sub-tables cannot have the same global names in the same
+        parent symbol table.
         
         """
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (),
-            Namespace("maths", ()),
-            Namespace("computing", ()),
-            Namespace("maths", (), es=u"matemática"),
+            SymbolTable("maths", ()),
+            SymbolTable("computing", ()),
+            SymbolTable("maths", (), es=u"matemática"),
         )
-        assert_raises(ScopeError, ns.validate_scope)
+        assert_raises(ScopeError, st.validate_scope)
     
-    def test_namespace_with_duplicate_namespace_localized_names(self):
+    def test_checking_duplicate_subtable_localized_names(self):
         """
-        Two subnamespaces cannot have the same global names in the same
-        parent namespace.
+        Two sub-tables cannot have the same global names in the same
+        parent table.
         
         """
-        ns1 = Namespace("global",
+        st1 = SymbolTable("global",
             (),
-            Namespace("maths", (), es=u"matemática"),
-            Namespace("computing", ()),
-            Namespace("mathematics", (), es=u"matemática"),
+            SymbolTable("maths", (), es=u"matemática"),
+            SymbolTable("computing", ()),
+            SymbolTable("mathematics", (), es=u"matemática"),
         )
-        ns2 = Namespace("global",
+        st2 = SymbolTable("global",
             (),
-            Namespace("maths", (), es=u"matemática"),
-            Namespace("computing", ()),
-            # This namespace will be called "matemática" in Spanish too:
-            Namespace(u"matemática", ()),
+            SymbolTable("maths", (), es=u"matemática"),
+            SymbolTable("computing", ()),
+            # This sub-table will be called "matemática" in Spanish too:
+            SymbolTable(u"matemática", ()),
         )
-        assert_raises(ScopeError, ns1.validate_scope)
-        assert_raises(ScopeError, ns2.validate_scope)
+        assert_raises(ScopeError, st1.validate_scope)
+        assert_raises(ScopeError, st2.validate_scope)
     
     def test_name_clash_in_grand_children(self):
         """
-        The scope must be validated even inside the subnamespaces.
+        The scope must be validated even inside the sub-tables.
         
         """
-        sciences_ns1 = Namespace("sciences",
+        sciences_st1 = SymbolTable("sciences",
             (),
-            Namespace("maths", (), es=u"matemática"),
-            Namespace("computing", ()),
-            Namespace("maths", ()),
+            SymbolTable("maths", (), es=u"matemática"),
+            SymbolTable("computing", ()),
+            SymbolTable("maths", ()),
         )
-        sciences_ns2 = Namespace("sciences",
+        sciences_st2 = SymbolTable("sciences",
             (),
-            Namespace("maths", (), es=u"matemática"),
-            Namespace("computing", ()),
-            Namespace("mathematics", (), es=u"matemática"),
+            SymbolTable("maths", (), es=u"matemática"),
+            SymbolTable("computing", ()),
+            SymbolTable("mathematics", (), es=u"matemática"),
         )
-        sciences_ns3 = Namespace("sciences",
+        sciences_st3 = SymbolTable("sciences",
             (),
-            Namespace("maths", (), es=u"matemática"),
-            Namespace("computing", ()),
-            # This namespace will be called "matemática" in Spanish too:
-            Namespace(u"matemática", ()),
+            SymbolTable("maths", (), es=u"matemática"),
+            SymbolTable("computing", ()),
+            # This sub-table will be called "matemática" in Spanish too:
+            SymbolTable(u"matemática", ()),
         )
         # Now a name clash at the objects level:
-        sciences_ns4 = Namespace("global",
+        sciences_st4 = SymbolTable("global",
             (
                 Bind("foo", BoolVar()),
                 Bind("foo", TrafficLightVar(), es="bar"),
             )
         )
         
-        ns1 = Namespace("global", (), sciences_ns1, Namespace("society", ()))
-        ns2 = Namespace("global", (), sciences_ns2, Namespace("society", ()))
-        ns3 = Namespace("global", (), sciences_ns3, Namespace("society", ()))
-        ns4 = Namespace("global", (), sciences_ns4)
+        st1 = SymbolTable("global", (), sciences_st1,
+                          SymbolTable("society", ()))
+        st2 = SymbolTable("global", (), sciences_st2,
+                          SymbolTable("society", ()))
+        st3 = SymbolTable("global", (), sciences_st3,
+                          SymbolTable("society", ()))
+        st4 = SymbolTable("global", (), sciences_st4)
         
-        assert_raises(ScopeError, ns1.validate_scope)
-        assert_raises(ScopeError, ns2.validate_scope)
-        assert_raises(ScopeError, ns3.validate_scope)
-        assert_raises(ScopeError, ns4.validate_scope)
+        assert_raises(ScopeError, st1.validate_scope)
+        assert_raises(ScopeError, st2.validate_scope)
+        assert_raises(ScopeError, st3.validate_scope)
+        assert_raises(ScopeError, st4.validate_scope)
     
-    def test_retrieving_symbol_table_with_children(self):
+    def test_retrieving_namespace_without_children(self):
         """
-        A symbol table should have subtables for the sub-namespaces of the
-        original namespace.
+        A namespace shouldn't have sub-namespaces if the original symbol table
+        doesn't have sub-tables.
         
         """
         bool_var = BoolVar()
         traffic = TrafficLightVar()
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (
                 Bind("bool", bool_var, es="booleano"),
                 Bind("traffic", traffic, es=u"tráfico")
             ),
-            Namespace("foo",
+        )
+        
+        # Checking the namespace:
+        global_namespace = st.get_namespace()
+        eq_(len(global_namespace.subnamespaces), 0)
+        
+        # Checking the namespace in Castilian:
+        castilian_namespace = st.get_namespace("es")
+        eq_(len(castilian_namespace.subnamespaces), 0)
+    
+    def test_retrieving_namespace_with_children(self):
+        """
+        A namespace should have sub-namespaces for the sub-tables of the
+        original symbol table.
+        
+        """
+        bool_var = BoolVar()
+        traffic = TrafficLightVar()
+        st = SymbolTable("global",
+            (
+                Bind("bool", bool_var, es="booleano"),
+                Bind("traffic", traffic, es=u"tráfico")
+            ),
+            SymbolTable("foo",
                 (
                     Bind("bar", bool_var, es="fulano"),
                     Bind("baz", traffic, es="mengano"),
@@ -557,40 +568,40 @@ class TestNamespace(object):
             ),
         )
         
-        # Checking the symbol tables:
-        global_symbol_table = ns.get_symbol_table()
-        eq_(len(global_symbol_table.subtables), 1)
-        global_subtable = global_symbol_table.subtables["foo"]
-        global_subtable_objects = {
+        # Checking the namespace:
+        global_namespace = st.get_namespace()
+        eq_(len(global_namespace.subnamespaces), 1)
+        global_subnamespace = global_namespace.subnamespaces["foo"]
+        global_subnamespace_objects = {
             'bar': bool_var,
             'baz': traffic,
         }
-        eq_(global_subtable.objects, global_subtable_objects)
+        eq_(global_subnamespace.objects, global_subnamespace_objects)
         
-        # Checking the symbol table in Castilian:
-        castilian_symbol_table = ns.get_symbol_table("es")
-        eq_(len(castilian_symbol_table.subtables), 1)
-        castilian_subtable = castilian_symbol_table.subtables["foo"]
-        castilian_subtable_objects = {
+        # Checking the namespace in Castilian:
+        castilian_namespace = st.get_namespace("es")
+        eq_(len(castilian_namespace.subnamespaces), 1)
+        castilian_subnamespace = castilian_namespace.subnamespaces["foo"]
+        castilian_subnamespace_objects = {
             'fulano': bool_var,
             'mengano': traffic,
         }
-        eq_(castilian_subtable.objects, castilian_subtable_objects)
+        eq_(castilian_subnamespace.objects, castilian_subnamespace_objects)
     
-    def test_retrieving_symbol_table_with_untranslated_contents(self):
+    def test_retrieving_namespace_with_untrastlated_contents(self):
         """
-        When a symbol table is requested in a locale which is not available,
-        the global symbol table should be returned instead.
+        When a namespace is requested in a locale which is not available,
+        the namespace with global names should be returned isttead.
         
         """
         bool_var = BoolVar()
         traffic = TrafficLightVar()
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (
                 Bind("bool", BoolVar(), es="booleano"),
                 Bind("traffic", TrafficLightVar(), es=u"tráfico")
             ),
-            Namespace("foo",
+            SymbolTable("foo",
                 (
                     Bind("bar", bool_var, es="fulano"),
                     Bind("baz", traffic, es="mengano"),
@@ -598,35 +609,35 @@ class TestNamespace(object):
             ),
         )
         
-        # Checking the symbol tables:
-        symbol_table = ns.get_symbol_table("fr")
-        eq_(len(symbol_table.subtables), 1)
-        subtable = symbol_table.subtables["foo"]
-        subtable_objects = {
+        # Checking the namespace:
+        namespace = st.get_namespace("fr")
+        eq_(len(namespace.subnamespaces), 1)
+        subnamespace = namespace.subnamespaces["foo"]
+        subnamespace_objects = {
             'bar': bool_var,
             'baz': traffic,
         }
-        eq_(subtable.objects, subtable_objects)
+        eq_(subnamespace.objects, subnamespace_objects)
         expected_unbound_objects_global = {
             'bool': BoolVar(),
             'traffic': TrafficLightVar(),
         }
-        eq_(symbol_table.objects, expected_unbound_objects_global)
+        eq_(namespace.objects, expected_unbound_objects_global)
     
-    def test_retrieving_symbol_table_with_partially_untranslated_contents(self):
+    def test_retrieving_namespace_with_partially_untrastlated_contents(self):
         """
-        When a symbol table is requested in a locale in which not all items are
-        available, the global symbol table should be returned instead.
+        When a namespace is requested in a locale in which not all items are
+        available, the namespace with global names should be returned instead.
         
         """
         bool_var = BoolVar()
         traffic = TrafficLightVar()
-        ns = Namespace("global",
+        st = SymbolTable("global",
             (
                 Bind("bool", BoolVar(), es="booleano", fr=u"booléen"),
                 Bind("traffic", TrafficLightVar(), es=u"tráfico")
             ),
-            Namespace("foo",
+            SymbolTable("foo",
                 (
                     Bind("bar", bool_var, es="fulano"),
                     Bind("baz", traffic, es="mengano", fr="bonjour"),
@@ -634,20 +645,20 @@ class TestNamespace(object):
             ),
         )
         
-        # Checking the symbol tables:
-        symbol_table = ns.get_symbol_table("fr")
-        eq_(len(symbol_table.subtables), 1)
-        subtable = symbol_table.subtables["foo"]
-        subtable_objects = {
+        # Checking the namespace:
+        namespace = st.get_namespace("fr")
+        eq_(len(namespace.subnamespaces), 1)
+        subnamespace = namespace.subnamespaces["foo"]
+        subnamespace_objects = {
             'bar': bool_var,
             'bonjour': traffic,
         }
-        eq_(subtable.objects, subtable_objects)
+        eq_(subnamespace.objects, subnamespace_objects)
         expected_unbound_objects_global = {
             u'booléen': BoolVar(),
             'traffic': TrafficLightVar(),
         }
-        eq_(symbol_table.objects, expected_unbound_objects_global)
+        eq_(namespace.objects, expected_unbound_objects_global)
     
     def test_equivalence(self):
         objects1 = lambda: [Bind("dish", String("cachapa")),
@@ -656,206 +667,206 @@ class TestNamespace(object):
                             Bind("dish", String("cachapa"))]
         objects3 = lambda: [Bind("pi", Number(3.1416))]
         
-        ns1 = Namespace("foo", objects1())
-        ns2 = Namespace("foo", objects1())
-        ns3 = Namespace("foo", objects1(), es="fulano")
-        ns4 = Namespace("foo", objects1(), es="fulano")
-        ns5 = Namespace("foo", objects2())
-        ns6 = Namespace("foo", objects3())
-        ns7 = Namespace("foo", objects2(), es="fulano")
-        ns8 = Namespace("foo", objects3(), es_VE="fulano")
-        ns9 = Namespace("bar", objects1())
-        ns10 = Namespace("foo", objects1())
-        ns11 = Namespace(
-            "foo", objects1(), Namespace("bar", []), Namespace("baz", []))
-        ns12 = Namespace(
-            "foo", objects1(), Namespace("baz", []), Namespace("bar", []))
+        st1 = SymbolTable("foo", objects1())
+        st2 = SymbolTable("foo", objects1())
+        st3 = SymbolTable("foo", objects1(), es="fulano")
+        st4 = SymbolTable("foo", objects1(), es="fulano")
+        st5 = SymbolTable("foo", objects2())
+        st6 = SymbolTable("foo", objects3())
+        st7 = SymbolTable("foo", objects2(), es="fulano")
+        st8 = SymbolTable("foo", objects3(), es_VE="fulano")
+        st9 = SymbolTable("bar", objects1())
+        st10 = SymbolTable("foo", objects1())
+        st11 = SymbolTable(
+            "foo", objects1(), SymbolTable("bar", []), SymbolTable("baz", []))
+        st12 = SymbolTable(
+            "foo", objects1(), SymbolTable("baz", []), SymbolTable("bar", []))
         
-        # Moving ns10 into the "baz" namespace:
-        Namespace("baz", [], ns10)
+        # Moving st10 into the "baz" symbol table:
+        SymbolTable("baz", [], st10)
         
-        ok_(ns1 == ns2)
-        ok_(ns1 == ns5)
-        ok_(ns1 == ns10)
-        ok_(ns2 == ns1)
-        ok_(ns2 == ns5)
-        ok_(ns2 == ns10)
-        ok_(ns3 == ns4)
-        ok_(ns3 == ns7)
-        ok_(ns4 == ns3)
-        ok_(ns4 == ns7)
-        ok_(ns5 == ns1)
-        ok_(ns5 == ns2)
-        ok_(ns5 == ns10)
-        ok_(ns7 == ns3)
-        ok_(ns7 == ns4)
-        ok_(ns10 == ns1)
-        ok_(ns10 == ns2)
-        ok_(ns10 == ns5)
-        ok_(ns11 == ns12)
-        ok_(ns12 == ns11)
+        ok_(st1 == st2)
+        ok_(st1 == st5)
+        ok_(st1 == st10)
+        ok_(st2 == st1)
+        ok_(st2 == st5)
+        ok_(st2 == st10)
+        ok_(st3 == st4)
+        ok_(st3 == st7)
+        ok_(st4 == st3)
+        ok_(st4 == st7)
+        ok_(st5 == st1)
+        ok_(st5 == st2)
+        ok_(st5 == st10)
+        ok_(st7 == st3)
+        ok_(st7 == st4)
+        ok_(st10 == st1)
+        ok_(st10 == st2)
+        ok_(st10 == st5)
+        ok_(st11 == st12)
+        ok_(st12 == st11)
         
-        ok_(ns1 != None)
-        ok_(ns1 != Bind("foo", String("cachapa")))
+        ok_(st1 != None)
+        ok_(st1 != Bind("foo", String("cachapa")))
         
-        ok_(ns1 != ns3)
-        ok_(ns1 != ns4)
-        ok_(ns1 != ns6)
-        ok_(ns1 != ns7)
-        ok_(ns1 != ns8)
-        ok_(ns1 != ns9)
-        ok_(ns1 != ns11)
-        ok_(ns1 != ns12)
-        ok_(ns2 != ns3)
-        ok_(ns2 != ns4)
-        ok_(ns2 != ns6)
-        ok_(ns2 != ns7)
-        ok_(ns2 != ns8)
-        ok_(ns2 != ns9)
-        ok_(ns2 != ns11)
-        ok_(ns2 != ns12)
-        ok_(ns3 != ns1)
-        ok_(ns3 != ns2)
-        ok_(ns3 != ns5)
-        ok_(ns3 != ns6)
-        ok_(ns3 != ns8)
-        ok_(ns3 != ns9)
-        ok_(ns3 != ns10)
-        ok_(ns3 != ns11)
-        ok_(ns3 != ns12)
-        ok_(ns4 != ns1)
-        ok_(ns4 != ns2)
-        ok_(ns4 != ns5)
-        ok_(ns4 != ns6)
-        ok_(ns4 != ns8)
-        ok_(ns4 != ns9)
-        ok_(ns4 != ns10)
-        ok_(ns4 != ns11)
-        ok_(ns4 != ns12)
-        ok_(ns5 != ns3)
-        ok_(ns5 != ns4)
-        ok_(ns5 != ns6)
-        ok_(ns5 != ns7)
-        ok_(ns5 != ns8)
-        ok_(ns5 != ns9)
-        ok_(ns5 != ns11)
-        ok_(ns5 != ns12)
-        ok_(ns6 != ns1)
-        ok_(ns6 != ns2)
-        ok_(ns6 != ns3)
-        ok_(ns6 != ns4)
-        ok_(ns6 != ns5)
-        ok_(ns6 != ns7)
-        ok_(ns6 != ns8)
-        ok_(ns6 != ns9)
-        ok_(ns6 != ns10)
-        ok_(ns6 != ns11)
-        ok_(ns6 != ns12)
-        ok_(ns7 != ns1)
-        ok_(ns7 != ns2)
-        ok_(ns7 != ns5)
-        ok_(ns7 != ns6)
-        ok_(ns7 != ns8)
-        ok_(ns7 != ns9)
-        ok_(ns7 != ns10)
-        ok_(ns7 != ns11)
-        ok_(ns7 != ns12)
-        ok_(ns8 != ns1)
-        ok_(ns8 != ns2)
-        ok_(ns8 != ns3)
-        ok_(ns8 != ns4)
-        ok_(ns8 != ns5)
-        ok_(ns8 != ns6)
-        ok_(ns8 != ns7)
-        ok_(ns8 != ns9)
-        ok_(ns8 != ns10)
-        ok_(ns8 != ns11)
-        ok_(ns8 != ns12)
-        ok_(ns9 != ns1)
-        ok_(ns9 != ns2)
-        ok_(ns9 != ns3)
-        ok_(ns9 != ns4)
-        ok_(ns9 != ns5)
-        ok_(ns9 != ns6)
-        ok_(ns9 != ns7)
-        ok_(ns9 != ns8)
-        ok_(ns9 != ns10)
-        ok_(ns9 != ns11)
-        ok_(ns9 != ns12)
-        ok_(ns10 != ns3)
-        ok_(ns10 != ns4)
-        ok_(ns10 != ns6)
-        ok_(ns10 != ns7)
-        ok_(ns10 != ns8)
-        ok_(ns10 != ns9)
-        ok_(ns11 != ns1)
-        ok_(ns11 != ns2)
-        ok_(ns11 != ns3)
-        ok_(ns11 != ns4)
-        ok_(ns11 != ns5)
-        ok_(ns11 != ns6)
-        ok_(ns11 != ns7)
-        ok_(ns11 != ns8)
-        ok_(ns11 != ns9)
-        ok_(ns11 != ns10)
-        ok_(ns12 != ns1)
-        ok_(ns12 != ns2)
-        ok_(ns12 != ns3)
-        ok_(ns12 != ns4)
-        ok_(ns12 != ns5)
-        ok_(ns12 != ns6)
-        ok_(ns12 != ns7)
-        ok_(ns12 != ns8)
-        ok_(ns12 != ns9)
-        ok_(ns12 != ns10)
+        ok_(st1 != st3)
+        ok_(st1 != st4)
+        ok_(st1 != st6)
+        ok_(st1 != st7)
+        ok_(st1 != st8)
+        ok_(st1 != st9)
+        ok_(st1 != st11)
+        ok_(st1 != st12)
+        ok_(st2 != st3)
+        ok_(st2 != st4)
+        ok_(st2 != st6)
+        ok_(st2 != st7)
+        ok_(st2 != st8)
+        ok_(st2 != st9)
+        ok_(st2 != st11)
+        ok_(st2 != st12)
+        ok_(st3 != st1)
+        ok_(st3 != st2)
+        ok_(st3 != st5)
+        ok_(st3 != st6)
+        ok_(st3 != st8)
+        ok_(st3 != st9)
+        ok_(st3 != st10)
+        ok_(st3 != st11)
+        ok_(st3 != st12)
+        ok_(st4 != st1)
+        ok_(st4 != st2)
+        ok_(st4 != st5)
+        ok_(st4 != st6)
+        ok_(st4 != st8)
+        ok_(st4 != st9)
+        ok_(st4 != st10)
+        ok_(st4 != st11)
+        ok_(st4 != st12)
+        ok_(st5 != st3)
+        ok_(st5 != st4)
+        ok_(st5 != st6)
+        ok_(st5 != st7)
+        ok_(st5 != st8)
+        ok_(st5 != st9)
+        ok_(st5 != st11)
+        ok_(st5 != st12)
+        ok_(st6 != st1)
+        ok_(st6 != st2)
+        ok_(st6 != st3)
+        ok_(st6 != st4)
+        ok_(st6 != st5)
+        ok_(st6 != st7)
+        ok_(st6 != st8)
+        ok_(st6 != st9)
+        ok_(st6 != st10)
+        ok_(st6 != st11)
+        ok_(st6 != st12)
+        ok_(st7 != st1)
+        ok_(st7 != st2)
+        ok_(st7 != st5)
+        ok_(st7 != st6)
+        ok_(st7 != st8)
+        ok_(st7 != st9)
+        ok_(st7 != st10)
+        ok_(st7 != st11)
+        ok_(st7 != st12)
+        ok_(st8 != st1)
+        ok_(st8 != st2)
+        ok_(st8 != st3)
+        ok_(st8 != st4)
+        ok_(st8 != st5)
+        ok_(st8 != st6)
+        ok_(st8 != st7)
+        ok_(st8 != st9)
+        ok_(st8 != st10)
+        ok_(st8 != st11)
+        ok_(st8 != st12)
+        ok_(st9 != st1)
+        ok_(st9 != st2)
+        ok_(st9 != st3)
+        ok_(st9 != st4)
+        ok_(st9 != st5)
+        ok_(st9 != st6)
+        ok_(st9 != st7)
+        ok_(st9 != st8)
+        ok_(st9 != st10)
+        ok_(st9 != st11)
+        ok_(st9 != st12)
+        ok_(st10 != st3)
+        ok_(st10 != st4)
+        ok_(st10 != st6)
+        ok_(st10 != st7)
+        ok_(st10 != st8)
+        ok_(st10 != st9)
+        ok_(st11 != st1)
+        ok_(st11 != st2)
+        ok_(st11 != st3)
+        ok_(st11 != st4)
+        ok_(st11 != st5)
+        ok_(st11 != st6)
+        ok_(st11 != st7)
+        ok_(st11 != st8)
+        ok_(st11 != st9)
+        ok_(st11 != st10)
+        ok_(st12 != st1)
+        ok_(st12 != st2)
+        ok_(st12 != st3)
+        ok_(st12 != st4)
+        ok_(st12 != st5)
+        ok_(st12 != st6)
+        ok_(st12 != st7)
+        ok_(st12 != st8)
+        ok_(st12 != st9)
+        ok_(st12 != st10)
     
     def test_string(self):
         # With ASCII names:
-        ns2 = Namespace("grand-child", [])
-        ns1 = Namespace("parent", (), ns2)
-        ns0 = Namespace("global", (), ns1)
-        eq_(str(ns0), "Namespace global")
-        eq_(str(ns1), "Namespace global:parent")
-        eq_(str(ns2), "Namespace global:parent:grand-child")
+        st2 = SymbolTable("grand-child", [])
+        st1 = SymbolTable("parent", (), st2)
+        st0 = SymbolTable("global", (), st1)
+        eq_(str(st0), "Symbol table global")
+        eq_(str(st1), "Symbol table global:parent")
+        eq_(str(st2), "Symbol table global:parent:grand-child")
         # With Unicode characters:
-        ns2 = Namespace(u"gránd-chíld", [])
-        ns1 = Namespace(u"párênt", (), ns2)
-        ns0 = Namespace(u"glòbál", (), ns1)
-        eq_(str(ns0), "Namespace glòbál")
-        eq_(str(ns1), "Namespace glòbál:párênt")
-        eq_(str(ns2), "Namespace glòbál:párênt:gránd-chíld")
+        st2 = SymbolTable(u"gránd-chíld", [])
+        st1 = SymbolTable(u"párênt", (), st2)
+        st0 = SymbolTable(u"glòbál", (), st1)
+        eq_(str(st0), "Symbol table glòbál")
+        eq_(str(st1), "Symbol table glòbál:párênt")
+        eq_(str(st2), "Symbol table glòbál:párênt:gránd-chíld")
     
     def test_unicode(self):
         # With ASCII names:
-        ns2 = Namespace("grand-child", [])
-        ns1 = Namespace("parent", (), ns2)
-        ns0 = Namespace("global", (), ns1)
-        eq_(unicode(ns0), "Namespace global")
-        eq_(unicode(ns1), "Namespace global:parent")
-        eq_(unicode(ns2), "Namespace global:parent:grand-child")
+        st2 = SymbolTable("grand-child", [])
+        st1 = SymbolTable("parent", (), st2)
+        st0 = SymbolTable("global", (), st1)
+        eq_(unicode(st0), "Symbol table global")
+        eq_(unicode(st1), "Symbol table global:parent")
+        eq_(unicode(st2), "Symbol table global:parent:grand-child")
         # With Unicode characters:
-        ns2 = Namespace(u"gránd-chíld", [])
-        ns1 = Namespace(u"párênt", (), ns2)
-        ns0 = Namespace(u"glòbál", (), ns1)
-        eq_(unicode(ns0), u"Namespace glòbál")
-        eq_(unicode(ns1), u"Namespace glòbál:párênt")
-        eq_(unicode(ns2), u"Namespace glòbál:párênt:gránd-chíld")
+        st2 = SymbolTable(u"gránd-chíld", [])
+        st1 = SymbolTable(u"párênt", (), st2)
+        st0 = SymbolTable(u"glòbál", (), st1)
+        eq_(unicode(st0), u"Symbol table glòbál")
+        eq_(unicode(st1), u"Symbol table glòbál:párênt")
+        eq_(unicode(st2), u"Symbol table glòbál:párênt:gránd-chíld")
 
 
-class TestSymbolTable(object):
-    """Tests for the symbol tables."""
+class TestNamespaces(object):
+    """Tests for the namespaces."""
     
-    def test_subtables_are_optional(self):
-        """Symbol tables may not have subtables."""
-        st = SymbolTable(objects={})
-        eq_(st.subtables, {})
+    def test_subnamespaces_are_optional(self):
+        """Namespaces may not have sub-namespaces."""
+        st = Namespace(objects={})
+        eq_(st.subnamespaces, {})
     
     def test_retrieving_existing_global_object(self):
         objects = {
             'bool': BoolVar(),
             'traffic': TrafficLightVar(),
         }
-        st = SymbolTable(objects)
+        st = Namespace(objects)
         requested_object = st.get_object("bool")
         eq_(requested_object, BoolVar())
     
@@ -867,8 +878,8 @@ class TestSymbolTable(object):
         global_objects = {
             'foo': TrafficLightVar(),
         }
-        sub_table = {'sub1': SymbolTable(sub_objects)}
-        st = SymbolTable(global_objects, sub_table)
+        sub_namespace = {'sub1': Namespace(sub_objects)}
+        st = Namespace(global_objects, sub_namespace)
         requested_object = st.get_object("bool", ["sub1"])
         eq_(requested_object, BoolVar())
     
@@ -883,10 +894,10 @@ class TestSymbolTable(object):
             'foo': TrafficLightVar(),
             'traffic-violation': TrafficViolationFunc(String("pedestrians")),
         }
-        third_level_tables = {'sub2': SymbolTable(third_level_objects)}
-        second_level_tables = {
-            'sub1': SymbolTable(second_level_objects, third_level_tables)}
-        st = SymbolTable(global_objects, second_level_tables)
+        third_level_namespaces = {'sub2': Namespace(third_level_objects)}
+        second_level_namespaces = {
+            'sub1': Namespace(second_level_objects, third_level_namespaces)}
+        st = Namespace(global_objects, second_level_namespaces)
         requested_object = st.get_object("bool", ["sub1", "sub2"])
         eq_(requested_object, BoolVar())
     
@@ -895,7 +906,7 @@ class TestSymbolTable(object):
             'foo': TrafficLightVar(),
             'traffic-violation': TrafficViolationFunc(String("pedestrians")),
         }
-        st = SymbolTable(global_objects,)
+        st = Namespace(global_objects,)
         assert_raises(ScopeError, st.get_object, "foo", ["doesn't", "exist"])
     
     def test_retrieving_non_existing_object(self):
@@ -903,6 +914,6 @@ class TestSymbolTable(object):
             'foo': TrafficLightVar(),
             'traffic-violation': TrafficViolationFunc(String("pedestrians")),
         }
-        st = SymbolTable(global_objects,)
+        st = Namespace(global_objects,)
         assert_raises(ScopeError, st.get_object, "bool")
 
