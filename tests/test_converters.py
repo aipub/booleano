@@ -80,50 +80,86 @@ class TestActualConverter(object):
         String(u"¡Estás viendo un texto en castellano aquí!"),
         Number(12345),
         Number(123.45),
-        Set(String("hola"), VariablePlaceholder("today"), Number(4)),
+        Set(String("hola"), VariablePlaceholder("today", None), Number(4)),
         Set(),
-        VariablePlaceholder("tomorrow"),
-        FunctionPlaceholder("today_is_gonna_rain"),
-        FunctionPlaceholder("distance", FunctionPlaceholder("where_am_i"),
+        VariablePlaceholder("tomorrow", None),
+        FunctionPlaceholder("today_is_gonna_rain", None),
+        FunctionPlaceholder("distance", None,
+                            FunctionPlaceholder("where_am_i", None),
                             String("Paris")),
         # Unary operators:
-        Truth(VariablePlaceholder("street_light")),
-        Truth(FunctionPlaceholder("near_paris", VariablePlaceholder("me"))),
-        Not(FunctionPlaceholder("near_paris", VariablePlaceholder("moon"))),
+        Truth(VariablePlaceholder("street_light", None)),
+        Truth(
+            FunctionPlaceholder("near_paris", None,
+                                VariablePlaceholder("me", None))
+            ),
+        Not(FunctionPlaceholder("near_paris",
+                                None,
+                                VariablePlaceholder("moon", None))),
         # Binary operators:
-        And(FunctionPlaceholder("in_europe"), FunctionPlaceholder("in_spain")),
+        And(
+            FunctionPlaceholder("in_europe", None),
+            FunctionPlaceholder("in_spain", None)
+            ),
         And(
             Or(
-               Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-               FunctionPlaceholder("today_is_gonna_rain")),
+               Equal(
+                     VariablePlaceholder("venezuela", None),
+                     String("Venezuela")
+                     ),
+               FunctionPlaceholder("today_is_gonna_rain", None)),
             Xor(
-                Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-                FunctionPlaceholder("today_is_gonna_rain"))
+                Equal(
+                      VariablePlaceholder("venezuela", None),
+                      String("Venezuela")
+                      ),
+                FunctionPlaceholder("today_is_gonna_rain", None))
             ),
-        Or(FunctionPlaceholder("in_europe"), FunctionPlaceholder("in_spain")),
+        Or(
+           FunctionPlaceholder("in_europe", None),
+           FunctionPlaceholder("in_spain", None)
+           ),
         Or(
             And(
-               Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-               FunctionPlaceholder("today_is_gonna_rain")),
+               Equal(
+                     VariablePlaceholder("venezuela", None), 
+                     String("Venezuela")
+                     ),
+               FunctionPlaceholder("today_is_gonna_rain", None)),
             Xor(
-                Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-                FunctionPlaceholder("today_is_gonna_rain"))
+                Equal(
+                      VariablePlaceholder("venezuela", None), 
+                      String("Venezuela")
+                      ),
+                FunctionPlaceholder("today_is_gonna_rain", None))
             ),
-        Xor(FunctionPlaceholder("in_europe"), FunctionPlaceholder("in_spain")),
+        Xor(
+            FunctionPlaceholder("in_europe", None), 
+            FunctionPlaceholder("in_spain", None)
+            ),
         Xor(
             Or(
-               Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-               FunctionPlaceholder("today_is_gonna_rain")),
+               Equal(
+                     VariablePlaceholder("venezuela", None), 
+                     String("Venezuela")
+                     ),
+               FunctionPlaceholder("today_is_gonna_rain", None)),
             And(
-                Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-                FunctionPlaceholder("today_is_gonna_rain"))
+                Equal(
+                      VariablePlaceholder("venezuela", None),
+                      String("Venezuela")
+                      ),
+                FunctionPlaceholder("today_is_gonna_rain", None))
             ),
-        Equal(VariablePlaceholder("venezuela"), String("Venezuela")),
-        NotEqual(VariablePlaceholder("venezuela"), VariablePlaceholder("here")),
-        LessThan(Number(2), VariablePlaceholder("counter")),
-        GreaterThan(Number(2), VariablePlaceholder("counter")),
-        LessEqual(Number(2), VariablePlaceholder("counter")),
-        GreaterEqual(Number(2), VariablePlaceholder("counter")),
+        Equal(VariablePlaceholder("venezuela", None), String("Venezuela")),
+        NotEqual(
+                 VariablePlaceholder("venezuela", None), 
+                 VariablePlaceholder("here", None)
+                 ),
+        LessThan(Number(2), VariablePlaceholder("counter", None)),
+        GreaterThan(Number(2), VariablePlaceholder("counter", None)),
+        LessEqual(Number(2), VariablePlaceholder("counter", None)),
+        GreaterEqual(Number(2), VariablePlaceholder("counter", None)),
         Contains(Number(4), Set(Number(3), String("no"), Number(0))),
         IsSubset(Set(), Set(Number(3), String("no"), Number(0))),
     )
@@ -131,7 +167,16 @@ class TestActualConverter(object):
     def test_conversions(self):
         """Check that each parse tree is converted back to its original form."""
         for parse_tree in self.parse_trees:
-            yield (check_anti_conversion, parse_tree)
+            
+            # Let's use a Nose test generator:
+            def check():
+                conversion = anti_converter(parse_tree)
+                eq_(parse_tree, conversion,
+                    'Parse tree %s changed to %s' % (repr(parse_tree), repr(conversion)))
+            check.description = ("Parse tree %s shouldn't change" %
+                                 repr(parse_tree))
+            
+            yield check
     
     @raises(ConversionError)
     def test_converting_non_node(self):
@@ -145,11 +190,7 @@ class TestActualConverter(object):
 anti_converter = AntiConverter()
 
 
-def check_anti_conversion(parse_tree):
-    """Make sure the anti-converter didn't change the parse tree."""
-    conversion = anti_converter(parse_tree)
-    eq_(parse_tree, conversion,
-        'Parse tree %s changed to %s' % (repr(parse_tree), repr(conversion)))
+
 
 
 #}

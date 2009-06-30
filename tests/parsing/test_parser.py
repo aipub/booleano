@@ -68,7 +68,7 @@ class TestParsing(BaseParseTest):
     
     # Expressions whose variables and functions are going to be converted:
     convertible_expressions = {
-        ' last_night': VariablePlaceholder("last_night"),
+        ' last_night': VariablePlaceholder("last_night", None),
     }
     
     constant_operands = {
@@ -127,30 +127,36 @@ class TestParsing(BaseParseTest):
     
     convertible_operands = {
         # ----- Variables:
-        'today': VariablePlaceholder("today"),
-        'camelCase': VariablePlaceholder("camelCase"),
-        'with_underscore': VariablePlaceholder("with_underscore"),
-        ' v1 ': VariablePlaceholder("v1"),
-        'var1_here': VariablePlaceholder("var1_here"),
-        u'résumé': VariablePlaceholder(u"résumé"),
-        u'有容乃大': VariablePlaceholder(u"有容乃大"),
-        '    spaces': VariablePlaceholder("spaces"),
-        'spaces    ': VariablePlaceholder("spaces"),
-        '  spaces  ': VariablePlaceholder("spaces"),
-        '_protected_var': VariablePlaceholder("_protected_var"),
-        '__private_var': VariablePlaceholder("__private_var"),
-        'one_underscore': VariablePlaceholder("one_underscore"),
-        'two__underscores__here': VariablePlaceholder("two__underscores__here"),
-        'case_insensitive_var': VariablePlaceholder("CASE_INSENSITIVE_VAR"),
-        'CASE_INSENSITIVE_VAR': VariablePlaceholder("case_insensitive_var"),
-        'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr"),
-        u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA"),
+        'today': VariablePlaceholder("today", None),
+        'camelCase': VariablePlaceholder("camelCase", None),
+        'with_underscore': VariablePlaceholder("with_underscore", None),
+        ' v1 ': VariablePlaceholder("v1", None),
+        'var1_here': VariablePlaceholder("var1_here", None),
+        u'résumé': VariablePlaceholder(u"résumé", None),
+        u'有容乃大': VariablePlaceholder(u"有容乃大", None),
+        '    spaces': VariablePlaceholder("spaces", None),
+        'spaces    ': VariablePlaceholder("spaces", None),
+        '  spaces  ': VariablePlaceholder("spaces", None),
+        '_protected_var': VariablePlaceholder("_protected_var", None),
+        '__private_var': VariablePlaceholder("__private_var", None),
+        'one_underscore': VariablePlaceholder("one_underscore", None),
+        'two__underscores__here': VariablePlaceholder("two__underscores__here",
+                                                      None),
+        'case_insensitive_var': VariablePlaceholder("CASE_INSENSITIVE_VAR", 
+                                                    None),
+        'CASE_INSENSITIVE_VAR': VariablePlaceholder("case_insensitive_var", 
+                                                    None),
+        'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr", 
+                                                    None),
+        u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA", 
+                                                    None),
         # ----- Sets:
-        '{var1, var2}': Set(VariablePlaceholder("var1"),
-                            VariablePlaceholder("var2")),
-        '{var, "string"}': Set(VariablePlaceholder("var"), String("string")),
+        '{var1, var2}': Set(VariablePlaceholder("var1", None),
+                            VariablePlaceholder("var2", None)),
+        '{var, "string"}': Set(VariablePlaceholder("var", None), 
+                               String("string")),
         '{3, var, "string"}': Set(Number(3), String("string"),
-                                  VariablePlaceholder("var")),
+                                  VariablePlaceholder("var", None)),
     }
     
     invalid_operands = (

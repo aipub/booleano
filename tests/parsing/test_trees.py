@@ -92,7 +92,7 @@ class TestConvertibleTrees(object):
     
     def test_operands(self):
         """Operands alone are valid convertible parse trees."""
-        operand = VariablePlaceholder("my_variable")
+        operand = VariablePlaceholder("my_variable", None)
         tree = ConvertibleParseTree(operand)
         converter = AntiConverter()
         conversion = tree(converter)

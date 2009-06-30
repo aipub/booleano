@@ -878,7 +878,7 @@ class TestVariablePlaceholder(object):
     
     def test_node_type(self):
         """Variable placeholders are leaf nodes."""
-        var = VariablePlaceholder("greeting")
+        var = VariablePlaceholder("greeting", None)
         ok_(var.is_leaf())
         assert_false(var.is_branch())
     
@@ -888,15 +888,29 @@ class TestVariablePlaceholder(object):
         name of the variable in question.
         
         """
-        var1 = VariablePlaceholder(u"PAÍS")
-        var2 = VariablePlaceholder("country")
+        var1 = VariablePlaceholder(u"PAÍS", None)
+        var2 = VariablePlaceholder("country", None)
         
         eq_(var1.name, u"país")
         eq_(var2.name, "country")
     
+    def test_no_namespace(self):
+        """Variable placeholders shouldn't have a default namespace."""
+        # Using None:
+        var1 = VariablePlaceholder("foo", None)
+        eq_(len(var1.namespace_parts), 0)
+        # Using an empty list:
+        var2 = VariablePlaceholder("foo", [])
+        eq_(len(var2.namespace_parts), 0)
+    
+    def test_namespaces(self):
+        """Variable placeholders should be aware of their namespace."""
+        var = VariablePlaceholder("country", ["geo", "bar"])
+        eq_(var.namespace_parts, ["geo", "bar"])
+    
     def test_no_operations(self):
         """Variable placeholders don't support operations."""
-        var = VariablePlaceholder("var")
+        var = VariablePlaceholder("var", None)
         assert_raises(InvalidOperationError, var.to_python)
         assert_raises(InvalidOperationError, var.get_logical_value)
         assert_raises(InvalidOperationError, var.equals, None)
@@ -907,40 +921,108 @@ class TestVariablePlaceholder(object):
     
     def test_equivalence(self):
         """
-        Two variable placeholders are equivalent if they have the same name.
+        Two variable placeholders are equivalent if they have the same name
+        and share the same namespace.
         
         """
-        var1 = VariablePlaceholder("foo")
-        var2 = VariablePlaceholder("bar")
-        var3 = VariablePlaceholder("Foo")
+        var1 = VariablePlaceholder("foo", None)
+        var2 = VariablePlaceholder("bar", None)
+        var3 = VariablePlaceholder("Foo", None)
+        var4 = VariablePlaceholder("foo", ["some", "namespace"])
+        var5 = VariablePlaceholder("bar", ["some", "namespace"])
+        var6 = VariablePlaceholder("foo", ["some", "namespace"])
         
         var1.check_equivalence(var3)
         var3.check_equivalence(var1)
+        var4.check_equivalence(var6)
+        var6.check_equivalence(var4)
         
         assert_raises(AssertionError, var1.check_equivalence, var2)
+        assert_raises(AssertionError, var1.check_equivalence, var4)
+        assert_raises(AssertionError, var1.check_equivalence, var5)
+        assert_raises(AssertionError, var1.check_equivalence, var6)
         assert_raises(AssertionError, var2.check_equivalence, var1)
         assert_raises(AssertionError, var2.check_equivalence, var3)
+        assert_raises(AssertionError, var2.check_equivalence, var4)
+        assert_raises(AssertionError, var2.check_equivalence, var5)
+        assert_raises(AssertionError, var2.check_equivalence, var6)
         assert_raises(AssertionError, var3.check_equivalence, var2)
+        assert_raises(AssertionError, var3.check_equivalence, var4)
+        assert_raises(AssertionError, var3.check_equivalence, var5)
+        assert_raises(AssertionError, var3.check_equivalence, var6)
+        assert_raises(AssertionError, var4.check_equivalence, var1)
+        assert_raises(AssertionError, var4.check_equivalence, var2)
+        assert_raises(AssertionError, var4.check_equivalence, var3)
+        assert_raises(AssertionError, var4.check_equivalence, var5)
+        assert_raises(AssertionError, var5.check_equivalence, var1)
+        assert_raises(AssertionError, var5.check_equivalence, var2)
+        assert_raises(AssertionError, var5.check_equivalence, var3)
+        assert_raises(AssertionError, var5.check_equivalence, var4)
+        assert_raises(AssertionError, var5.check_equivalence, var6)
+        assert_raises(AssertionError, var6.check_equivalence, var1)
+        assert_raises(AssertionError, var6.check_equivalence, var2)
+        assert_raises(AssertionError, var6.check_equivalence, var3)
+        assert_raises(AssertionError, var6.check_equivalence, var5)
         
         ok_(var1 == var3)
         ok_(var3 == var1)
+        ok_(var4 == var6)
+        ok_(var6 == var4)
+        
         ok_(var1 != var2)
+        ok_(var1 != var4)
+        ok_(var1 != var5)
+        ok_(var1 != var6)
         ok_(var2 != var1)
         ok_(var2 != var3)
+        ok_(var2 != var4)
+        ok_(var2 != var5)
+        ok_(var2 != var6)
         ok_(var3 != var2)
+        ok_(var3 != var4)
+        ok_(var3 != var5)
+        ok_(var3 != var6)
+        ok_(var4 != var1)
+        ok_(var4 != var2)
+        ok_(var4 != var3)
+        ok_(var4 != var5)
+        ok_(var5 != var1)
+        ok_(var5 != var2)
+        ok_(var5 != var3)
+        ok_(var5 != var4)
+        ok_(var5 != var6)
+        ok_(var6 != var1)
+        ok_(var6 != var2)
+        ok_(var6 != var3)
+        ok_(var6 != var5)
     
-    def test_string_representation(self):
-        var = VariablePlaceholder(u"aquí")
+    def test_string_representation_without_namespace(self):
+        var = VariablePlaceholder(u"aquí", None)
         eq_(unicode(var), u"Variable placeholder aquí")
         eq_(str(var), "Variable placeholder aquí")
     
-    def test_representation(self):
+    def test_string_representation_with_namespace(self):
+        var = VariablePlaceholder(u"aquí", ["some", "thing"])
+        eq_(unicode(var), u"Variable placeholder aquí at some:thing")
+        eq_(str(var), "Variable placeholder aquí at some:thing")
+    
+    def test_representation_without_namespace(self):
         # With Unicode
-        var = VariablePlaceholder(u"aquí")
+        var = VariablePlaceholder(u"aquí", None)
         eq_(repr(var), '<Variable placeholder "aquí">')
         # With ASCII
-        var = VariablePlaceholder("here")
+        var = VariablePlaceholder("here", None)
         eq_(repr(var), '<Variable placeholder "here">')
+    
+    def test_representation_with_namespace(self):
+        # With Unicode
+        var = VariablePlaceholder(u"aquí", ["some", "thing"])
+        eq_('<Variable placeholder "aquí" at namespace="some:thing">',
+            repr(var))
+        # With ASCII
+        var = VariablePlaceholder("here", ["some", "thing"])
+        eq_('<Variable placeholder "here" at namespace="some:thing">',
+            repr(var))
 
 
 class TestFunctionPlaceholder(object):
@@ -948,7 +1030,7 @@ class TestFunctionPlaceholder(object):
     
     def test_node_type(self):
         """Function placeholders are branch nodes."""
-        func = FunctionPlaceholder("greet", String("arg0"))
+        func = FunctionPlaceholder("greet", None, String("arg0"))
         ok_(func.is_branch())
         assert_false(func.is_leaf())
     
@@ -959,27 +1041,42 @@ class TestFunctionPlaceholder(object):
         arguments passed.
         
         """
-        func1 = FunctionPlaceholder(u"PAÍS")
+        func1 = FunctionPlaceholder(u"PAÍS", None)
         eq_(func1.name, u"país")
         eq_(func1.arguments, ())
         
-        func2 = FunctionPlaceholder("country", FunctionPlaceholder("city"),
+        func2 = FunctionPlaceholder("country", None,
+                                    FunctionPlaceholder("city", None),
                                     Number(2))
         eq_(func2.name, "country")
-        eq_(func2.arguments, (FunctionPlaceholder("city"), Number(2)))
+        eq_(func2.arguments, (FunctionPlaceholder("city", None), Number(2)))
+    
+    def test_no_namespace(self):
+        """Function placeholders shouldn't have a default namespace."""
+        # Using None:
+        func1 = FunctionPlaceholder("foo", None)
+        eq_(len(func1.namespace_parts), 0)
+        # Using an empty list:
+        func2 = FunctionPlaceholder("foo", [])
+        eq_(len(func2.namespace_parts), 0)
+    
+    def test_namespaces(self):
+        """Function placeholders should be aware of their namespace."""
+        func = FunctionPlaceholder("country", ["geo", "bar"])
+        eq_(func.namespace_parts, ["geo", "bar"])
     
     def test_non_operands_as_arguments(self):
         """Function placeholders reject non-operands as arguments."""
-        assert_raises(BadCallError, FunctionPlaceholder, "func", Number(3),
-                      Number(6), 1)
-        assert_raises(BadCallError, FunctionPlaceholder, "func", 2,
+        assert_raises(BadCallError, FunctionPlaceholder, "func", (),
+                      Number(3), Number(6), 1)
+        assert_raises(BadCallError, FunctionPlaceholder, "func", (), 2,
                       Number(6), Number(3))
-        assert_raises(BadCallError, FunctionPlaceholder, "func", Number(6),
-                      3, Number(3))
+        assert_raises(BadCallError, FunctionPlaceholder, "func", (),
+                      Number(6), 3, Number(3))
     
     def test_no_operations(self):
         """Function placeholders don't support operations."""
-        func = FunctionPlaceholder("func")
+        func = FunctionPlaceholder("func", ())
         assert_raises(InvalidOperationError, func.to_python)
         assert_raises(InvalidOperationError, func.get_logical_value)
         assert_raises(InvalidOperationError, func.equals, None)
@@ -990,51 +1087,164 @@ class TestFunctionPlaceholder(object):
     
     def test_equivalence(self):
         """
-        Two function placeholders are equivalent if they have the same name.
+        Two function placeholders are equivalent if they have the same name
+        and share the namespace.
         
         """
-        func1 = FunctionPlaceholder("foo", String("hi"), Number(4))
-        func2 = FunctionPlaceholder("foo")
-        func3 = FunctionPlaceholder("Foo", String("hi"), Number(4))
-        func4 = FunctionPlaceholder("Foo", Number(4), String("hi"))
+        func1 = FunctionPlaceholder("foo", None, String("hi"), Number(4))
+        func2 = FunctionPlaceholder("foo", None)
+        func3 = FunctionPlaceholder("Foo", None, String("hi"), Number(4))
+        func4 = FunctionPlaceholder("Foo", None, Number(4), String("hi"))
+        func5 = FunctionPlaceholder("baz", None, String("hi"), Number(4))
+        func6 = FunctionPlaceholder("foo", ["a", "b"], String("hi"), Number(4))
+        func7 = FunctionPlaceholder("foo", ["a", "b"], String("hi"), Number(4))
+        func8 = FunctionPlaceholder("foo", ["a", "b"])
         
         func1.check_equivalence(func3)
         func3.check_equivalence(func1)
+        func6.check_equivalence(func7)
+        func7.check_equivalence(func6)
         
         assert_raises(AssertionError, func1.check_equivalence, func2)
         assert_raises(AssertionError, func1.check_equivalence, func4)
+        assert_raises(AssertionError, func1.check_equivalence, func5)
+        assert_raises(AssertionError, func1.check_equivalence, func6)
+        assert_raises(AssertionError, func1.check_equivalence, func7)
+        assert_raises(AssertionError, func1.check_equivalence, func8)
         assert_raises(AssertionError, func2.check_equivalence, func1)
         assert_raises(AssertionError, func2.check_equivalence, func3)
         assert_raises(AssertionError, func2.check_equivalence, func4)
+        assert_raises(AssertionError, func2.check_equivalence, func5)
+        assert_raises(AssertionError, func2.check_equivalence, func6)
+        assert_raises(AssertionError, func2.check_equivalence, func7)
+        assert_raises(AssertionError, func2.check_equivalence, func8)
         assert_raises(AssertionError, func3.check_equivalence, func2)
         assert_raises(AssertionError, func3.check_equivalence, func4)
+        assert_raises(AssertionError, func3.check_equivalence, func5)
+        assert_raises(AssertionError, func3.check_equivalence, func6)
+        assert_raises(AssertionError, func3.check_equivalence, func7)
+        assert_raises(AssertionError, func3.check_equivalence, func8)
+        assert_raises(AssertionError, func4.check_equivalence, func1)
+        assert_raises(AssertionError, func4.check_equivalence, func2)
+        assert_raises(AssertionError, func4.check_equivalence, func3)
+        assert_raises(AssertionError, func4.check_equivalence, func5)
+        assert_raises(AssertionError, func4.check_equivalence, func6)
+        assert_raises(AssertionError, func4.check_equivalence, func7)
+        assert_raises(AssertionError, func4.check_equivalence, func8)
+        assert_raises(AssertionError, func5.check_equivalence, func1)
+        assert_raises(AssertionError, func5.check_equivalence, func2)
+        assert_raises(AssertionError, func5.check_equivalence, func3)
+        assert_raises(AssertionError, func5.check_equivalence, func4)
+        assert_raises(AssertionError, func5.check_equivalence, func6)
+        assert_raises(AssertionError, func5.check_equivalence, func7)
+        assert_raises(AssertionError, func5.check_equivalence, func8)
+        assert_raises(AssertionError, func6.check_equivalence, func1)
+        assert_raises(AssertionError, func6.check_equivalence, func2)
+        assert_raises(AssertionError, func6.check_equivalence, func3)
+        assert_raises(AssertionError, func6.check_equivalence, func4)
+        assert_raises(AssertionError, func6.check_equivalence, func5)
+        assert_raises(AssertionError, func6.check_equivalence, func8)
+        assert_raises(AssertionError, func7.check_equivalence, func1)
+        assert_raises(AssertionError, func7.check_equivalence, func2)
+        assert_raises(AssertionError, func7.check_equivalence, func3)
+        assert_raises(AssertionError, func7.check_equivalence, func4)
+        assert_raises(AssertionError, func7.check_equivalence, func5)
+        assert_raises(AssertionError, func7.check_equivalence, func8)
+        assert_raises(AssertionError, func8.check_equivalence, func1)
+        assert_raises(AssertionError, func8.check_equivalence, func2)
+        assert_raises(AssertionError, func8.check_equivalence, func3)
+        assert_raises(AssertionError, func8.check_equivalence, func4)
+        assert_raises(AssertionError, func8.check_equivalence, func5)
+        assert_raises(AssertionError, func8.check_equivalence, func6)
+        assert_raises(AssertionError, func8.check_equivalence, func7)
         
         ok_(func1 == func3)
         ok_(func3 == func1)
+        ok_(func6 == func7)
+        ok_(func7 == func6)
+        
         ok_(func1 != func2)
         ok_(func1 != func4)
+        ok_(func1 != func5)
+        ok_(func1 != func6)
+        ok_(func1 != func7)
+        ok_(func1 != func8)
         ok_(func2 != func1)
         ok_(func2 != func3)
         ok_(func2 != func4)
+        ok_(func2 != func5)
+        ok_(func2 != func6)
+        ok_(func2 != func7)
+        ok_(func2 != func8)
         ok_(func3 != func2)
         ok_(func3 != func4)
+        ok_(func3 != func5)
+        ok_(func3 != func6)
+        ok_(func3 != func7)
+        ok_(func3 != func8)
         ok_(func4 != func1)
         ok_(func4 != func2)
         ok_(func4 != func3)
+        ok_(func4 != func5)
+        ok_(func4 != func6)
+        ok_(func4 != func7)
+        ok_(func4 != func8)
+        ok_(func5 != func1)
+        ok_(func5 != func2)
+        ok_(func5 != func3)
+        ok_(func5 != func4)
+        ok_(func5 != func6)
+        ok_(func5 != func7)
+        ok_(func5 != func8)
+        ok_(func6 != func1)
+        ok_(func6 != func2)
+        ok_(func6 != func3)
+        ok_(func6 != func4)
+        ok_(func6 != func5)
+        ok_(func6 != func8)
+        ok_(func7 != func1)
+        ok_(func7 != func2)
+        ok_(func7 != func3)
+        ok_(func7 != func4)
+        ok_(func7 != func5)
+        ok_(func7 != func8)
+        ok_(func7 != func1)
+        ok_(func7 != func2)
+        ok_(func7 != func3)
+        ok_(func7 != func4)
+        ok_(func7 != func5)
+        ok_(func7 != func8)
     
-    def test_string_representation(self):
-        func = FunctionPlaceholder(u"aquí", Number(1), Number(2))
+    def test_string_representation_without_namespace(self):
+        func = FunctionPlaceholder(u"aquí", None, Number(1), Number(2))
         eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0)")
         eq_(str(func), "Function placeholder aquí(1.0, 2.0)")
     
-    def test_representation(self):
+    def test_string_representation_with_namespace(self):
+        func = FunctionPlaceholder(u"aquí", ["a", "z"], Number(1), Number(2))
+        eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0) at a:z")
+        eq_(str(func), "Function placeholder aquí(1.0, 2.0) at a:z")
+    
+    def test_representation_without_namespace(self):
         # With Unicode:
-        func = FunctionPlaceholder(u"aquí", Number(1), String("hi"))
+        func = FunctionPlaceholder(u"aquí", None, Number(1), String("hi"))
         eq_('<Function placeholder aquí(<Number 1.0>, <String "hi">)>',
             repr(func))
         # With ASCII:
-        func = FunctionPlaceholder("here", Number(1), String("hi"))
+        func = FunctionPlaceholder("here", None, Number(1), String("hi"))
         eq_(u'<Function placeholder here(<Number 1.0>, <String "hi">)>',
+            repr(func))
+    
+    def test_representation_with_namespace(self):
+        # With Unicode:
+        func = FunctionPlaceholder(u"aquí", ["a", "d"], Number(1), String("hi"))
+        eq_('<Function placeholder aquí(<Number 1.0>, <String "hi">) ' \
+            'at namespace="a:d">',
+            repr(func))
+        # With ASCII:
+        func = FunctionPlaceholder("here", ["a", "d"], Number(1), String("hi"))
+        eq_(u'<Function placeholder here(<Number 1.0>, <String "hi">) ' \
+            'at namespace="a:d">',
             repr(func))
 
 

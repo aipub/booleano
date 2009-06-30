@@ -308,10 +308,10 @@ class AntiConverter(BaseConverter):
         return Set(*operands)
     
     def convert_variable(self, name):
-        return VariablePlaceholder(name)
+        return VariablePlaceholder(name, None)
     
     def convert_function(self, name, *arguments):
-        return FunctionPlaceholder(name, *arguments)
+        return FunctionPlaceholder(name, None, *arguments)
 
 
 #}

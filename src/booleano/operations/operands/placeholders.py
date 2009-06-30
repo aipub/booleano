@@ -50,19 +50,28 @@ class PlaceholderOperand(Operand):
     
         The name of the object represented by the placeholder.
     
+    .. attribute:: namespace_parts
+    
+        The namespace that contains the placeholder, represented by a list of
+        the identifiers in the namespace string.
+    
     """
     
     operations = OPERATIONS
     
-    def __init__(self, name):
+    def __init__(self, name, namespace_parts):
         """
         Name this placeholder operand as ``name``.
         
         :param name: The name for this placeholder.
         :type name: basestring
+        :param namespace_parts: The identifiers in the namespace that contains
+            the placeholder.
+        :type namespace_parts: list
         
         """
         self.name = name.lower()
+        self.namespace_parts = namespace_parts or ()
     
     def check_equivalence(self, node):
         """
@@ -73,7 +82,8 @@ class PlaceholderOperand(Operand):
         
         """
         super(PlaceholderOperand, self).check_equivalence(node)
-        assert self.name == node.name, \
+        assert (self.name == node.name and
+                self.namespace_parts == node.namespace_parts), \
                'Placeholders "%s" and "%s" are not equivalent'
     
     def no_evaluation(self, *args, **kwargs):
@@ -89,6 +99,15 @@ class PlaceholderOperand(Operand):
     # All the evaluation-related operation raise an InvalidOperationError
     to_python = get_logical_value = equals = less_than = greater_than = \
     contains = is_subset = no_evaluation
+    
+    def _namespace_to_unicode(self):
+        """Return the namespace as a single Unicode string."""
+        return u":".join(self.namespace_parts)
+    
+    def _namespace_to_ascii(self):
+        """Return the namespace as a single ASCII string."""
+        parts = [part.encode("utf-8") for part in self.namespace_parts]
+        return ":".join(parts)
 
 
 class VariablePlaceholder(PlaceholderOperand):
@@ -102,11 +121,19 @@ class VariablePlaceholder(PlaceholderOperand):
     
     def __unicode__(self):
         """Return the Unicode representation for this variable placeholder."""
-        return "Variable placeholder %s" % self.name
+        msg = "Variable placeholder %s" % self.name
+        if self.namespace_parts:
+            ns = self._namespace_to_unicode()
+            msg = "%s at %s" % (msg, ns)
+        return msg
     
     def __repr__(self):
         """Return the representation for this variable placeholder."""
-        return '<Variable placeholder "%s">' % self.name.encode("utf-8")
+        msg = '<Variable placeholder "%s"' % self.name.encode("utf-8")
+        if self.namespace_parts:
+            ns = self._namespace_to_ascii()
+            msg = '%s at namespace="%s"' % (msg, ns)
+        return msg + ">"
 
 
 class FunctionPlaceholder(PlaceholderOperand):
@@ -121,13 +148,16 @@ class FunctionPlaceholder(PlaceholderOperand):
     
     """
     
-    def __init__(self, function_name, *arguments):
+    def __init__(self, function_name, namespace_parts, *arguments):
         """
         Check that all the  ``arguments`` are operands before creating the
         placeholder for the function called ``function_name``.
         
         :param function_name: The name of the function to be represented.
         :type function_name: basestring
+        :param namespace_parts: The identifiers in the namespace that contains
+            the function placeholder.
+        :type namespace_parts: list
         :raises BadCallError: If one of the ``arguments`` is not an
             :class:`Operand`.
         
@@ -138,7 +168,8 @@ class FunctionPlaceholder(PlaceholderOperand):
                                    'non-operand argument: %s' %
                                    (function_name, argument))
         self.arguments = arguments
-        super(FunctionPlaceholder, self).__init__(function_name)
+        super(FunctionPlaceholder, self).__init__(function_name,
+                                                  namespace_parts)
     
     def check_equivalence(self, node):
         """
@@ -158,12 +189,20 @@ class FunctionPlaceholder(PlaceholderOperand):
         """Return the Unicode representation for this function placeholder."""
         args = [unicode(arg) for arg in self.arguments]
         args = ", ".join(args)
-        return "Function placeholder %s(%s)" % (self.name, args)
+        msg = "Function placeholder %s(%s)" % (self.name, args)
+        if self.namespace_parts:
+            ns = self._namespace_to_unicode()
+            msg = "%s at %s" % (msg, ns)
+        return msg
     
     def __repr__(self):
         """Return the representation for this function placeholder."""
         args = [repr(arg) for arg in self.arguments]
         args = ", ".join(args)
-        return "<Function placeholder %s(%s)>" % (self.name.encode("utf-8"),
+        msg = "<Function placeholder %s(%s)" % (self.name.encode("utf-8"),
                                                   args)
+        if self.namespace_parts:
+            ns = self._namespace_to_ascii()
+            msg = '%s at namespace="%s"' % (msg, ns)
+        return msg + ">"
 
