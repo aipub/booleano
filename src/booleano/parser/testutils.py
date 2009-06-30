@@ -32,6 +32,8 @@ Utilities to test Booleano grammars.
 from nose.tools import eq_, ok_, raises
 from pyparsing import ParseException
 
+from booleano.parser.generic import EvaluableParser, ConvertibleParser
+
 __all__ = ["BaseParseTest"]
 
 
@@ -46,6 +48,10 @@ class BaseParseTest(object):
     
         An instance of the grammar to be tested.
     
+    .. attribute:: namespace
+    
+        An instance of the namespace to be used.
+    
     .. attribute:: expressions
     
         A dictionary with all the valid expressions recognized by the grammar,
@@ -54,57 +60,84 @@ class BaseParseTest(object):
     
     """
     
+    def __init__(self, *args, **kwargs):
+        super(BaseParseTest, self).__init__(*args, **kwargs)
+        self.evaluable_parser = EvaluableParser(self.grammar, self.namespace)
+        self.convertible_parser = ConvertibleParser(self.grammar,
+                                                    self.namespace)
+        # Because the grammar in both parsers is the exact same thing (the
+        # only thing that changes are a couple of parse actions), we're going
+        # to select one of them to represent the parsers when the post-parse
+        # actions are not relevant -- I've selected the evaluable one
+        # arbitrarily:
+        self.parser = self.evaluable_parser
+    
     def test_infinitely_recursive_constructs(self):
         """
-        There must not exist infinitely recursive constructs in the grammar.
+        There must not exist infinitely recursive constructs in the grammar
+        built by the parser.
         
         """
-        self.grammar.define_string().validate()
-        self.grammar.define_number().validate()
-        self.grammar.define_name().validate()
-        # Validating all the operands together, including sets:
-        self.grammar.define_operand(True).validate()
-        self.grammar.define_operand(False).validate()
+        # Building the parser:
+        self.evaluable_parser.build_parser()
+        self.convertible_parser.build_parser()
         # Finally, validate the whole grammar:
-        self.grammar.evaluable_grammar.validate()
-        self.grammar.convertible_grammar.validate()
+        self.evaluable_parser._parser.validate()
+        self.convertible_parser._parser.validate()
     
-    def test_contant_expressions(self):
+    def test_constant_expressions(self):
         """
-        Contants expressions should be represented the same way in evaluable
+        Constants expressions should be represented the same way in evaluable
         and convertible trees.
         
         """
         for expression, expected_node in self.constant_expressions.items():
-            yield (check_expression, self.grammar.parse_evaluable, expression,
+            yield (check_expression, self.evaluable_parser, expression,
                    expected_node)
-            yield (check_expression, self.grammar.parse_convertible, expression,
+            yield (check_expression, self.convertible_parser, expression,
                    expected_node)
     
     def test_constant_operands(self):
-        operand_parser = self.grammar.define_operand().parseString
-        for expression, expected_node in self.constant_operands.items():
-            yield (check_operand, operand_parser, expression,
-                   expected_node)
+        """
+        Valid operands must be parsed successfully.
+        
+        """
+        operand_parser = self.parser.define_operand().parseString
+        for expression, expected_operand in self.constant_operands.items():
+            
+            # Making a Nose test generator:
+            def check():
+                node = operand_parser(expression, parseAll=True)
+                eq_(1, len(node))
+                expected_operand.check_equivalence(node[0])
+            check.description = ('"%s" is a valid operand' % expression)
+            
+            yield check
     
     def test_invalid_operands(self):
-        operand_parser = self.grammar.define_operand().parseString
+        """
+        Expressions representing invalid operands must not yield a parse tree.
+        
+        """
+        operand_parser = self.parser.define_operand().parseString
         for expression in self.invalid_operands:
-            yield (check_invalid_operand, operand_parser, expression)
+            
+            # Making a Nose test generator:
+            @raises(ParseException)
+            def check():
+                operand_parser(expression, parseAll=True)
+            check.description = ('"%s" does NOT represent an operand' %
+                                 expression)
+            
+            yield check
 
 
 def check_expression(parser, expression, expected_node):
+    """
+    Check that the parse tree of ``expression`` with ``parser``, equals
+    ``expected_node``.
+    
+    """
     tree = parser(expression)
     expected_node.check_equivalence(tree.root_node)
-
-
-def check_operand(parser, expression, expected_node):
-    node = parser(expression, parseAll=True)
-    eq_(1, len(node))
-    expected_node.check_equivalence(node[0])
-
-
-@raises(ParseException)
-def check_invalid_operand(parser, expression):
-    parser(expression, parseAll=True)
 

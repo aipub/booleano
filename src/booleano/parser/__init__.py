@@ -26,6 +26,37 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Parser for boolean expressions.
+Parser of boolean expressions.
 
 """
+
+__all__ = ("ParseManager", "Bind", "SymbolTable")
+
+
+# TODO: Get a better name for this.
+class ParseManager(object):
+    
+    def __init__(self,
+                 symbol_table,
+                 generic_grammar,
+                 tree_type="evaluable",
+                 cache_limit=-1,
+                 **localized_grammars):
+        self.cache_limit = cache_limit
+        prepared_parsers = {}
+        for (locale, grammar) in grammar:
+            parser.set_namespace(symbol_table.get_namespace(locale))
+            prepared_parsers[locale] = parser
+    
+    def get_parser(self, locale):
+        raise NotImplementedError()
+    
+    def parse_evaluable(self, expression, locale, helpers):
+        raise NotImplementedError
+    
+    def parse_convertible(self, expression, locale):
+        raise NotImplementedError
+
+
+# Importing the objects to be available from this namespace:
+from booleano.parser.scope import Bind, SymbolTable

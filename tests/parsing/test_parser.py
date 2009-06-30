@@ -26,11 +26,12 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Test suite for the generic grammar.
+Test suite for the built-in parser implementation.
 
 """
 
-from booleano.parser.syntaxes import GenericGrammar
+from booleano.parser.generic import Grammar
+from booleano.parser.scope import Namespace
 from booleano.parser.testutils import BaseParseTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
@@ -43,7 +44,16 @@ class TestParsing(BaseParseTest):
     Tests for the parser of the generic grammar.
     
     """
-    grammar = GenericGrammar()
+    grammar = Grammar()
+    
+    namespace = Namespace(
+        # Global objects:
+        {
+            
+        },
+        # Sub-namespaces
+        {}
+    )
     
     # Expressions that don't contain variables or functions:
     constant_expressions = {
