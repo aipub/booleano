@@ -284,6 +284,7 @@ class BaseConverter(object):
         :type name: basestring
         
         """
+        # TODO: Accept namespaces!
         raise NotImplementedError
     
     def convert_function(self, name, *arguments):
@@ -297,6 +298,7 @@ class BaseConverter(object):
         The arguments will be received converted.
         
         """
+        # TODO: Accept namespaces!
         raise NotImplementedError
     
     #}
