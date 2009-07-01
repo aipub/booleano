@@ -52,8 +52,8 @@ class TestBaseConverter(object):
         assert_raises(NotImplementedError, conv.convert_string, None)
         assert_raises(NotImplementedError, conv.convert_number, None)
         assert_raises(NotImplementedError, conv.convert_set, None)
-        assert_raises(NotImplementedError, conv.convert_variable, None)
-        assert_raises(NotImplementedError, conv.convert_function, None)
+        assert_raises(NotImplementedError, conv.convert_variable, None, ())
+        assert_raises(NotImplementedError, conv.convert_function, None, ())
         assert_raises(NotImplementedError, conv.convert_truth, None)
         assert_raises(NotImplementedError, conv.convert_not, None)
         assert_raises(NotImplementedError, conv.convert_and, None, None)
@@ -170,9 +170,10 @@ class TestActualConverter(object):
             
             # Let's use a Nose test generator:
             def check():
-                conversion = anti_converter(parse_tree)
+                conversion = ANTI_CONVERTER(parse_tree)
                 eq_(parse_tree, conversion,
-                    'Parse tree %s changed to %s' % (repr(parse_tree), repr(conversion)))
+                    'Parse tree %s changed to %s' % (repr(parse_tree),
+                                                     repr(conversion)))
             check.description = ("Parse tree %s shouldn't change" %
                                  repr(parse_tree))
             
@@ -181,16 +182,13 @@ class TestActualConverter(object):
     @raises(ConversionError)
     def test_converting_non_node(self):
         """Only nodes are tried to be converted."""
-        anti_converter(12345)
+        ANTI_CONVERTER(12345)
 
 
 #{ Test utilities
 
 
-anti_converter = AntiConverter()
-
-
-
+ANTI_CONVERTER = AntiConverter()
 
 
 #}

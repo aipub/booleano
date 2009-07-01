@@ -33,7 +33,6 @@ from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
     String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
 from booleano.operations.operators import UnaryOperator
-from booleano.operations.operands.constants import Constant
 from booleano.exc import ConversionError
 
 __all__ = ("BaseConverter", )
@@ -97,7 +96,7 @@ class BaseConverter(object):
         
         if node.is_leaf():
             if isinstance(node, VariablePlaceholder):
-                return convert(node.name)
+                return convert(node.name, node.namespace_parts)
             # It's a string or a number
             return convert(node.constant_value)
         
@@ -108,7 +107,7 @@ class BaseConverter(object):
         
         if isinstance(node, FunctionPlaceholder):
             arguments = [self.convert(arg) for arg in node.arguments]
-            return convert(node.name, *arguments)
+            return convert(node.name, node.namespace_parts, *arguments)
         
         # At this point, node must be an operator.
         
@@ -264,41 +263,60 @@ class BaseConverter(object):
     
     #{ Operand converters
     
-    def convert_string(self, operand):
-        """Convert the constant string ``operand``."""
+    def convert_string(self, text):
+        """
+        Convert the literal string ``text``.
+        
+        :param text: The contents of the literal string.
+        :type text: basestring
+        
+        """
         raise NotImplementedError
     
-    def convert_number(self, operand):
-        """Convert the constant number ``operand``."""
+    def convert_number(self, number):
+        """
+        Convert the literal number ``number``.
+        
+        :param number: The literal number.
+        :type number: float
+        
+        """
         raise NotImplementedError
     
-    def convert_set(self, *operands):
-        """Convert the set ``operand``."""
+    def convert_set(self, *elements):
+        """
+        Convert the literal set with the ``elements``.
+        
+        """
         raise NotImplementedError
     
-    def convert_variable(self, name):
+    def convert_variable(self, name, namespace_parts):
         """
         Convert the variable called ``name``.
         
         :param name: The name of the variable.
         :type name: basestring
+        :param namespace_parts: The namespace of the variable (if any),
+            represented by the identifiers that make it up.
+        :type namespace_parts: list
         
         """
-        # TODO: Accept namespaces!
         raise NotImplementedError
     
-    def convert_function(self, name, *arguments):
+    def convert_function(self, name, namespace_parts, *arguments):
         """
         Convert the function call to ``name`` using the additional positional
         arguments as the arguments of the call.
         
         :param name: The name of the function being called.
         :type name: basestring
+        :param namespace_parts: The namespace of the function (if any),
+            represented by the identifiers that make it up.
+        :type namespace_parts: list
         
         The arguments will be received converted.
         
         """
-        # TODO: Accept namespaces!
         raise NotImplementedError
     
     #}

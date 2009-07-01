@@ -253,7 +253,8 @@ class LoggingHandlerFixture(object):
 
 class AntiConverter(BaseConverter):
     """
-    A parse tree converter that returns the original parse tree.
+    A parse tree converter that returns the original parse tree, ignoring the
+    namespaces in the constants.
     
     This is the simplest way to check the converter.
     
@@ -298,20 +299,20 @@ class AntiConverter(BaseConverter):
     def convert_is_subset(self, master_operand, slave_operand):
         return IsSubset(slave_operand, master_operand)
     
-    def convert_string(self, operand):
-        return String(operand)
+    def convert_string(self, text):
+        return String(text)
     
-    def convert_number(self, operand):
-        return Number(operand)
+    def convert_number(self, number):
+        return Number(number)
     
-    def convert_set(self, *operands):
-        return Set(*operands)
+    def convert_set(self, *elements):
+        return Set(*elements)
     
-    def convert_variable(self, name):
-        return VariablePlaceholder(name, None)
+    def convert_variable(self, name, namespace_parts):
+        return VariablePlaceholder(name, namespace_parts)
     
-    def convert_function(self, name, *arguments):
-        return FunctionPlaceholder(name, None, *arguments)
+    def convert_function(self, name, namespace_parts, *arguments):
+        return FunctionPlaceholder(name, namespace_parts, *arguments)
 
 
 #}
