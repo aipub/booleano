@@ -309,12 +309,12 @@ class TestVariable(object):
     def test_string_representation(self):
         var = TrafficLightVar()
         as_unicode = unicode(var)
-        eq_("Unbound variable TrafficLightVar", as_unicode)
+        eq_("Anonymous variable [TrafficLightVar]", as_unicode)
         eq_(str(var), as_unicode)
     
     def test_representation(self):
         var = TrafficLightVar()
-        eq_(repr(var), '<Unbound variable TrafficLightVar at %s>' % id(var))
+        eq_(repr(var), "<Anonymous variable [TrafficLightVar]>")
 
 
 class TestFunction(object):
@@ -532,16 +532,16 @@ class TestFunction(object):
     
     def test_string_representation(self):
         func = PermissiveFunction(String("foo"), String(u"bár"))
-        expected = u'Unbound function PermissiveFunction(arg0="foo", ' \
-                   u'oarg0="bár", oarg1=1.0)'
+        expected = (u'Anonymous function call [PermissiveFunction](arg0="foo", '
+                    u'oarg0="bár", oarg1=1.0)')
         eq_(unicode(func), expected)
         eq_(str(func), expected.encode("utf-8"))
     
     def test_representation(self):
         func = PermissiveFunction(String("foo"), String(u"báz"))
-        expected = '<Unbound function PermissiveFunction' \
-                   '(arg0=<String "foo">, oarg0=<String "báz">, ' \
-                   'oarg1=<Number 1.0>) at %s>' % id(func)
+        expected = '<Anonymous function call [PermissiveFunction] ' \
+                   'arg0=<String "foo">, oarg0=<String "báz">, ' \
+                   'oarg1=<Number 1.0>>'
         eq_(repr(func), expected)
 
 
@@ -998,30 +998,30 @@ class TestVariablePlaceholder(object):
     
     def test_string_representation_without_namespace(self):
         var = VariablePlaceholder(u"aquí", None)
-        eq_(unicode(var), u"Variable placeholder aquí")
-        eq_(str(var), "Variable placeholder aquí")
+        eq_(unicode(var), u'Placeholder variable "aquí"')
+        eq_(str(var), 'Placeholder variable "aquí"')
     
     def test_string_representation_with_namespace(self):
         var = VariablePlaceholder(u"aquí", ["some", "thing"])
-        eq_(unicode(var), u"Variable placeholder aquí at some:thing")
-        eq_(str(var), "Variable placeholder aquí at some:thing")
+        eq_(unicode(var), u'Placeholder variable "aquí" at some:thing')
+        eq_(str(var), 'Placeholder variable "aquí" at some:thing')
     
     def test_representation_without_namespace(self):
         # With Unicode
         var = VariablePlaceholder(u"aquí", None)
-        eq_(repr(var), '<Variable placeholder "aquí">')
+        eq_(repr(var), '<Placeholder variable "aquí">')
         # With ASCII
         var = VariablePlaceholder("here", None)
-        eq_(repr(var), '<Variable placeholder "here">')
+        eq_(repr(var), '<Placeholder variable "here">')
     
     def test_representation_with_namespace(self):
         # With Unicode
         var = VariablePlaceholder(u"aquí", ["some", "thing"])
-        eq_('<Variable placeholder "aquí" at namespace="some:thing">',
+        eq_('<Placeholder variable "aquí" at namespace="some:thing">',
             repr(var))
         # With ASCII
         var = VariablePlaceholder("here", ["some", "thing"])
-        eq_('<Variable placeholder "here" at namespace="some:thing">',
+        eq_('<Placeholder variable "here" at namespace="some:thing">',
             repr(var))
 
 
@@ -1217,33 +1217,33 @@ class TestFunctionPlaceholder(object):
     
     def test_string_representation_without_namespace(self):
         func = FunctionPlaceholder(u"aquí", None, Number(1), Number(2))
-        eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0)")
-        eq_(str(func), "Function placeholder aquí(1.0, 2.0)")
+        eq_(unicode(func), u'Placeholder function call "aquí"(1.0, 2.0)')
+        eq_(str(func), 'Placeholder function call "aquí"(1.0, 2.0)')
     
     def test_string_representation_with_namespace(self):
         func = FunctionPlaceholder(u"aquí", ["a", "z"], Number(1), Number(2))
-        eq_(unicode(func), u"Function placeholder aquí(1.0, 2.0) at a:z")
-        eq_(str(func), "Function placeholder aquí(1.0, 2.0) at a:z")
+        eq_(unicode(func), u'Placeholder function call "aquí"(1.0, 2.0) at a:z')
+        eq_(str(func), 'Placeholder function call "aquí"(1.0, 2.0) at a:z')
     
     def test_representation_without_namespace(self):
         # With Unicode:
         func = FunctionPlaceholder(u"aquí", None, Number(1), String("hi"))
-        eq_('<Function placeholder aquí(<Number 1.0>, <String "hi">)>',
+        eq_('<Placeholder function call "aquí"(<Number 1.0>, <String "hi">)>',
             repr(func))
         # With ASCII:
         func = FunctionPlaceholder("here", None, Number(1), String("hi"))
-        eq_(u'<Function placeholder here(<Number 1.0>, <String "hi">)>',
+        eq_(u'<Placeholder function call "here"(<Number 1.0>, <String "hi">)>',
             repr(func))
     
     def test_representation_with_namespace(self):
         # With Unicode:
         func = FunctionPlaceholder(u"aquí", ["a", "d"], Number(1), String("hi"))
-        eq_('<Function placeholder aquí(<Number 1.0>, <String "hi">) ' \
+        eq_('<Placeholder function call "aquí"(<Number 1.0>, <String "hi">) ' \
             'at namespace="a:d">',
             repr(func))
         # With ASCII:
         func = FunctionPlaceholder("here", ["a", "d"], Number(1), String("hi"))
-        eq_(u'<Function placeholder here(<Number 1.0>, <String "hi">) ' \
+        eq_(u'<Placeholder function call "here"(<Number 1.0>, <String "hi">) ' \
             'at namespace="a:d">',
             repr(func))
 

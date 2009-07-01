@@ -111,13 +111,12 @@ class TestTruth(object):
     def test_string_representation(self):
         op = Truth(BoolVar())
         as_unicode = unicode(op)
-        eq_(as_unicode, "Truth(Unbound variable BoolVar)")
+        eq_(as_unicode, "Truth(Anonymous variable [BoolVar])")
         eq_(as_unicode, str(op))
     
     def test_representation(self):
-        op0 = BoolVar()
-        op = Truth(op0)
-        eq_(repr(op), '<Truth <Unbound variable BoolVar at %s>>' % id(op0))
+        op = Truth(BoolVar())
+        eq_(repr(op), '<Truth <Anonymous variable [BoolVar]>>')
 
 
 class TestNot(object):
@@ -176,24 +175,20 @@ class TestNot(object):
         op2 = Not(And(BoolVar(), BoolVar()))
         as_unicode1 = unicode(op1)
         as_unicode2 = unicode(op2)
-        eq_(as_unicode1, "Not(Unbound variable BoolVar)")
+        eq_(as_unicode1, "Not(Anonymous variable [BoolVar])")
         eq_(as_unicode1, str(op1))
-        eq_(as_unicode2,
-            "Not(And(Unbound variable BoolVar, Unbound variable BoolVar))")
+        eq_(as_unicode2, "Not(And(Anonymous variable [BoolVar], " \
+                         "Anonymous variable [BoolVar]))")
         eq_(as_unicode2, str(op2))
     
     def test_representation(self):
         # With an operand:
-        op0 = BoolVar()
-        op = Not(op0)
-        eq_(repr(op), '<Not <Unbound variable BoolVar at %s>>' % id(op0))
+        op = Not(BoolVar())
+        eq_(repr(op), '<Not <Anonymous variable [BoolVar]>>')
         # With an operation:
-        op1 = BoolVar()
-        op2 = BoolVar()
-        op = Not(And(op1, op2))
-        expected = "<Not <And <Unbound variable BoolVar at %s> " \
-                             "<Unbound variable BoolVar at %s>>>" % (id(op1),
-                                                                     id(op2))
+        op = Not(And(BoolVar(), BoolVar()))
+        expected = "<Not <And <Anonymous variable [BoolVar]> " \
+                             "<Anonymous variable [BoolVar]>>>"
         eq_(repr(op), expected)
 
 
@@ -264,28 +259,25 @@ class TestAnd(object):
     def test_string_representation(self):
         op = And(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_("And(Unbound variable BoolVar, Unbound variable BoolVar)",
+        eq_("And(Anonymous variable [BoolVar], Anonymous variable [BoolVar])",
             as_unicode)
         eq_(as_unicode, str(op))
         
         # Now with operators as operands:
         op = And(Not(BoolVar()), Not(BoolVar()))
-        eq_("And(Not(Unbound variable BoolVar), Not(Unbound variable BoolVar))",
+        eq_("And(Not(Anonymous variable [BoolVar]), Not(Anonymous variable [BoolVar]))",
             unicode(op))
     
     def test_representation(self):
-        op1 = BoolVar()
-        op2 = BoolVar()
-        op = And(op1, op2)
-        expected = "<And <Unbound variable BoolVar at %s> " \
-                        "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        op = And(BoolVar(), BoolVar())
+        expected = "<And <Anonymous variable [BoolVar]> " \
+                        "<Anonymous variable [BoolVar]>>"
         eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = And(Not(op1), Not(op2))
-        expected = "<And <Not <Unbound variable BoolVar at %s>> " \
-                        "<Not <Unbound variable BoolVar at %s>>>" % (id(op1),
-                                                                     id(op2))
+        op = And(Not(BoolVar()), Not(BoolVar()))
+        expected = "<And <Not <Anonymous variable [BoolVar]>> " \
+                        "<Not <Anonymous variable [BoolVar]>>>"
         eq_(repr(op), expected)
 
 
@@ -360,29 +352,27 @@ class TestOr(object):
     def test_string_representation(self):
         op = Or(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        expected = "Or(Unbound variable BoolVar, Unbound variable BoolVar)"
+        expected = "Or(Anonymous variable [BoolVar], " \
+                   "Anonymous variable [BoolVar])"
         eq_(as_unicode, expected)
         eq_(as_unicode, str(op))
         
         # Now with operators as operands:
         op = Or(Not(BoolVar()), Not(BoolVar()))
-        expected = "Or(Not(Unbound variable BoolVar), " \
-                      "Not(Unbound variable BoolVar))"
+        expected = "Or(Not(Anonymous variable [BoolVar]), " \
+                      "Not(Anonymous variable [BoolVar]))"
         eq_(unicode(op), expected)
     
     def test_representation(self):
-        op1 = BoolVar()
-        op2 = BoolVar()
-        op = Or(op1, op2)
-        expected = "<Or <Unbound variable BoolVar at %s> " \
-                       "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        op = Or(BoolVar(), BoolVar())
+        expected = "<Or <Anonymous variable [BoolVar]> " \
+                       "<Anonymous variable [BoolVar]>>"
         eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = Or(Not(op1), Not(op2))
-        expected = "<Or <Not <Unbound variable BoolVar at %s>> " \
-                       "<Not <Unbound variable BoolVar at %s>>>" % (id(op1),
-                                                                    id(op2))
+        op = Or(Not(BoolVar()), Not(BoolVar()))
+        expected = "<Or <Not <Anonymous variable [BoolVar]>> " \
+                       "<Not <Anonymous variable [BoolVar]>>>"
         eq_(repr(op), expected)
 
 
@@ -445,27 +435,26 @@ class TestXor(object):
     def test_string_representation(self):
         op = Xor(BoolVar(), BoolVar())
         as_unicode = unicode(op)
-        eq_("Xor(Unbound variable BoolVar, Unbound variable BoolVar)",
+        eq_("Xor(Anonymous variable [BoolVar], Anonymous variable [BoolVar])",
             as_unicode)
         eq_(as_unicode, str(op))
         
         # Now with an operators as operands:
         op = Xor(Not(BoolVar()), Not(BoolVar()))
-        eq_("Xor(Not(Unbound variable BoolVar), Not(Unbound variable BoolVar))",
+        eq_("Xor(Not(Anonymous variable [BoolVar]), " \
+            "Not(Anonymous variable [BoolVar]))",
             unicode(op))
     
     def test_representation(self):
-        op1 = BoolVar()
-        op2 = BoolVar()
-        op = Xor(op1, op2)
-        expected = "<Xor <Unbound variable BoolVar at %s> " \
-                   "<Unbound variable BoolVar at %s>>" % (id(op1), id(op2))
+        op = Xor(BoolVar(), BoolVar())
+        expected = "<Xor <Anonymous variable [BoolVar]> " \
+                   "<Anonymous variable [BoolVar]>>"
         eq_(repr(op), expected)
         
         # Now with operators as operands:
-        op = Xor(Not(op1), Not(op2))
-        expected = "<Xor <Not <Unbound variable BoolVar at %s>> "\
-                   "<Not <Unbound variable BoolVar at %s>>>" % (id(op1), id(op2))
+        op = Xor(Not(BoolVar()), Not(BoolVar()))
+        expected = "<Xor <Not <Anonymous variable [BoolVar]>> "\
+                   "<Not <Anonymous variable [BoolVar]>>>"
         eq_(repr(op), expected)
 
 
@@ -546,14 +535,14 @@ class TestNonConnectiveBinaryOperators(object):
     
     def test_string_representation(self):
         op = Equal(String(u"¿qué hora es?"), BoolVar())
-        eq_(unicode(op), u'Equal(Unbound variable BoolVar, "¿qué hora es?")')
-        eq_(str(op), 'Equal(Unbound variable BoolVar, "¿qué hora es?")')
+        eq_(u'Equal(Anonymous variable [BoolVar], "¿qué hora es?")',
+            unicode(op))
+        eq_(str(op), 'Equal(Anonymous variable [BoolVar], "¿qué hora es?")')
     
     def test_representation(self):
-        var = BoolVar()
-        op = Equal(String(u"¿qué hora es?"), var)
-        expected = '<Equal <Unbound variable BoolVar at %s> ' \
-                          '<String "¿qué hora es?">>' % id(var)
+        op = Equal(String(u"¿qué hora es?"), BoolVar())
+        expected = '<Equal <Anonymous variable [BoolVar]> ' \
+                          '<String "¿qué hora es?">>'
         eq_(repr(op), expected)
 
 
@@ -1007,4 +996,3 @@ class NumVar(Variable):
 
 
 #}
-

@@ -121,7 +121,7 @@ class VariablePlaceholder(PlaceholderOperand):
     
     def __unicode__(self):
         """Return the Unicode representation for this variable placeholder."""
-        msg = "Variable placeholder %s" % self.name
+        msg = 'Placeholder variable "%s"' % self.name
         if self.namespace_parts:
             ns = self._namespace_to_unicode()
             msg = "%s at %s" % (msg, ns)
@@ -129,7 +129,7 @@ class VariablePlaceholder(PlaceholderOperand):
     
     def __repr__(self):
         """Return the representation for this variable placeholder."""
-        msg = '<Variable placeholder "%s"' % self.name.encode("utf-8")
+        msg = '<Placeholder variable "%s"' % self.name.encode("utf-8")
         if self.namespace_parts:
             ns = self._namespace_to_ascii()
             msg = '%s at namespace="%s"' % (msg, ns)
@@ -189,7 +189,7 @@ class FunctionPlaceholder(PlaceholderOperand):
         """Return the Unicode representation for this function placeholder."""
         args = [unicode(arg) for arg in self.arguments]
         args = ", ".join(args)
-        msg = "Function placeholder %s(%s)" % (self.name, args)
+        msg = 'Placeholder function call "%s"(%s)' % (self.name, args)
         if self.namespace_parts:
             ns = self._namespace_to_unicode()
             msg = "%s at %s" % (msg, ns)
@@ -199,8 +199,8 @@ class FunctionPlaceholder(PlaceholderOperand):
         """Return the representation for this function placeholder."""
         args = [repr(arg) for arg in self.arguments]
         args = ", ".join(args)
-        msg = "<Function placeholder %s(%s)" % (self.name.encode("utf-8"),
-                                                  args)
+        func_name = self.name.encode("utf-8")
+        msg = '<Placeholder function call "%s"(%s)' % (func_name, args)
         if self.namespace_parts:
             ns = self._namespace_to_ascii()
             msg = '%s at namespace="%s"' % (msg, ns)

@@ -76,14 +76,13 @@ class TestEvaluableTrees(object):
     def test_string(self):
         tree = EvaluableParseTree(BoolVar())
         as_unicode = unicode(tree)
-        expected = "Evaluable parse tree (Truth(Unbound variable BoolVar))"
+        expected = "Evaluable parse tree (Truth(Anonymous variable [BoolVar]))"
         eq_(as_unicode, expected)
     
     def test_representation(self):
-        var = BoolVar()
-        tree = EvaluableParseTree(var)
+        tree = EvaluableParseTree(BoolVar())
         expected = "<Parse tree (evaluable) <Truth " \
-                   "<Unbound variable BoolVar at %s>>>" % id(var)
+                   "<Anonymous variable [BoolVar]>>>"
         eq_(repr(tree), expected)
 
 
@@ -101,13 +100,12 @@ class TestConvertibleTrees(object):
     def test_string(self):
         tree = ConvertibleParseTree(BoolVar())
         as_unicode = unicode(tree)
-        expected = "Convertible parse tree (Unbound variable BoolVar)"
+        expected = "Convertible parse tree (Anonymous variable [BoolVar])"
         eq_(as_unicode, expected)
     
     def test_representation(self):
-        var = BoolVar()
-        tree = ConvertibleParseTree(var)
+        tree = ConvertibleParseTree(BoolVar())
         expected = "<Parse tree (convertible) " \
-                   "<Unbound variable BoolVar at %s>>" % id(var)
+                   "<Anonymous variable [BoolVar]>>"
         eq_(repr(tree), expected)
 

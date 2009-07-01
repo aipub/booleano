@@ -57,20 +57,6 @@ class Class(Operand):
     
     # Only actual classes should be checked.
     bypass_operation_check = True
-    
-    def to_string(self, global_name=None, namespace=None):
-        raise NotImplementedError()
-    
-    def to_repr(self, global_name=None, names={}, namespace=None):
-        raise NotImplementedError()
-    
-    def __unicode__(self):
-        """Return the Unicode representation of this class."""
-        return self.to_string()
-    
-    def __repr__(self):
-        """Represent this class, including its translations."""
-        return self.to_repr()
 
 
 class Variable(Class):
@@ -82,28 +68,13 @@ class Variable(Class):
     # Only actual variables should be checked.
     bypass_operation_check = True
     
-    def to_string(self, global_name=None, namespace=None):
+    def __unicode__(self):
         """Return the Unicode representation of this variable."""
-        if not global_name:
-            return "Unbound variable %s" % self.__class__.__name__
-        name = global_name
-        if namespace:
-            namespace = u":".join(namespace)
-            name = name + " (in %s)" % namespace
-        return u"Variable %s" % name
+        return 'Anonymous variable [%s]' % self.__class__.__name__
     
-    def to_repr(self, global_name=None, names={}, namespace=None):
-        """Represent this variable, including its translations."""
-        if not global_name:
-            return "<Unbound variable %s at %s>" % (self.__class__.__name__,
-                                                    id(self))
-        names = ['%s="%s"' % (locale, name.encode("utf-8")) for (locale, name)
-                 in names.items()]
-        names.insert(0, self.global_name.encode("utf-8"))
-        names = " ".join(names)
-        if namespace:
-            names = names + " (in %s)" % namespace
-        return "<Variable %s>" % names
+    def __repr__(self):
+        """Represent this variable."""
+        return "<Anonymous variable [%s]>" % self.__class__.__name__
 
 
 class _FunctionMeta(_OperandMeta):
@@ -147,11 +118,14 @@ class _FunctionMeta(_OperandMeta):
 
 class Function(Class):
     """
-    Base class for developer-defined, n-ary functions.
+    Base class for **calls** of developer-defined, n-ary functions.
+    
+    Instances of this Python class represent calls of the function, not the
+    function itself.
     
     A Booleano function is a `factory object
-    <http://en.wikipedia.org/wiki/Factory_object>`_ because it always returns
-    a Booleano operand.
+    <http://en.wikipedia.org/wiki/Factory_object>`_ because its evaluation
+    returns a Booleano operand.
     
     Subclasses must override :meth:`check_arguments` to verify the validity of
     the arguments, or to do nothing if it's not necessary.
@@ -280,37 +254,21 @@ class Function(Class):
                "Functions %s and %s were called with different arguments" % \
                (node, self)
     
-    def to_string(self, global_name=None, namespace=None):
+    def __unicode__(self):
         """Return the Unicode representation of this function."""
         args = [u'%s=%s' % (k, v) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
         
-        if not global_name:
-            return "Unbound function %s(%s)" % (self.__class__.__name__, args)
-        
-        name = global_name
-        if namespace:
-            namespace = u":".join(namespace)
-            name = name + " (in %s)" % namespace
-        return u"Function %s" % name
+        return "Anonymous function call [%s](%s)" % (self.__class__.__name__, args)
     
-    def to_repr(self, global_name=None, names={}, namespace=None):
+    def __repr__(self):
         """
-        Represent this function, including its translations.
+        Represent this function, including its arguments.
         
         """
         args = ['%s=%s' % (k, repr(v)) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
         
-        if not global_name:
-            return "<Unbound function %s(%s) at %s>" % (self.__class__.__name__,
-                                                        args, id(self))
-        
-        names = ['%s="%s"' % (locale, name.encode("utf-8")) for (locale, name)
-                 in names.items()]
-        names.insert(0, self.global_name.encode("utf-8"))
-        names = " ".join(names)
-        if namespace:
-            names = names + " (in %s)" % namespace
-        return "<Function %s>" % names
+        return "<Anonymous function call [%s] %s>" % (self.__class__.__name__,
+                                                      args)
 
