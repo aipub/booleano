@@ -43,7 +43,15 @@ __all__ = ["Variable", "Function"]
 
 class Class(Operand):
     """
-    Base class for Booleano classes.
+    Base class for Booleano's anonymous classes.
+    
+    The classes are anonymous because the have no notion of binding. From the
+    Wikipedia:
+    
+        In most languages, a class is bound to a name or identifier upon
+        definition. However, some languages allow classes to be defined without
+        names. Such a class is called an anonymous class (analogous to named vs.
+        anonymous functions).
     
     """
     
