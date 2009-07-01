@@ -59,6 +59,7 @@ setup(name='booleano',
       author_email="me@gustavonarea.net",
       url="http://code.gustavonarea.net/booleano/",
       license="MIT X License (http://www.opensource.org/licenses/mit-license.php)",
+      namespace_packages = ["booleano"],
       packages=find_packages('src', exclude=['tests']),
       package_dir={'': 'src'},
       package_data={

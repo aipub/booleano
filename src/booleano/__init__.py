@@ -25,17 +25,11 @@
 # Except as contained in this notice, the name(s) of the above copyright
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
-"""
-Evaluation of boolean expressions in natural languages.
 
-"""
-
-class ExpressionsManager(object):
-    
-    def __init__(self, scope, language=None):
-        self.cache = {}
-    
-    def evaluate(self, expression, **helpers):
-        # TODO: Check that all the helpers required by the variables have been
-        # passed!
-        pass
+# Namespace package here! See:
+# http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
+try: #pragma: no cover
+    __import__('pkg_resources').declare_namespace(__name__)
+except ImportError: #pragma: no cover
+    from pkgutil import extend_path
+    __path__ = extend_path(__path__, __name__)
