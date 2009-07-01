@@ -64,22 +64,22 @@ class BaseConverter(object):
         FunctionPlaceholder: "convert_function",
     }
     
-    def __call__(self, parse_tree):
+    def __call__(self, root_node):
         """
-        Convert ``parse_tree``.
+        Convert ``root_node``.
         
-        :param parse_tree: The parse tree to be converted.
-        :type parse_tree: OperationNode
-        :return: The parse tree converted.
-        :raises ConversionError: If the type of ``parse_tree`` is unknown.
+        :param root_node: The root of the tree to be converted.
+        :type root_node: OperationNode
+        :return: The tree converted.
+        :raises ConversionError: If the type of ``root_node`` is unknown.
         
         If ``node`` is a branch, its children will be converted first.
         
         """
-        parse_tree_type = parse_tree.__class__
-        if parse_tree_type not in self.converters:
-            raise ConversionError("Unknown tree type: %s" % parse_tree_type)
-        return self.convert(parse_tree)
+        root_node_type = root_node.__class__
+        if root_node_type not in self.converters:
+            raise ConversionError("Unknown tree node type: %s" % root_node_type)
+        return self.convert(root_node)
     
     def convert(self, node):
         """
