@@ -51,7 +51,7 @@ class ParseTree(object):
         Instantiate a parse tree whose root node is ``root_node``.
         
         :param root_node: The root node of the parse tree.
-        :type root_node: ParseTreeNode
+        :type root_node: OperationNode
         
         """
         self.root_node = root_node

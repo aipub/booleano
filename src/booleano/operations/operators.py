@@ -30,7 +30,7 @@ Built-in operators.
 
 """
 
-from booleano.operations import OPERATIONS, ParseTreeNode
+from booleano.operations import OPERATIONS, OperationNode
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError
 
@@ -38,7 +38,7 @@ __all__ = ("Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
     "GreaterThan", "LessEqual", "GreaterEqual", "Contains", "IsSubset", )
 
 
-class Operator(ParseTreeNode):
+class Operator(OperationNode):
     """
     Base class for logical operators.
     

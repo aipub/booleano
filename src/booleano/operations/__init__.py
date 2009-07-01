@@ -54,10 +54,12 @@ OPERATIONS = set((
 ))
 
 
-class ParseTreeNode(object):
+class OperationNode(object):
     """
-    Base class for the individual elements available in parse trees (i.e.,
-    operands and operations).
+    Base class for the individual elements available in a boolean operation
+    (i.e., operands and operations).
+    
+    It can also be seen as the base class for each node in the parse trees.
     
     """
     
@@ -113,7 +115,7 @@ class ParseTreeNode(object):
         Make sure ``node`` and this node are equivalent.
         
         :param node: The other node which may be equivalent to this one.
-        :type node: ParseTreeNode
+        :type node: OperationNode
         :raises AssertionError: If both nodes have different classes.
         
         Operands and operations must extend this method to check for other

@@ -69,7 +69,7 @@ class BaseConverter(object):
         Convert ``parse_tree``.
         
         :param parse_tree: The parse tree to be converted.
-        :type parse_tree: ParseTreeNode
+        :type parse_tree: OperationNode
         :return: The parse tree converted.
         :raises ConversionError: If the type of ``parse_tree`` is unknown.
         
@@ -86,7 +86,7 @@ class BaseConverter(object):
         Convert ``node``.
         
         :param node: The node to be converted.
-        :type node: ParseTreeNode
+        :type node: OperationNode
         :return: The node converted.
         
         If ``node`` is a branch, its children will be converted first.

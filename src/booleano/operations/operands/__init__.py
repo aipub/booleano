@@ -31,7 +31,7 @@ Booleano operands.
 """
 
 
-from booleano.operations import OPERATIONS, ParseTreeNode
+from booleano.operations import OPERATIONS, OperationNode
 from booleano.exc import InvalidOperationError, BadOperandError
 
 __all__ = ("String", "Number", "Set", "Variable", "Function",
@@ -106,7 +106,7 @@ class _OperandMeta(type):
         return getattr(method, "implemented", True)
 
 
-class Operand(ParseTreeNode):
+class Operand(OperationNode):
     """
     Base class for *unbound* operands.
     
