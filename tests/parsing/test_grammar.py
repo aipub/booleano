@@ -32,7 +32,7 @@ Test suite for the grammar configurations.
 
 from nose.tools import eq_, ok_, assert_raises
 
-from booleano.parser.generic import Grammar
+from booleano.parser import Grammar
 from booleano.exc import GrammarError
 
 

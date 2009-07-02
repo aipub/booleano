@@ -32,7 +32,7 @@ Utilities to test Booleano grammars and parsers.
 from nose.tools import eq_, ok_, raises
 from pyparsing import ParseException
 
-from booleano.parser.generic import Parser, EvaluableParser, ConvertibleParser
+from booleano.parser.parsers import Parser, EvaluableParser, ConvertibleParser
 
 __all__ = ("BaseGrammarTest", )
 

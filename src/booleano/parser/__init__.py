@@ -30,7 +30,8 @@ Parser of boolean expressions.
 
 """
 
-__all__ = ("ParseManager", "Bind", "SymbolTable")
+__all__ = ("ParseManager", "EvaluableParser", "ConvertibleParser", "Grammar",
+           "Bind", "SymbolTable")
 
 
 # TODO: Get a better name for this.
@@ -60,3 +61,5 @@ class ParseManager(object):
 
 # Importing the objects to be available from this namespace:
 from booleano.parser.scope import Bind, SymbolTable
+from booleano.parser.parsers import EvaluableParser, ConvertibleParser
+from booleano.parser.grammar import Grammar

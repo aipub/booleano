@@ -30,7 +30,7 @@ Test suite for the built-in parser implementation.
 
 """
 
-from booleano.parser.generic import Grammar
+from booleano.parser import Grammar
 from booleano.parser.scope import Namespace
 from booleano.parser.testutils import BaseGrammarTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
