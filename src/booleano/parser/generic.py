@@ -44,7 +44,7 @@ from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
-from booleano.exc import BadGrammarError, BadExpressionError
+from booleano.exc import GrammarError, BadExpressionError
 
 
 __all__ = ("Grammar", "EvaluableParser", "ConvertibleParser")
@@ -88,22 +88,18 @@ class Grammar(object):
         'arguments_start': "(",
         'arguments_end': ")",
         'arguments_separator': ",",
-        # Signed numbers:
+        # Numeric-related tokens:
         'positive_sign': "+",
         'negative_sign': "-",
+        'decimal_separator': ".",
+        'thousands_separator': ",",
         # Miscellaneous tokens:
         'identifier_spacing': "_",
         'namespace_separator': ":",
-        'decimal_separator': ".",
-        'thousands_separator': ",",
     }
     
     default_settings = {
-        # Grammar part generators:
-        'operation_definition': None,
-        'string_definition': None,
-        'number_definition': None,
-        'variable_definition': None,
+        
     }
     
     known_generators = set([
@@ -114,10 +110,26 @@ class Grammar(object):
         "variable",
     ])
     
-    def __init__(self, custom_settings=(), **custom_tokens):
-        self._custom_tokens = {}
+    def __init__(self, settings=None, generators=None, **tokens):
+        """
+        Set up a grammar, possibly customizing its properties.
+        
+        :param custom_settings: The grammar's settings to be overridden, if any.
+        :type custom_settings: dict
+        :param custom_generators: The custom generators for the parser to be
+            generated, if any.
+        :type custom_generators: dict
+        
+        Keyword arguments represent the tokens to be overridden.
+        
+        """
         self._custom_settings = {}
-        for (token_name, token) in custom_tokens:
+        self._custom_generators = {}
+        self._custom_tokens = {}
+        # Setting the custom properties:
+        settings = settings or {}
+        generators = generators or {}
+        for (token_name, token) in tokens:
             self.set_token(token_name, token)
     
     #{ Token handling
@@ -130,11 +142,13 @@ class Grammar(object):
         :type token_name: basestring
         :return: The requested token.
         :rtype: basestring
+        :raises GrammarError: If the ``token_name`` is unknown.
         
         If the token doesn't have a custom value, the default value will be
         returned instead.
         
         """
+        self._check_token_existence(token_name)
         return self._custom_tokens.get(token_name,
                                        self.default_tokens[token_name])
     
@@ -146,12 +160,27 @@ class Grammar(object):
         :type token_name: basestring
         :param token: The new value of the token.
         :type token: basestring
-        :raises BadParserError: If ``token_name`` is unknown.
+        :raises GrammarError: If the ``token_name`` is unknown.
+        
+        """
+        self._check_token_existence(token_name)
+        self._custom_tokens[token_name] = token
+    
+    def _check_token_existence(self, token_name):
+        """
+        Check that ``token_name`` is a known token.
+        
+        :param token_name: The token's name.
+        :type token_name: basestring
+        :raises GrammarError: If ``token_name`` is unknown.
         
         """
         if token_name not in self.default_tokens:
-            raise BadParserError('Unknown token name "%s"' % token_name)
-        self._custom_tokens[token_name] = token
+            raise GrammarError('Unknown token "%s"' % token_name)
+    
+    #{ Settings handling
+    
+    
     
     #}
 

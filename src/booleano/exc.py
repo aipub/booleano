@@ -31,7 +31,7 @@ Exceptions raised by :mod:`booleano`.
 """
 
 __all__ = ("InvalidOperationError", "BadCallError", "BadOperandError",
-           "BadFunctionError", "BadGrammarError", "BadExpressionError",
+           "BadFunctionError", "GrammarError", "BadExpressionError",
            "ScopeError", "ConversionError")
 
 
@@ -101,8 +101,12 @@ class ParsingException(BooleanoException):
     pass
 
 
-class BadGrammarError(ParsingException):
-    """Exception raised when a grammar is defined incorrectly."""
+class GrammarError(ParsingException):
+    """
+    Exception raised when a grammar is defined incorrectly, or an attempt is
+    made to use it incorrectly.
+    
+    """
     pass
 
 
