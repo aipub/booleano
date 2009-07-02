@@ -32,14 +32,14 @@ Test suite for the built-in parser implementation.
 
 from booleano.parser.generic import Grammar
 from booleano.parser.scope import Namespace
-from booleano.parser.testutils import BaseParseTest
+from booleano.parser.testutils import BaseExpressionsTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
 
 
-class TestParsing(BaseParseTest):
+class TestParsing(BaseExpressionsTest):
     """
     Tests for the parser of the generic grammar.
     

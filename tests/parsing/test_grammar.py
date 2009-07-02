@@ -33,10 +33,11 @@ Test suite for the grammar configurations.
 from nose.tools import eq_, ok_, assert_raises
 
 from booleano.parser.generic import Grammar
+from booleano.parser.testutils import BaseGrammarTest
 from booleano.exc import GrammarError
 
 
-class TestDefaultGrammar(object):
+class TestDefaultGrammar(BaseGrammarTest):
     """Tests for the grammar with the default properties, at least initially."""
     
     def setUp(self):

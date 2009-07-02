@@ -26,7 +26,7 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Utilities to test Booleano grammars.
+Utilities to test Booleano grammars and parsers.
 
 """
 from nose.tools import eq_, ok_, raises
@@ -34,19 +34,48 @@ from pyparsing import ParseException
 
 from booleano.parser.generic import EvaluableParser, ConvertibleParser
 
-__all__ = ["BaseParseTest"]
+__all__ = ("BaseGrammarTest", "BaseExpressionsTest")
 
 
-class BaseParseTest(object):
+class BaseGrammarTest(object):
     """
-    The base test case for the parser of a grammar.
+    The base test case for the grammars.
+    
+    .. attribute:: grammar
+    
+        An instance of the grammar to be tested. **This attribute must be set
+        in the subclasses**, like this::
+        
+            from booleano.parser.generic import Grammar
+            
+            class TestMyGrammar(BaseGrammarTest):
+            
+                grammar = Grammar(ne="<>")
+    
+    """
+    
+    def test_infinitely_recursive_constructs(self):
+        """The grammar doesn't cause infinitely recursive constructs."""
+        evaluable_parser = EvaluableParser(self.grammar, None)
+        convertible_parser = ConvertibleParser(self.grammar, None)
+        # Building the parser:
+        evaluable_parser.build_parser()
+        convertible_parser.build_parser()
+        # Finally, validate the whole grammar:
+        evaluable_parser._parser.validate()
+        convertible_parser._parser.validate()
+
+
+class BaseExpressionsTest(object):
+    """
+    The base test case for the expressions the parser could handle.
     
     Subclasses must define all the following attributes for the test case to
     work.
     
     .. attribute:: grammar
     
-        An instance of the grammar to be tested.
+        An instance of the grammar to be used.
     
     .. attribute:: namespace
     
@@ -61,7 +90,7 @@ class BaseParseTest(object):
     """
     
     def __init__(self, *args, **kwargs):
-        super(BaseParseTest, self).__init__(*args, **kwargs)
+        super(BaseExpressionsTest, self).__init__(*args, **kwargs)
         self.evaluable_parser = EvaluableParser(self.grammar, self.namespace)
         self.convertible_parser = ConvertibleParser(self.grammar,
                                                     self.namespace)
@@ -71,19 +100,6 @@ class BaseParseTest(object):
         # actions are not relevant -- I've selected the evaluable one
         # arbitrarily:
         self.parser = self.evaluable_parser
-    
-    def test_infinitely_recursive_constructs(self):
-        """
-        There must not exist infinitely recursive constructs in the grammar
-        built by the parser.
-        
-        """
-        # Building the parser:
-        self.evaluable_parser.build_parser()
-        self.convertible_parser.build_parser()
-        # Finally, validate the whole grammar:
-        self.evaluable_parser._parser.validate()
-        self.convertible_parser._parser.validate()
     
     def test_literal_expressions(self):
         """
