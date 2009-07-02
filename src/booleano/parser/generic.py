@@ -279,10 +279,9 @@ class Parser(object):
     
     parse_tree_class = None
     
-    def __init__(self, grammar, namespace):
+    def __init__(self, grammar):
         self._parser = None
         self._grammar = grammar
-        self._namespace = namespace
     
     def __call__(self, expression):
         """
@@ -520,6 +519,10 @@ class EvaluableParser(Parser):
     
     parse_tree_class = EvaluableParseTree
     
+    def __init__(self, grammar, namespace):
+        self._namespace = namespace
+        super(EvaluableParser, self).__init__(grammar)
+    
     def make_variable(self, tokens):
         """Make a Variable using the token passed."""
         var = self._namespace.get_object(tokens[0][0], tokens[0][1])
@@ -541,9 +544,9 @@ class ConvertibleParser(Parser):
     
     def make_variable(self, tokens):
         """Make a Variable placeholder using the token passed."""
-        return VariablePlaceholder(tokens[0])
+        return VariablePlaceholder(tokens[0][0], tokens[0][1])
     
     def make_function(self, tokens):
         """Make a Function placeholder using the token passed."""
-        return FunctionPlaceholder(tokens[0])
+        return FunctionPlaceholder(tokens[0][0], tokens[0][1])
 

@@ -32,46 +32,29 @@ Test suite for the built-in parser implementation.
 
 from booleano.parser.generic import Grammar
 from booleano.parser.scope import Namespace
-from booleano.parser.testutils import BaseExpressionsTest
+from booleano.parser.testutils import BaseGrammarTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
 
 
-class TestParsing(BaseExpressionsTest):
+class TestDefaultGrammar(BaseGrammarTest):
     """
-    Tests for the parser of the generic grammar.
+    Tests for the parser of the default/generic grammar.
     
     """
+    
     grammar = Grammar()
     
-    namespace = Namespace(
-        # Global objects:
-        {
-            
-        },
-        # Sub-namespaces
-        {}
-    )
-    
-    # Literals-only expressions:
-    literal_expressions = {
+    expressions = {
+        # Literals-only expressions:
         '  "a string" == 245    ': Equal(String("a string"), Number(245)),
         '   2 > 5   ': GreaterThan(Number(2), Number(5)),
+        # TODO: Identifiers-only expressions:
     }
     
-    # Expressions whose variables and functions are going to be evaluated:
-    # TODO:
-    evaluable_expressions = {
-    }
-    
-    # Expressions whose variables and functions are going to be converted:
-    convertible_expressions = {
-        ' last_night': VariablePlaceholder("last_night", None),
-    }
-    
-    literals = {
+    single_operands = {
         # ----- Strings
         '"oneword"': String("oneword"),
         '"double quotes"': String("double quotes"),
@@ -121,11 +104,14 @@ class TestParsing(BaseExpressionsTest):
                 ),
             ),
     }
-    
-    # TODO:
-    evaluable_operands = {}
-    
-    convertible_operands = {
+    # TODO: Uncomment these expressions:
+    """
+        '{var1, var2}': Set(VariablePlaceholder("var1", None),
+                            VariablePlaceholder("var2", None)),
+        '{var, "string"}': Set(VariablePlaceholder("var", None), 
+                               String("string")),
+        '{3, var, "string"}': Set(Number(3), String("string"),
+                                  VariablePlaceholder("var", None)),
         # ----- Variables:
         'today': VariablePlaceholder("today", None),
         'camelCase': VariablePlaceholder("camelCase", None),
@@ -148,18 +134,10 @@ class TestParsing(BaseExpressionsTest):
                                                     None),
         'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr", 
                                                     None),
-        u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA", 
-                                                    None),
-        # ----- Sets:
-        '{var1, var2}': Set(VariablePlaceholder("var1", None),
-                            VariablePlaceholder("var2", None)),
-        '{var, "string"}': Set(VariablePlaceholder("var", None), 
-                               String("string")),
-        '{3, var, "string"}': Set(Number(3), String("string"),
-                                  VariablePlaceholder("var", None)),
-    }
+        u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA", ()),
+    """
     
-    invalid_literals = (
+    invalid_operands = (
         # Invalid strings:
         '\'mixed quotes"',
         # Invalid numbers:

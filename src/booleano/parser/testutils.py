@@ -32,14 +32,17 @@ Utilities to test Booleano grammars and parsers.
 from nose.tools import eq_, ok_, raises
 from pyparsing import ParseException
 
-from booleano.parser.generic import EvaluableParser, ConvertibleParser
+from booleano.parser.generic import Parser, EvaluableParser, ConvertibleParser
 
-__all__ = ("BaseGrammarTest", "BaseExpressionsTest")
+__all__ = ("BaseGrammarTest", )
 
 
 class BaseGrammarTest(object):
     """
-    The base test case for the grammars.
+    Base test case for a grammar and the expressions its parser could handle.
+    
+    Subclasses must define all the following attributes for the test case to
+    work.
     
     .. attribute:: grammar
     
@@ -52,35 +55,6 @@ class BaseGrammarTest(object):
             
                 grammar = Grammar(ne="<>")
     
-    """
-    
-    def test_infinitely_recursive_constructs(self):
-        """The grammar doesn't cause infinitely recursive constructs."""
-        evaluable_parser = EvaluableParser(self.grammar, None)
-        convertible_parser = ConvertibleParser(self.grammar, None)
-        # Building the parser:
-        evaluable_parser.build_parser()
-        convertible_parser.build_parser()
-        # Finally, validate the whole grammar:
-        evaluable_parser._parser.validate()
-        convertible_parser._parser.validate()
-
-
-class BaseExpressionsTest(object):
-    """
-    The base test case for the expressions the parser could handle.
-    
-    Subclasses must define all the following attributes for the test case to
-    work.
-    
-    .. attribute:: grammar
-    
-        An instance of the grammar to be used.
-    
-    .. attribute:: namespace
-    
-        An instance of the namespace to be used.
-    
     .. attribute:: expressions
     
         A dictionary with all the valid expressions recognized by the grammar,
@@ -90,70 +64,64 @@ class BaseExpressionsTest(object):
     """
     
     def __init__(self, *args, **kwargs):
-        super(BaseExpressionsTest, self).__init__(*args, **kwargs)
-        self.evaluable_parser = EvaluableParser(self.grammar, self.namespace)
-        self.convertible_parser = ConvertibleParser(self.grammar,
-                                                    self.namespace)
-        # Because the grammar in both parsers is the exact same thing (the
-        # only thing that changes are a couple of parse actions), we're going
-        # to select one of them to represent the parsers when the post-parse
-        # actions are not relevant -- I've selected the evaluable one
-        # arbitrarily:
-        self.parser = self.evaluable_parser
+        super(BaseGrammarTest, self).__init__(*args, **kwargs)
+        # Let's use the convertible parser to ease testing:
+        self.parser = ConvertibleParser(self.grammar)
     
-    def test_literal_expressions(self):
-        """
-        Literals-only expressions should be represented the same way in
-        evaluable and convertible trees.
-        
-        """
-        for expression, expected_node in self.literal_expressions.items():
-            yield (check_expression, self.evaluable_parser, expression,
-                   expected_node)
-            yield (check_expression, self.convertible_parser, expression,
-                   expected_node)
+    def test_infinitely_recursive_constructs(self):
+        """The grammar doesn't cause infinitely recursive constructs."""
+        parser = Parser(self.grammar)
+        # Building the parser:
+        parser.build_parser()
+        # Finally, validate the whole grammar:
+        parser._parser.validate()
     
-    def test_literals(self):
+    def test_expressions(self):
+        """Valid expressions should yield the expected parse tree."""
+        for expression, expected_node in self.expressions.items():
+            
+            # Making a Nose test generator:
+            def check():
+                tree = self.parser(expression)
+                expected_node.check_equivalence(tree.root_node)
+            check.description = 'Operation "%s" should yield "%s"' % \
+                                (expression, expected_node)
+            
+            yield check
+    
+    def test_single_operands(self):
         """
-        Literals must be parsed successfully.
+        Expressions made up of a single operand must yield the expected operand.
         
         """
         operand_parser = self.parser.define_operand().parseString
-        for expression, expected_operand in self.literals.items():
+        
+        for expression, expected_operand in self.single_operands.items():
             
             # Making a Nose test generator:
             def check():
                 node = operand_parser(expression, parseAll=True)
                 eq_(1, len(node))
                 expected_operand.check_equivalence(node[0])
-            check.description = ('"%s" is a valid literal' % expression)
+            check.description = ('Single operand "%s" should return %s' %
+                                 (expression, expected_operand))
             
             yield check
     
-    def test_invalid_literals(self):
+    def test_invalid_operands(self):
         """
-        Expressions representing invalid literals must not yield a parse tree.
+        Expressions representing invalid operands must not yield a parse tree.
         
         """
         operand_parser = self.parser.define_operand().parseString
-        for expression in self.invalid_literals:
+        for expression in self.invalid_operands:
             
             # Making a Nose test generator:
             @raises(ParseException)
             def check():
                 operand_parser(expression, parseAll=True)
-            check.description = ('"%s" is an invalid literal' %
+            check.description = ('"%s" is an invalid operand' %
                                  expression)
             
             yield check
-
-
-def check_expression(parser, expression, expected_node):
-    """
-    Check that the parse tree of ``expression`` with ``parser``, equals
-    ``expected_node``.
-    
-    """
-    tree = parser(expression)
-    expected_node.check_equivalence(tree.root_node)
 
