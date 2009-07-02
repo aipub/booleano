@@ -55,8 +55,8 @@ class TestParsing(BaseParseTest):
         {}
     )
     
-    # Expressions that don't contain variables or functions:
-    constant_expressions = {
+    # Literals-only expressions:
+    literal_expressions = {
         '  "a string" == 245    ': Equal(String("a string"), Number(245)),
         '   2 > 5   ': GreaterThan(Number(2), Number(5)),
     }
@@ -71,7 +71,7 @@ class TestParsing(BaseParseTest):
         ' last_night': VariablePlaceholder("last_night", None),
     }
     
-    constant_operands = {
+    literals = {
         # ----- Strings
         '"oneword"': String("oneword"),
         '"double quotes"': String("double quotes"),
@@ -159,7 +159,7 @@ class TestParsing(BaseParseTest):
                                   VariablePlaceholder("var", None)),
     }
     
-    invalid_operands = (
+    invalid_literals = (
         # Invalid strings:
         '\'mixed quotes"',
         # Invalid numbers:
@@ -182,7 +182,7 @@ class TestParsing(BaseParseTest):
         "{element 1, element 2}",
         "{element1; element2; element3}",
         "{element == 'string'}",
-        # Invalid whatever:
+        # Miscellaneous:
         "-",
         "this is definitely not an operand",
     )

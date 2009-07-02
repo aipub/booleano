@@ -85,48 +85,48 @@ class BaseParseTest(object):
         self.evaluable_parser._parser.validate()
         self.convertible_parser._parser.validate()
     
-    def test_constant_expressions(self):
+    def test_literal_expressions(self):
         """
-        Constants expressions should be represented the same way in evaluable
-        and convertible trees.
+        Literals-only expressions should be represented the same way in
+        evaluable and convertible trees.
         
         """
-        for expression, expected_node in self.constant_expressions.items():
+        for expression, expected_node in self.literal_expressions.items():
             yield (check_expression, self.evaluable_parser, expression,
                    expected_node)
             yield (check_expression, self.convertible_parser, expression,
                    expected_node)
     
-    def test_constant_operands(self):
+    def test_literals(self):
         """
-        Valid operands must be parsed successfully.
+        Literals must be parsed successfully.
         
         """
         operand_parser = self.parser.define_operand().parseString
-        for expression, expected_operand in self.constant_operands.items():
+        for expression, expected_operand in self.literals.items():
             
             # Making a Nose test generator:
             def check():
                 node = operand_parser(expression, parseAll=True)
                 eq_(1, len(node))
                 expected_operand.check_equivalence(node[0])
-            check.description = ('"%s" is a valid operand' % expression)
+            check.description = ('"%s" is a valid literal' % expression)
             
             yield check
     
-    def test_invalid_operands(self):
+    def test_invalid_literals(self):
         """
-        Expressions representing invalid operands must not yield a parse tree.
+        Expressions representing invalid literals must not yield a parse tree.
         
         """
         operand_parser = self.parser.define_operand().parseString
-        for expression in self.invalid_operands:
+        for expression in self.invalid_literals:
             
             # Making a Nose test generator:
             @raises(ParseException)
             def check():
                 operand_parser(expression, parseAll=True)
-            check.description = ('"%s" does NOT represent an operand' %
+            check.description = ('"%s" is an invalid literal' %
                                  expression)
             
             yield check
