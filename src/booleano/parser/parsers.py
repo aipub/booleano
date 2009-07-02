@@ -230,7 +230,7 @@ class Parser(object):
         Return the syntax definition for an identifier.
         
         """
-        # Defining the individual indentifiers:
+        # Defining the individual identifiers:
         def first_not_a_number(tokens):
             if tokens[0][0].isdigit():
                 raise ParseException('"%s" must not start by a number for it '
