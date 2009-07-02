@@ -114,7 +114,7 @@ class Grammar(object):
         """
         Set up a grammar, possibly customizing its properties.
         
-        :param custom_settings: The grammar's settings to be overridden, if any.
+        :param custom_settings: The grammar settings to be overridden, if any.
         :type custom_settings: dict
         :param custom_generators: The custom generators for the parser to be
             generated, if any.
@@ -129,7 +129,11 @@ class Grammar(object):
         # Setting the custom properties:
         settings = settings or {}
         generators = generators or {}
-        for (token_name, token) in tokens:
+        for (setting_name, setting) in settings.items():
+            self.set_setting(setting_name, setting)
+        for (generator_name, generator) in generators.items():
+            self.set_custom_generator(generator_name, generator)
+        for (token_name, token) in tokens.items():
             self.set_token(token_name, token)
     
     #{ Token handling

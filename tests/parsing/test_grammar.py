@@ -133,3 +133,65 @@ class TestDefaultGrammar(object):
                       "non_existing", mock_generator)
     
     #}
+
+
+class TestEarlyCustomizedGrammar(object):
+    """
+    Tests for the grammar customized from the beginning (i.e., in the
+    constructor).
+    
+    """
+    
+    def test_custom_tokens(self):
+        """The tokens can be customized using the keyword arguments."""
+        grammar = Grammar(eq="=", ne="<>")
+        # Checking the two new tokens:
+        eq_(grammar.get_token("eq"), "=")
+        eq_(grammar.get_token("ne"), "<>")
+        # Everything else must have not changed:
+        eq_(grammar.get_token("not"), "~")
+        eq_(grammar.get_token("and"), "&")
+        eq_(grammar.get_token("or"), "|")
+        eq_(grammar.get_token("xor"), "^")
+        eq_(grammar.get_token("lt"), "<")
+        eq_(grammar.get_token("gt"), ">")
+        eq_(grammar.get_token("le"), "<=")
+        eq_(grammar.get_token("ge"), ">=")
+        eq_(grammar.get_token("in"), u"∈")
+        eq_(grammar.get_token("contained"), u"⊂")
+        eq_(grammar.get_token("set_start"), "{")
+        eq_(grammar.get_token("set_end"), "}")
+        eq_(grammar.get_token("element_separator"), ",")
+        eq_(grammar.get_token("string_start"), '"')
+        eq_(grammar.get_token("string_end"), '"')
+        eq_(grammar.get_token("group_start"), "(")
+        eq_(grammar.get_token("group_end"), ")")
+        eq_(grammar.get_token("arguments_start"), "(")
+        eq_(grammar.get_token("arguments_end"), ")")
+        eq_(grammar.get_token("arguments_separator"), ",")
+        eq_(grammar.get_token("positive_sign"), "+")
+        eq_(grammar.get_token("negative_sign"), "-")
+        eq_(grammar.get_token("decimal_separator"), ".")
+        eq_(grammar.get_token("thousands_separator"), ",")
+        eq_(grammar.get_token("identifier_spacing"), "_")
+        eq_(grammar.get_token("namespace_separator"), ":")
+    
+    def test_settings(self):
+        settings = {'superset_right_in_is_subset': False,
+                    'set_right_in_contains': None}
+        grammar = Grammar(settings)
+        # Checking the new settings:
+        eq_(grammar.get_setting("superset_right_in_is_subset"), False)
+        eq_(grammar.get_setting("set_right_in_contains"), None)
+        # Everything else must have not changed:
+        eq_(grammar.get_setting("optional_positive_sign"), True)
+    
+    def test_generators(self):
+        mock_generator = lambda: None
+        generators = {'string': mock_generator}
+        grammar = Grammar(None, generators)
+        # Checking the new generators:
+        eq_(grammar.get_custom_generator("string"), mock_generator)
+        # Everything else must have not changed:
+        eq_(grammar.get_custom_generator("operation"), None)
+        eq_(grammar.get_custom_generator("number"), None)
