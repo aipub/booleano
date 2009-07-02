@@ -41,7 +41,7 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
 from booleano.exc import GrammarError, BadExpressionError
@@ -74,8 +74,8 @@ class Grammar(object):
         'le': "<=",
         'ge': ">=",
         # Set operators:
-        'in': u"∈",
-        'contained': u"⊂",
+        'belongs_to': u"∈",
+        'is_subset': u"⊂",
         'set_start': "{",
         'set_end': "}",
         'element_separator': ",",

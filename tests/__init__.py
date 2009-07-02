@@ -36,7 +36,7 @@ import logging
 
 from booleano.converters import BaseConverter
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
 from booleano.exc import InvalidOperationError, BadCallError
@@ -293,8 +293,8 @@ class AntiConverter(BaseConverter):
     def convert_greater_equal(self, master_operand, slave_operand):
         return GreaterEqual(master_operand, slave_operand)
     
-    def convert_contains(self, master_operand, slave_operand):
-        return Contains(slave_operand, master_operand,)
+    def convert_belongs_to(self, master_operand, slave_operand):
+        return BelongsTo(slave_operand, master_operand,)
     
     def convert_is_subset(self, master_operand, slave_operand):
         return IsSubset(slave_operand, master_operand)

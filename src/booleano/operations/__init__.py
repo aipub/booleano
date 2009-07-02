@@ -41,7 +41,7 @@ __all__ = (
     "FunctionPlaceholder",
     # Operators:
     "Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
-    "GreaterThan", "LessEqual", "GreaterEqual", "Contains", "IsSubset",
+    "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset",
 )
 
 
@@ -195,5 +195,5 @@ class OperationNode(object):
 from booleano.operations.operands import (String, Number, Set, Variable,
     Function, VariablePlaceholder, FunctionPlaceholder, Operand)
 from booleano.operations.operators import (Truth, Not, And, Or, Xor, Equal,
-    NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, Contains,
+    NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
     IsSubset, Operator)

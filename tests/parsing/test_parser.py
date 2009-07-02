@@ -34,7 +34,7 @@ from booleano.parser.generic import Grammar
 from booleano.parser.scope import Namespace
 from booleano.parser.testutils import BaseParseTest
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, Variable, Function, VariablePlaceholder,
     FunctionPlaceholder)
 

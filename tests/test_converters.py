@@ -33,7 +33,7 @@ from nose.tools import eq_, assert_raises, raises
 
 from booleano.converters import BaseConverter
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
 from booleano.exc import ConversionError
 
@@ -67,7 +67,7 @@ class TestBaseConverter(object):
         assert_raises(NotImplementedError, conv.convert_less_equal, None, None)
         assert_raises(NotImplementedError, conv.convert_greater_equal, None,
                       None)
-        assert_raises(NotImplementedError, conv.convert_contains, None, None)
+        assert_raises(NotImplementedError, conv.convert_belongs_to, None, None)
         assert_raises(NotImplementedError, conv.convert_is_subset, None, None)
 
 
@@ -160,7 +160,7 @@ class TestActualConverter(object):
         GreaterThan(Number(2), VariablePlaceholder("counter", None)),
         LessEqual(Number(2), VariablePlaceholder("counter", None)),
         GreaterEqual(Number(2), VariablePlaceholder("counter", None)),
-        Contains(Number(4), Set(Number(3), String("no"), Number(0))),
+        BelongsTo(Number(4), Set(Number(3), String("no"), Number(0))),
         IsSubset(Set(), Set(Number(3), String("no"), Number(0))),
     )
     

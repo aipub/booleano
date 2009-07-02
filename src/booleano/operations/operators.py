@@ -35,7 +35,7 @@ from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError
 
 __all__ = ("Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
-    "GreaterThan", "LessEqual", "GreaterEqual", "Contains", "IsSubset", )
+    "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset", )
 
 
 class Operator(OperationNode):
@@ -567,7 +567,7 @@ class _SetOperator(BinaryOperator):
         return (right_operand, left_operand)
 
 
-class Contains(_SetOperator):
+class BelongsTo(_SetOperator):
     """
     The "belongs to" operator (``∈``).
     

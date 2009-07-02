@@ -33,7 +33,7 @@ Tests for the operators.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset)
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
 from booleano.operations.operators import Operator
 from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
@@ -886,31 +886,31 @@ class TestGreaterEqual(object):
         assert_false(operation(**helpers))
 
 
-class TestContains(object):
+class TestBelongsTo(object):
     """Tests for the ``∈`` set operator."""
     
     def test_item_and_set(self):
         item = Number(3)
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = Contains(item, set_)
+        operation = BelongsTo(item, set_)
         eq_(operation.master_operand, set_)
         eq_(operation.slave_operand, item)
     
     def test_item_and_non_set(self):
         item = String("Paris")
         set_ = String("France")
-        assert_raises(InvalidOperationError, Contains, item, set_)
+        assert_raises(InvalidOperationError, BelongsTo, item, set_)
     
     def test_constant_evaluation(self):
         item = Number(3)
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
-        operation = Contains(item, set_)
+        operation = BelongsTo(item, set_)
         ok_(operation())
     
     def test_variable_evaluation(self):
         item = NumVar()
         set_ = PedestriansCrossingRoad()
-        operation = Contains(item, set_)
+        operation = BelongsTo(item, set_)
         
         # 4 ∈ {"madrid", 4}
         helpers = {

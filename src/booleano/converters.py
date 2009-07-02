@@ -30,7 +30,7 @@ Converters for Booleano parse tree structures.
 
 """
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, Contains, IsSubset,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
 from booleano.operations.operators import UnaryOperator
 from booleano.exc import ConversionError
@@ -54,7 +54,7 @@ class BaseConverter(object):
         GreaterThan: "convert_greater_than",
         LessEqual: "convert_less_equal",
         GreaterEqual: "convert_greater_equal",
-        Contains: "convert_contains",
+        BelongsTo: "convert_belongs_to",
         IsSubset: "convert_is_subset",
         # Operand converters:
         String: "convert_string",
@@ -239,7 +239,7 @@ class BaseConverter(object):
         """
         raise NotImplementedError
     
-    def convert_contains(self, master_operand, slave_operand):
+    def convert_belongs_to(self, master_operand, slave_operand):
         """
         Convert "belongs to" operation where the set is 
         ``master_operand`` and the element is ``slave_operand``.
