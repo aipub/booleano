@@ -302,7 +302,7 @@ class EvaluableParser(Parser):
     
     def make_variable(self, tokens):
         """Make a Variable using the token passed."""
-        var = self._namespace.get_object(tokens[0][0], tokens[0][1])
+        var = self._namespace.get_object(tokens[1], tokens[0])
         # TODO: Check that it's a variable!!!
         return var
     
@@ -321,9 +321,9 @@ class ConvertibleParser(Parser):
     
     def make_variable(self, tokens):
         """Make a Variable placeholder using the token passed."""
-        return VariablePlaceholder(tokens[0][0], tokens[0][1])
+        return VariablePlaceholder(tokens[1], tokens[0])
     
     def make_function(self, tokens):
         """Make a Function placeholder using the token passed."""
-        return FunctionPlaceholder(tokens[0][0], tokens[0][1])
+        return FunctionPlaceholder(tokens[1], tokens[0])
 

@@ -103,9 +103,6 @@ class TestDefaultGrammar(BaseGrammarTest):
                     Set(String("el trigal"), String("las chimeneas"))
                 ),
             ),
-    }
-    # TODO: Uncomment these expressions:
-    """
         '{var1, var2}': Set(VariablePlaceholder("var1", None),
                             VariablePlaceholder("var2", None)),
         '{var, "string"}': Set(VariablePlaceholder("var", None), 
@@ -135,7 +132,7 @@ class TestDefaultGrammar(BaseGrammarTest):
         'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr", 
                                                     None),
         u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA", ()),
-    """
+    }
     
     invalid_operands = (
         # Invalid strings:
