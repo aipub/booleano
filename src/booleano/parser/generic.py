@@ -99,7 +99,9 @@ class Grammar(object):
     }
     
     default_settings = {
-        
+        'superset_right_in_is_subset': True,
+        'set_right_in_contains': True,
+        'optional_positive_sign': True,
     }
     
     known_generators = set([
@@ -172,7 +174,7 @@ class Grammar(object):
         
         :param token_name: The token's name.
         :type token_name: basestring
-        :raises GrammarError: If ``token_name`` is unknown.
+        :raises GrammarError: If the ``token_name`` is unknown.
         
         """
         if token_name not in self.default_tokens:
@@ -180,7 +182,48 @@ class Grammar(object):
     
     #{ Settings handling
     
+    def get_setting(self, setting_name):
+        """
+        Return the value of setting identified by ``setting_name``.
+        
+        :param setting_name: The name of the setting to be retrieved.
+        :type setting_name: basestring
+        :return: The setting value.
+        :raises GrammarError: If the ``setting_name`` is unknown.
+        
+        """
+        self._check_setting_existence(setting_name)
+        return self._custom_settings.get(setting_name,
+                                         self.default_settings[setting_name])
     
+    def set_setting(self, setting_name, setting):
+        """
+        Set the setting called ``setting_name`` to the custom value ``setting``.
+        
+        :param setting_name: The name of the setting to be customized.
+        :type setting_name: basestring
+        :param setting: The new value of the setting.
+        :type setting: basestring
+        :raises GrammarError: If the ``setting_name`` is unknown or ``setting``
+            is an invalid value for ``setting_name``.
+        
+        Settings whose expected value is a Python boolean are not validated.
+        
+        """
+        self._check_setting_existence(setting_name)
+        self._custom_settings[setting_name] = setting
+    
+    def _check_setting_existence(self, setting_name):
+        """
+        Check that ``setting_name`` is a known setting.
+        
+        :param setting_name: The setting's name.
+        :type setting_name: basestring
+        :raises GrammarError: If the ``setting_name`` is unknown.
+        
+        """
+        if setting_name not in self.default_settings:
+            raise GrammarError('Unknown setting "%s"' % setting_name)
     
     #}
 

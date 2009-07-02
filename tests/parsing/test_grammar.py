@@ -37,10 +37,12 @@ from booleano.exc import GrammarError
 
 
 class TestDefaultGrammar(object):
-    """Tests for the grammar with the default properties."""
+    """Tests for the grammar with the default properties, at least initially."""
     
     def setUp(self):
         self.grammar = Grammar()
+    
+    #{ Token handling stuff
     
     def test_default_tokens(self):
         """All the tokens must have an initial value."""
@@ -89,3 +91,23 @@ class TestDefaultGrammar(object):
     
     def test_setting_non_existing_token(self):
         assert_raises(GrammarError, self.grammar.set_token, "non_existing", "-")
+    
+    #{ Setting handling-stuff
+    
+    def test_default_settings(self):
+        eq_(self.grammar.get_setting("superset_right_in_is_subset"), True)
+        eq_(self.grammar.get_setting("set_right_in_contains"), True)
+        eq_(self.grammar.get_setting("optional_positive_sign"), True)
+    
+    def test_setting_existing_setting(self):
+        self.grammar.set_setting("set_right_in_contains", False)
+        eq_(self.grammar.get_setting("set_right_in_contains"), False)
+    
+    def test_requesting_non_existing_setting(self):
+        assert_raises(GrammarError, self.grammar.get_setting, "non_existing")
+    
+    def test_setting_non_existing_setting(self):
+        assert_raises(GrammarError, self.grammar.set_setting, "non_existing",
+                      None)
+    
+    #}
