@@ -92,7 +92,7 @@ class TestDefaultGrammar(object):
     def test_setting_non_existing_token(self):
         assert_raises(GrammarError, self.grammar.set_token, "non_existing", "-")
     
-    #{ Setting handling-stuff
+    #{ Setting handling stuff
     
     def test_default_settings(self):
         eq_(self.grammar.get_setting("superset_right_in_is_subset"), True)
@@ -109,5 +109,27 @@ class TestDefaultGrammar(object):
     def test_setting_non_existing_setting(self):
         assert_raises(GrammarError, self.grammar.set_setting, "non_existing",
                       None)
+    
+    #{ Custom generator handling stuff
+    
+    def test_no_custom_generators_by_default(self):
+        """There must not be custom generators by default."""
+        eq_(self.grammar.get_custom_generator("operation"), None)
+        eq_(self.grammar.get_custom_generator("string"), None)
+        eq_(self.grammar.get_custom_generator("number"), None)
+    
+    def test_setting_existing_generator(self):
+        mock_generator = lambda: None
+        self.grammar.set_custom_generator("number", mock_generator)
+        eq_(self.grammar.get_custom_generator("number"), mock_generator)
+    
+    def test_requesting_non_existing_generator(self):
+        assert_raises(GrammarError, self.grammar.get_custom_generator,
+                      "non_existing")
+    
+    def test_setting_non_existing_generator(self):
+        mock_generator = lambda: None
+        assert_raises(GrammarError, self.grammar.set_custom_generator,
+                      "non_existing", mock_generator)
     
     #}

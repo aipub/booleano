@@ -106,10 +106,8 @@ class Grammar(object):
     
     known_generators = set([
         "operation",
-        "operand",
         "string",
         "number",
-        "variable",
     ])
     
     def __init__(self, settings=None, generators=None, **tokens):
@@ -224,6 +222,47 @@ class Grammar(object):
         """
         if setting_name not in self.default_settings:
             raise GrammarError('Unknown setting "%s"' % setting_name)
+    
+    # Custom generator handling
+    
+    def get_custom_generator(self, generator_name):
+        """
+        Return the generator identified by ``generator_name``.
+        
+        :param generator_name: The name of the generator to be retrieved.
+        :type generator_name: basestring
+        :return: The generator value or ``None`` if it's not been set.
+        :raises GrammarError: If the ``generator_name`` is unknown.
+        
+        """
+        self._check_generator_existence(generator_name)
+        return self._custom_generators.get(generator_name)
+    
+    def set_custom_generator(self, generator_name, generator):
+        """
+        Set the generator called ``generator_name`` to the custom callable
+        ``generator``.
+        
+        :param generator_name: The name of the generator to be overridden.
+        :type generator_name: basestring
+        :param generator: The custom generator (a Python callable).
+        :raises GrammarError: If the ``generator_name`` is unknown.
+        
+        """
+        self._check_generator_existence(generator_name)
+        self._custom_generators[generator_name] = generator
+    
+    def _check_generator_existence(self, generator_name):
+        """
+        Check that ``generator_name`` is a known generator.
+        
+        :param generator_name: The generator's name.
+        :type generator_name: basestring
+        :raises GrammarError: If the ``generator_name`` is unknown.
+        
+        """
+        if generator_name not in self.known_generators:
+            raise GrammarError('Unknown generator "%s"' % generator_name)
     
     #}
 
