@@ -896,12 +896,8 @@ class TestVariablePlaceholder(object):
     
     def test_no_namespace(self):
         """Variable placeholders shouldn't have a default namespace."""
-        # Using None:
-        var1 = VariablePlaceholder("foo", None)
-        eq_(len(var1.namespace_parts), 0)
-        # Using an empty list:
-        var2 = VariablePlaceholder("foo", [])
-        eq_(len(var2.namespace_parts), 0)
+        var = VariablePlaceholder("foo")
+        eq_(len(var.namespace_parts), 0)
     
     def test_namespaces(self):
         """Variable placeholders should be aware of their namespace."""
@@ -1053,12 +1049,8 @@ class TestFunctionPlaceholder(object):
     
     def test_no_namespace(self):
         """Function placeholders shouldn't have a default namespace."""
-        # Using None:
-        func1 = FunctionPlaceholder("foo", None)
-        eq_(len(func1.namespace_parts), 0)
-        # Using an empty list:
-        func2 = FunctionPlaceholder("foo", [])
-        eq_(len(func2.namespace_parts), 0)
+        func = FunctionPlaceholder("foo")
+        eq_(len(func.namespace_parts), 0)
     
     def test_namespaces(self):
         """Function placeholders should be aware of their namespace."""

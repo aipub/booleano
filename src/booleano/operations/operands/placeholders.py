@@ -59,7 +59,7 @@ class PlaceholderOperand(Operand):
     
     operations = OPERATIONS
     
-    def __init__(self, name, namespace_parts):
+    def __init__(self, name, namespace_parts=None):
         """
         Name this placeholder operand as ``name``.
         
@@ -148,7 +148,7 @@ class FunctionPlaceholder(PlaceholderOperand):
     
     """
     
-    def __init__(self, function_name, namespace_parts, *arguments):
+    def __init__(self, function_name, namespace_parts=None, *arguments):
         """
         Check that all the  ``arguments`` are operands before creating the
         placeholder for the function called ``function_name``.
