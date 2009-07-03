@@ -51,7 +51,12 @@ class TestDefaultGrammar(BaseGrammarTest):
         # Literals-only expressions:
         '  "a string" == 245    ': Equal(String("a string"), Number(245)),
         '   2 > 5   ': GreaterThan(Number(2), Number(5)),
-        # TODO: Identifiers-only expressions:
+        # Identifiers-only expressions:
+        '  today > yesterday ': GreaterThan(PlaceholderVariable("today"),
+                                            PlaceholderVariable("yesterday")),
+        'time:today > time:yesterday ': GreaterThan(
+            PlaceholderVariable("today", ("time", )),
+            PlaceholderVariable("yesterday", ("time", ))),
     }
     
     single_operands = {
