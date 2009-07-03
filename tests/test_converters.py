@@ -34,7 +34,7 @@ from nose.tools import eq_, assert_raises, raises
 from booleano.converters import BaseConverter
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
+    String, Number, Set, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import ConversionError
 
 from tests import AntiConverter
@@ -80,86 +80,86 @@ class TestActualConverter(object):
         String(u"¡Estás viendo un texto en castellano aquí!"),
         Number(12345),
         Number(123.45),
-        Set(String("hola"), VariablePlaceholder("today", None), Number(4)),
+        Set(String("hola"), PlaceholderVariable("today", None), Number(4)),
         Set(),
-        VariablePlaceholder("tomorrow", None),
-        FunctionPlaceholder("today_is_gonna_rain", None),
-        FunctionPlaceholder("distance", None,
-                            FunctionPlaceholder("where_am_i", None),
+        PlaceholderVariable("tomorrow", None),
+        PlaceholderFunction("today_is_gonna_rain", None),
+        PlaceholderFunction("distance", None,
+                            PlaceholderFunction("where_am_i", None),
                             String("Paris")),
         # Unary operators:
-        Truth(VariablePlaceholder("street_light", None)),
+        Truth(PlaceholderVariable("street_light", None)),
         Truth(
-            FunctionPlaceholder("near_paris", None,
-                                VariablePlaceholder("me", None))
+            PlaceholderFunction("near_paris", None,
+                                PlaceholderVariable("me", None))
             ),
-        Not(FunctionPlaceholder("near_paris",
+        Not(PlaceholderFunction("near_paris",
                                 None,
-                                VariablePlaceholder("moon", None))),
+                                PlaceholderVariable("moon", None))),
         # Binary operators:
         And(
-            FunctionPlaceholder("in_europe", None),
-            FunctionPlaceholder("in_spain", None)
+            PlaceholderFunction("in_europe", None),
+            PlaceholderFunction("in_spain", None)
             ),
         And(
             Or(
                Equal(
-                     VariablePlaceholder("venezuela", None),
+                     PlaceholderVariable("venezuela", None),
                      String("Venezuela")
                      ),
-               FunctionPlaceholder("today_is_gonna_rain", None)),
+               PlaceholderFunction("today_is_gonna_rain", None)),
             Xor(
                 Equal(
-                      VariablePlaceholder("venezuela", None),
+                      PlaceholderVariable("venezuela", None),
                       String("Venezuela")
                       ),
-                FunctionPlaceholder("today_is_gonna_rain", None))
+                PlaceholderFunction("today_is_gonna_rain", None))
             ),
         Or(
-           FunctionPlaceholder("in_europe", None),
-           FunctionPlaceholder("in_spain", None)
+           PlaceholderFunction("in_europe", None),
+           PlaceholderFunction("in_spain", None)
            ),
         Or(
             And(
                Equal(
-                     VariablePlaceholder("venezuela", None), 
+                     PlaceholderVariable("venezuela", None), 
                      String("Venezuela")
                      ),
-               FunctionPlaceholder("today_is_gonna_rain", None)),
+               PlaceholderFunction("today_is_gonna_rain", None)),
             Xor(
                 Equal(
-                      VariablePlaceholder("venezuela", None), 
+                      PlaceholderVariable("venezuela", None), 
                       String("Venezuela")
                       ),
-                FunctionPlaceholder("today_is_gonna_rain", None))
+                PlaceholderFunction("today_is_gonna_rain", None))
             ),
         Xor(
-            FunctionPlaceholder("in_europe", None), 
-            FunctionPlaceholder("in_spain", None)
+            PlaceholderFunction("in_europe", None), 
+            PlaceholderFunction("in_spain", None)
             ),
         Xor(
             Or(
                Equal(
-                     VariablePlaceholder("venezuela", None), 
+                     PlaceholderVariable("venezuela", None), 
                      String("Venezuela")
                      ),
-               FunctionPlaceholder("today_is_gonna_rain", None)),
+               PlaceholderFunction("today_is_gonna_rain", None)),
             And(
                 Equal(
-                      VariablePlaceholder("venezuela", None),
+                      PlaceholderVariable("venezuela", None),
                       String("Venezuela")
                       ),
-                FunctionPlaceholder("today_is_gonna_rain", None))
+                PlaceholderFunction("today_is_gonna_rain", None))
             ),
-        Equal(VariablePlaceholder("venezuela", None), String("Venezuela")),
+        Equal(PlaceholderVariable("venezuela", None), String("Venezuela")),
         NotEqual(
-                 VariablePlaceholder("venezuela", None), 
-                 VariablePlaceholder("here", None)
+                 PlaceholderVariable("venezuela", None), 
+                 PlaceholderVariable("here", None)
                  ),
-        LessThan(Number(2), VariablePlaceholder("counter", None)),
-        GreaterThan(Number(2), VariablePlaceholder("counter", None)),
-        LessEqual(Number(2), VariablePlaceholder("counter", None)),
-        GreaterEqual(Number(2), VariablePlaceholder("counter", None)),
+        LessThan(Number(2), PlaceholderVariable("counter", None)),
+        GreaterThan(Number(2), PlaceholderVariable("counter", None)),
+        LessEqual(Number(2), PlaceholderVariable("counter", None)),
+        GreaterEqual(Number(2), PlaceholderVariable("counter", None)),
         BelongsTo(Number(4), Set(Number(3), String("no"), Number(0))),
         IsSubset(Set(), Set(Number(3), String("no"), Number(0))),
     )

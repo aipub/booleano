@@ -37,8 +37,8 @@ using the classes provided by this package.
 
 __all__ = (
     # Operands:
-    "String", "Number", "Set", "Variable", "Function", "VariablePlaceholder",
-    "FunctionPlaceholder",
+    "String", "Number", "Set", "Variable", "Function", "PlaceholderVariable",
+    "PlaceholderFunction",
     # Operators:
     "Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
     "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset",
@@ -71,10 +71,10 @@ class OperationNode(object):
         
         Leaf nodes are those that don't contain other nodes (operands or
         operators): :class:`String`, :class:`Number`, :class:`Variable` and
-        :class:`VariablePlaceholder`.
+        :class:`PlaceholderVariable`.
         
         """
-        if (self.is_operator() or self.__class__ in (Set, FunctionPlaceholder)
+        if (self.is_operator() or self.__class__ in (Set, PlaceholderFunction)
             or isinstance(self, Function)):
             return False
         return True
@@ -87,7 +87,7 @@ class OperationNode(object):
         
         Branch nodes are those that contain other nodes (operands or operators):
         All the operators, plus :class:`Set`, :class:`Function` and
-        :class:`FunctionPlaceholder`.
+        :class:`PlaceholderFunction`.
         
         """
         return not self.is_leaf()
@@ -193,7 +193,7 @@ class OperationNode(object):
 # Importing the built-in operands and operators so they can be available from
 # this namespace:
 from booleano.operations.operands import (String, Number, Set, Variable,
-    Function, VariablePlaceholder, FunctionPlaceholder, Operand)
+    Function, PlaceholderVariable, PlaceholderFunction, Operand)
 from booleano.operations.operators import (Truth, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
     IsSubset, Operator)

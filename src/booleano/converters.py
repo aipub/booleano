@@ -31,7 +31,7 @@ Converters for Booleano parse tree structures.
 """
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, VariablePlaceholder, FunctionPlaceholder)
+    String, Number, Set, PlaceholderVariable, PlaceholderFunction)
 from booleano.operations.operators import UnaryOperator
 from booleano.exc import ConversionError
 
@@ -60,8 +60,8 @@ class BaseConverter(object):
         String: "convert_string",
         Number: "convert_number",
         Set: "convert_set",
-        VariablePlaceholder: "convert_variable",
-        FunctionPlaceholder: "convert_function",
+        PlaceholderVariable: "convert_variable",
+        PlaceholderFunction: "convert_function",
     }
     
     def __call__(self, root_node):
@@ -95,7 +95,7 @@ class BaseConverter(object):
         convert = getattr(self, self.converters[node.__class__])
         
         if node.is_leaf():
-            if isinstance(node, VariablePlaceholder):
+            if isinstance(node, PlaceholderVariable):
                 return convert(node.name, node.namespace_parts)
             # It's a string or a number
             return convert(node.constant_value)
@@ -105,7 +105,7 @@ class BaseConverter(object):
                         in node.constant_value]
             return convert(*elements)
         
-        if isinstance(node, FunctionPlaceholder):
+        if isinstance(node, PlaceholderFunction):
             arguments = [self.convert(arg) for arg in node.arguments]
             return convert(node.name, node.namespace_parts, *arguments)
         

@@ -40,8 +40,8 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, Variable, Function, VariablePlaceholder,
-    FunctionPlaceholder)
+    String, Number, Set, Variable, Function, PlaceholderVariable,
+    PlaceholderFunction)
 from booleano.exc import BadExpressionError
 
 
@@ -331,12 +331,12 @@ class ConvertibleParser(Parser):
     parse_tree_class = ConvertibleParseTree
     
     def make_variable(self, tokens):
-        """Make a Variable placeholder using the token passed."""
-        return VariablePlaceholder(tokens.identifier, tokens.namespace_parts)
+        """Make a Placeholder variable using the token passed."""
+        return PlaceholderVariable(tokens.identifier, tokens.namespace_parts)
     
     def make_function(self, tokens):
-        """Make a Function placeholder using the token passed."""
+        """Make a Placeholder function using the token passed."""
         tokens = tokens[0]
-        return FunctionPlaceholder(tokens.identifier, tokens.namespace_parts,
+        return PlaceholderFunction(tokens.identifier, tokens.namespace_parts,
                                    *tokens.arguments[0])
 

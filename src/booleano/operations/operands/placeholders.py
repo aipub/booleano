@@ -37,7 +37,7 @@ from booleano.operations import OPERATIONS
 from booleano.operations.operands import Operand
 from booleano.exc import BadCallError, InvalidOperationError
 
-__all__ = ("VariablePlaceholder", "FunctionPlaceholder")
+__all__ = ("PlaceholderVariable", "PlaceholderFunction")
 
 
 class PlaceholderOperand(Operand):
@@ -110,9 +110,9 @@ class PlaceholderOperand(Operand):
         return ":".join(parts)
 
 
-class VariablePlaceholder(PlaceholderOperand):
+class PlaceholderVariable(PlaceholderOperand):
     """
-    Variable placeholder.
+    Placeholder variable.
     
     .. attribute:: name
         The name of the variable being represented.
@@ -120,7 +120,7 @@ class VariablePlaceholder(PlaceholderOperand):
     """
     
     def __unicode__(self):
-        """Return the Unicode representation for this variable placeholder."""
+        """Return the Unicode representation for this placeholder variable."""
         msg = 'Placeholder variable "%s"' % self.name
         if self.namespace_parts:
             ns = self._namespace_to_unicode()
@@ -128,7 +128,7 @@ class VariablePlaceholder(PlaceholderOperand):
         return msg
     
     def __repr__(self):
-        """Return the representation for this variable placeholder."""
+        """Return the representation for this placeholder variable."""
         msg = '<Placeholder variable "%s"' % self.name.encode("utf-8")
         if self.namespace_parts:
             ns = self._namespace_to_ascii()
@@ -136,9 +136,9 @@ class VariablePlaceholder(PlaceholderOperand):
         return msg + ">"
 
 
-class FunctionPlaceholder(PlaceholderOperand):
+class PlaceholderFunction(PlaceholderOperand):
     """
-    Function placeholder.
+    Placeholder function.
     
     .. attribute:: name
         The name of the function being represented.
@@ -156,7 +156,7 @@ class FunctionPlaceholder(PlaceholderOperand):
         :param function_name: The name of the function to be represented.
         :type function_name: basestring
         :param namespace_parts: The identifiers in the namespace that contains
-            the function placeholder.
+            the placeholder function.
         :type namespace_parts: tuple
         :raises BadCallError: If one of the ``arguments`` is not an
             :class:`Operand`.
@@ -164,29 +164,29 @@ class FunctionPlaceholder(PlaceholderOperand):
         """
         for argument in arguments:
             if not isinstance(argument, Operand):
-                raise BadCallError(u'Function placeholder "%s" received a '
+                raise BadCallError(u'Placeholder function "%s" received a '
                                    'non-operand argument: %s' %
                                    (function_name, argument))
         self.arguments = arguments
-        super(FunctionPlaceholder, self).__init__(function_name,
+        super(PlaceholderFunction, self).__init__(function_name,
                                                   namespace_parts)
     
     def check_equivalence(self, node):
         """
-        Check that function placeholder ``node`` is equivalent to the current
-        function placeholder.
+        Check that placeholder function ``node`` is equivalent to the current
+        placeholder function.
         
-        :raises AssertionError: If ``node`` is not a function placeholder, or
-            if it's a function placeholder but represents a different function.
+        :raises AssertionError: If ``node`` is not a placeholder function, or
+            if it's a placeholder function but represents a different function.
         
         """
-        super(FunctionPlaceholder, self).check_equivalence(node)
+        super(PlaceholderFunction, self).check_equivalence(node)
         assert self.arguments == node.arguments, \
-               u'Function placeholders "%s" and "%s" were called with ' \
+               u'Placeholder functions "%s" and "%s" were called with ' \
                'different arguments' % (self, node)
     
     def __unicode__(self):
-        """Return the Unicode representation for this function placeholder."""
+        """Return the Unicode representation for this placeholder function."""
         args = [unicode(arg) for arg in self.arguments]
         args = ", ".join(args)
         msg = 'Placeholder function call "%s"(%s)' % (self.name, args)
@@ -196,7 +196,7 @@ class FunctionPlaceholder(PlaceholderOperand):
         return msg
     
     def __repr__(self):
-        """Return the representation for this function placeholder."""
+        """Return the representation for this placeholder function."""
         args = [repr(arg) for arg in self.arguments]
         args = ", ".join(args)
         func_name = self.name.encode("utf-8")

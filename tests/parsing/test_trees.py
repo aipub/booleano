@@ -33,7 +33,7 @@ Tests for the parse trees.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
-from booleano.operations import And, String, VariablePlaceholder
+from booleano.operations import And, String, PlaceholderVariable
 from booleano.exc import InvalidOperationError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad, BoolVar,
@@ -91,7 +91,7 @@ class TestConvertibleTrees(object):
     
     def test_operands(self):
         """Operands alone are valid convertible parse trees."""
-        operand = VariablePlaceholder("my_variable", None)
+        operand = PlaceholderVariable("my_variable", None)
         tree = ConvertibleParseTree(operand)
         converter = AntiConverter()
         conversion = tree(converter)

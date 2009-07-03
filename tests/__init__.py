@@ -37,8 +37,8 @@ import logging
 from booleano.converters import BaseConverter
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, Variable, Function, VariablePlaceholder,
-    FunctionPlaceholder)
+    String, Number, Set, Variable, Function, PlaceholderVariable,
+    PlaceholderFunction)
 from booleano.exc import InvalidOperationError, BadCallError
 
 
@@ -309,10 +309,10 @@ class AntiConverter(BaseConverter):
         return Set(*elements)
     
     def convert_variable(self, name, namespace_parts):
-        return VariablePlaceholder(name, namespace_parts)
+        return PlaceholderVariable(name, namespace_parts)
     
     def convert_function(self, name, namespace_parts, *arguments):
-        return FunctionPlaceholder(name, namespace_parts, *arguments)
+        return PlaceholderFunction(name, namespace_parts, *arguments)
 
 
 #}
