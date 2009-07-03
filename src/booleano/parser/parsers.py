@@ -160,19 +160,25 @@ class Parser(object):
         set_.setName("set")
         
         # Defining the variables:
-        variable = identifier.setName("variable")
+        variable = identifier.copy()
+        variable.setName("variable")
         variable.addParseAction(self.make_variable)
         
         # Defining the functions:
-        function_name = identifier.setName("function_name")
+        function_name = identifier.copy()
+        function_name = function_name.setResultsName("function_name")
+        function_name.setName("function_name")
         args_start = Suppress(self._grammar.get_token("arguments_start"))
         args_end = Suppress(self._grammar.get_token("arguments_end"))
         args_sep = self._grammar.get_token("arguments_separator")
-        arguments = Optional(delimitedList(operand, delim=args_sep))
+        arguments = Optional(Group(delimitedList(operand, delim=args_sep)),
+                             default=())
+        arguments = arguments.setResultsName("arguments")
         function = Group(function_name + args_start + arguments + args_end)
+        function.setName("function")
         function.setParseAction(self.make_function)
         
-        operand << (variable | self.define_number() | \
+        operand << (function | variable | self.define_number() | \
                     self.define_string() | set_)
         
         return operand
@@ -246,8 +252,11 @@ class Parser(object):
         namespace = Group(ZeroOrMore(identifier0 + namespace_sep))
         namespace.setName("namespace")
         
-        identifier = namespace + identifier0
-        identifier.setName("identifier")
+        # Finally, let's build the full identifier, which could have a
+        # namespace:
+        identifier = (namespace.setResultsName("namespace_parts") +
+                      identifier0.setResultsName("identifier"))
+        identifier.setName("full_identifier")
         
         return identifier
     
@@ -308,7 +317,9 @@ class EvaluableParser(Parser):
     
     def make_function(self, tokens):
         """Make a Function using the token passed."""
-        return Function(tokens[0])
+        func = self._namespace.get_object(tokens[1], tokens[0])
+        # TODO: Check that it's a function!!!
+        return func
 
 
 class ConvertibleParser(Parser):
@@ -321,9 +332,11 @@ class ConvertibleParser(Parser):
     
     def make_variable(self, tokens):
         """Make a Variable placeholder using the token passed."""
-        return VariablePlaceholder(tokens[1], tokens[0])
+        return VariablePlaceholder(tokens.identifier, tokens.namespace_parts)
     
     def make_function(self, tokens):
         """Make a Function placeholder using the token passed."""
-        return FunctionPlaceholder(tokens[1], tokens[0])
+        tokens = tokens[0]
+        return FunctionPlaceholder(tokens.identifier, tokens.namespace_parts,
+                                   *tokens.arguments[0])
 
