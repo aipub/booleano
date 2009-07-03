@@ -201,6 +201,10 @@ class TestDefaultGrammar(BaseGrammarTest):
         "dashes-here-cant-you-see-them",
         "1st_variable",
         "25th_variable",
+        "namespace-here:variable",
+        "1stnamespace:var",
+        "global:2ndlevel:var",
+        "namespace:1st_variable",
         # Invalid functions:
         "func(",
         "func)",
@@ -214,6 +218,11 @@ class TestDefaultGrammar(BaseGrammarTest):
         "function-name()",
         "1st_function()",
         "25th_function()",
+        "namespace-here:function()",
+        "1stnamespace:function()",
+        "global:2ndlevel:function()",
+        "namespace:1st_function()",
+        "foo( bad-namespace:baz() )",
         # Invalid sets:
         "[]",
         "{]",
