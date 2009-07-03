@@ -144,6 +144,9 @@ class TestDefaultGrammar(BaseGrammarTest):
         u'ñŝ0:ñŝ1:variable': VariablePlaceholder("variable", (u"ñŝ0", u"ñŝ1")),
         # ----- Functions:
         'stop()': FunctionPlaceholder("stop"),
+        'stop ()': FunctionPlaceholder("stop"),
+        'stop( )': FunctionPlaceholder("stop"),
+        'stop ( )': FunctionPlaceholder("stop"),
         'camelCase()': FunctionPlaceholder("camelCase"),
         'with_underscore()': FunctionPlaceholder("with_underscore"),
         ' v1() ': FunctionPlaceholder("v1"),
