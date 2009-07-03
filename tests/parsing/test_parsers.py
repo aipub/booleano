@@ -136,6 +136,12 @@ class TestDefaultGrammar(BaseGrammarTest):
         'CASE_INSENSITIVE_VAR': VariablePlaceholder("case_insensitive_var"),
         'cAsE_iNsEnSiTiVe_VaR': VariablePlaceholder("CaSe_InSeNsItIvE_vAr"),
         u'MAYÚSCULA_minúscula': VariablePlaceholder(u"mayúscula_MINÚSCULA"),
+        'ns:variable': VariablePlaceholder("variable", ("ns", )),
+        'ns0:ns1:variable': VariablePlaceholder("variable", ("ns0", "ns1")),
+        'ns0:ns1:ns2:variable': VariablePlaceholder("variable",
+                                                    ("ns0", "ns1", "ns2")),
+        'ns:sub_ns:variable': VariablePlaceholder("variable", ("ns", "sub_ns")),
+        u'ñŝ0:ñŝ1:variable': VariablePlaceholder("variable", (u"ñŝ0", u"ñŝ1")),
         # ----- Functions:
         'stop()': FunctionPlaceholder("stop"),
         'camelCase()': FunctionPlaceholder("camelCase"),
@@ -168,6 +174,15 @@ class TestDefaultGrammar(BaseGrammarTest):
             FunctionPlaceholder(u"sub_función"),
             Number(3),
             ),
+        'ns:function()': FunctionPlaceholder("function", ("ns", )),
+        'ns0:ns1:function()': FunctionPlaceholder("function", ("ns0", "ns1")),
+        'ns0:ns1:ns2:function()': FunctionPlaceholder("function",
+                                                      ("ns0", "ns1", "ns2")),
+        'ns:sub_ns:function("with argument")': FunctionPlaceholder("function",
+            ("ns", "sub_ns"),
+            String("with argument"),
+            ),
+        u'ñŝ:ñś1:function()': FunctionPlaceholder("function", (u"ñŝ", u"ñś1")),
     }
     
     invalid_operands = (
