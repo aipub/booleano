@@ -67,11 +67,11 @@ class PlaceholderOperand(Operand):
         :type name: basestring
         :param namespace_parts: The identifiers in the namespace that contains
             the placeholder.
-        :type namespace_parts: list
+        :type namespace_parts: tuple
         
         """
         self.name = name.lower()
-        self.namespace_parts = namespace_parts or ()
+        self.namespace_parts = tuple(namespace_parts or ())
     
     def check_equivalence(self, node):
         """
@@ -157,7 +157,7 @@ class FunctionPlaceholder(PlaceholderOperand):
         :type function_name: basestring
         :param namespace_parts: The identifiers in the namespace that contains
             the function placeholder.
-        :type namespace_parts: list
+        :type namespace_parts: tuple
         :raises BadCallError: If one of the ``arguments`` is not an
             :class:`Operand`.
         

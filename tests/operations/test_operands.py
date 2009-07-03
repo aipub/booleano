@@ -899,10 +899,15 @@ class TestVariablePlaceholder(object):
         var = VariablePlaceholder("foo")
         eq_(len(var.namespace_parts), 0)
     
-    def test_namespaces(self):
+    def test_namespace(self):
         """Variable placeholders should be aware of their namespace."""
+        var = VariablePlaceholder("country", ("geo", "bar"))
+        eq_(var.namespace_parts, ("geo", "bar"))
+    
+    def test_namespace_as_non_tuple(self):
+        """Namespace parts must be stored as tuple."""
         var = VariablePlaceholder("country", ["geo", "bar"])
-        eq_(var.namespace_parts, ["geo", "bar"])
+        eq_(var.namespace_parts, ("geo", "bar"))
     
     def test_no_operations(self):
         """Variable placeholders don't support operations."""
@@ -1054,8 +1059,13 @@ class TestFunctionPlaceholder(object):
     
     def test_namespaces(self):
         """Function placeholders should be aware of their namespace."""
+        func = FunctionPlaceholder("country", ("geo", "bar"))
+        eq_(func.namespace_parts, ("geo", "bar"))
+    
+    def test_namespace_as_non_tuple(self):
+        """Namespace parts must be stored as tuple."""
         func = FunctionPlaceholder("country", ["geo", "bar"])
-        eq_(func.namespace_parts, ["geo", "bar"])
+        eq_(func.namespace_parts, ("geo", "bar"))
     
     def test_non_operands_as_arguments(self):
         """Function placeholders reject non-operands as arguments."""
