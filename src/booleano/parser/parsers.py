@@ -115,7 +115,7 @@ class Parser(object):
         # Making the logical connectives:
         not_ = CaselessLiteral(self._grammar.get_token("not"))
         and_ = Suppress(self._grammar.get_token("and"))
-        in_or = CaselessLiteral(self._grammar.get_token("or"))
+        in_or = Suppress(self._grammar.get_token("or"))
         ex_or = Suppress(self._grammar.get_token("xor"))
         
         operand = self.define_operand()
@@ -127,6 +127,7 @@ class Parser(object):
                 #(not_, 1, opAssoc.RIGHT),
                 (and_, 2, opAssoc.LEFT, self.make_and),
                 (ex_or, 2, opAssoc.LEFT, self.make_xor),
+                (in_or, 2, opAssoc.LEFT, self.make_or),
             ]
         )
         
@@ -300,6 +301,10 @@ class Parser(object):
     def make_xor(self, tokens):
         """Make an *Xor* connective using the tokens passed."""
         return self.__make_binary_connective__(Xor, tokens[0])
+    
+    def make_or(self, tokens):
+        """Make an *Or* connective using the tokens passed."""
+        return self.__make_binary_connective__(Or, tokens[0])
     
     def __make_binary_connective__(self, operation_class, operands):
         """
