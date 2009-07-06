@@ -120,6 +120,31 @@ class TestDefaultGrammar(BaseGrammarTest):
                 ),
             PlaceholderFunction("today_is_monday")
             ),
+        'today_will_rain() ^ Pi > 3.0': Xor(
+            PlaceholderFunction("today_will_rain"),
+            GreaterThan(PlaceholderVariable("Pi"), Number(3.0))
+            ),
+        'weather:today_rains ^ Pi > e ^ today_is_monday()': Xor(
+            PlaceholderVariable("today_rains", ("weather", )),
+            Xor(
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e")),
+                PlaceholderFunction("today_is_monday")
+                )
+            ),
+        'weather:today_rains ^ (Pi > e ^ today_is_monday())': Xor(
+            PlaceholderVariable("today_rains", ("weather", )),
+            Xor(
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e")),
+                PlaceholderFunction("today_is_monday")
+                )
+            ),
+        '(weather:today_rains ^ Pi > e) ^ today_is_monday()': Xor(
+            Xor(
+                PlaceholderVariable("today_rains", ("weather", )),
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e"))
+                ),
+            PlaceholderFunction("today_is_monday")
+            ),
     }
     
     single_operands = {
