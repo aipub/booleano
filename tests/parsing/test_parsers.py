@@ -183,6 +183,22 @@ class TestDefaultGrammar(BaseGrammarTest):
             PlaceholderVariable("sister", ("relatives", )),
             PlaceholderVariable("siblings", ("relatives", ))
             ),
+        u'{"hi", "bye"} ⊂ {"hello", "hi", "bye"}': IsSubset(
+            Set(String("hi"), String("bye")),
+            Set(String("hello"), String("hi"), String("bye"))
+            ),
+        u'salutations ⊂ {"morning", "hi", "bye", "later"}': IsSubset(
+            PlaceholderVariable("salutations"),
+            Set(String("morning"), String("hi"), String("bye"), String("later"))
+            ),
+        u'{"hi", "bye"} ⊂ salutations': IsSubset(
+            Set(String("hi"), String("bye")),
+            PlaceholderVariable("salutations")
+            ),
+        u'relatives:siblings ⊂ relatives:everyone': IsSubset(
+            PlaceholderVariable("siblings", ("relatives", )),
+            PlaceholderVariable("everyone", ("relatives", ))
+            ),
     }
     
     single_operands = {

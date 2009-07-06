@@ -90,6 +90,7 @@ class Parser(object):
         
         # Making the set-specific operations:
         belongs_to = Suppress(self._grammar.get_token("belongs_to"))
+        is_subset = Suppress(self._grammar.get_token("is_subset"))
         
         # Making the relational operations:
         t_eq = self._grammar.get_token("eq")
@@ -128,6 +129,7 @@ class Parser(object):
             [
                 (relationals, 2, opAssoc.LEFT, self.make_relational),
                 (belongs_to, 2, opAssoc.LEFT, self.make_belongs_to),
+                (is_subset, 2, opAssoc.LEFT, self.make_is_subset),
                 #(not_, 1, opAssoc.RIGHT),
                 (and_, 2, opAssoc.LEFT, self.make_and),
                 (ex_or, 2, opAssoc.LEFT, self.make_xor),
@@ -306,6 +308,15 @@ class Parser(object):
         element = tokens[0][0]
         set_ = tokens[0][1]
         return BelongsTo(element, set_)
+    
+    def make_is_subset(self, tokens):
+        """
+        Make a **is sub-set** operation using the operands passed in ``tokens``.
+        
+        """
+        subset = tokens[0][0]
+        superset = tokens[0][1]
+        return IsSubset(subset, superset)
     
     def make_and(self, tokens):
         """Make an *And* connective using the tokens passed."""
