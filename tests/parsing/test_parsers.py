@@ -57,6 +57,43 @@ class TestDefaultGrammar(BaseGrammarTest):
         'time:today > time:yesterday ': GreaterThan(
             PlaceholderVariable("today", ("time", )),
             PlaceholderVariable("yesterday", ("time", ))),
+        # Literals + non-literal expressions:
+        'today > "1999-06-01"': GreaterThan(PlaceholderVariable("today"),
+                                            String("1999-06-01")),
+        'get_parents("Gustavo") == {"Liliana", "Carlos"}': Equal(
+            PlaceholderFunction("get_parents", None, String("Gustavo")),
+            Set(String("Liliana"), String("Carlos"))
+            ),
+        # Relational operations:
+        'now == today:time': Equal(PlaceholderVariable("now"),
+                                   PlaceholderVariable("time", ("today", ))),
+        '3.1416 == Pi': Equal(Number(3.1416), PlaceholderVariable("pi")),
+        'Pi == 3.1416': Equal(PlaceholderVariable("pi"), Number(3.1416)),
+        'days:today != days:yesterday': NotEqual(
+            PlaceholderVariable("today", ("days",)),
+            PlaceholderVariable("yesterday", ("days",))),
+        '3.00 != Pi': NotEqual(Number(3.0), PlaceholderVariable("pi")),
+        'Pi != 3.00': Equal(PlaceholderVariable("pi"), Number(3.00)),
+        'days:today > days:yesterday': GreaterThan(
+            PlaceholderVariable("today", ("days",)),
+            PlaceholderVariable("yesterday", ("days",))),
+        '3.00 > Pi': GreaterThan(Number(3.0), PlaceholderVariable("pi")),
+        'Pi > 3.00': GreaterThan(PlaceholderVariable("pi"), Number(3.00)),
+        'days:today < days:yesterday': LessThan(
+            PlaceholderVariable("today", ("days",)),
+            PlaceholderVariable("yesterday", ("days",))),
+        '3.00 < Pi': LessThan(Number(3.0), PlaceholderVariable("pi")),
+        'Pi < 3.00': LessThan(PlaceholderVariable("pi"), Number(3.00)),
+        'days:today >= days:yesterday': GreaterEqual(
+            PlaceholderVariable("today", ("days",)),
+            PlaceholderVariable("yesterday", ("days",))),
+        '3.00 >= Pi': GreaterEqual(Number(3.0), PlaceholderVariable("pi")),
+        'Pi >= 3.00': GreaterEqual(PlaceholderVariable("pi"), Number(3.00)),
+        'days:today <= days:yesterday': LessEqual(
+            PlaceholderVariable("today", ("days",)),
+            PlaceholderVariable("yesterday", ("days",))),
+        '3.00 <= Pi': LessEqual(Number(3.0), PlaceholderVariable("pi")),
+        'Pi <= 3.00': LessEqual(PlaceholderVariable("pi"), Number(3.00)),
     }
     
     single_operands = {
