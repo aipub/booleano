@@ -170,6 +170,19 @@ class TestDefaultGrammar(BaseGrammarTest):
                 ),
             PlaceholderFunction("today_is_monday")
             ),
+        # Set-specific operations:
+        u'"hi" ∈ {"hi", "bye"}': BelongsTo(
+            String("hi"),
+            Set(String("hi"), String("bye"))
+            ),
+        u'greeting ∈ {"hi", "bye"}': BelongsTo(
+            PlaceholderVariable("greeting"),
+            Set(String("hi"), String("bye"))
+            ),
+        u'relatives:sister ∈ relatives:siblings': BelongsTo(
+            PlaceholderVariable("sister", ("relatives", )),
+            PlaceholderVariable("siblings", ("relatives", ))
+            ),
     }
     
     single_operands = {

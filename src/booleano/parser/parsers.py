@@ -88,6 +88,9 @@ class Parser(object):
         grp_start = Suppress(self._grammar.get_token("group_start"))
         grp_end = Suppress(self._grammar.get_token("group_end"))
         
+        # Making the set-specific operations:
+        belongs_to = Suppress(self._grammar.get_token("belongs_to"))
+        
         # Making the relational operations:
         t_eq = self._grammar.get_token("eq")
         t_ne = self._grammar.get_token("ne")
@@ -124,6 +127,7 @@ class Parser(object):
             operand,
             [
                 (relationals, 2, opAssoc.LEFT, self.make_relational),
+                (belongs_to, 2, opAssoc.LEFT, self.make_belongs_to),
                 #(not_, 1, opAssoc.RIGHT),
                 (and_, 2, opAssoc.LEFT, self.make_and),
                 (ex_or, 2, opAssoc.LEFT, self.make_xor),
@@ -293,6 +297,15 @@ class Parser(object):
         operation = self.__operations__[operator]
         
         return operation(left_op, right_op)
+    
+    def make_belongs_to(self, tokens):
+        """
+        Make a **belongs to** operation using the operands passed in ``tokens``.
+        
+        """
+        element = tokens[0][0]
+        set_ = tokens[0][1]
+        return BelongsTo(element, set_)
     
     def make_and(self, tokens):
         """Make an *And* connective using the tokens passed."""
