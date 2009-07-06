@@ -94,6 +94,32 @@ class TestDefaultGrammar(BaseGrammarTest):
             PlaceholderVariable("yesterday", ("days",))),
         '3.00 <= Pi': LessEqual(Number(3.0), PlaceholderVariable("pi")),
         'Pi <= 3.00': LessEqual(PlaceholderVariable("pi"), Number(3.00)),
+        # Logical connectives:
+        'today_will_rain() & Pi > 3.0': And(
+            PlaceholderFunction("today_will_rain"),
+            GreaterThan(PlaceholderVariable("Pi"), Number(3.0))
+            ),
+        'weather:today_rains & Pi > e & today_is_monday()': And(
+            PlaceholderVariable("today_rains", ("weather", )),
+            And(
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e")),
+                PlaceholderFunction("today_is_monday")
+                )
+            ),
+        'weather:today_rains & (Pi > e & today_is_monday())': And(
+            PlaceholderVariable("today_rains", ("weather", )),
+            And(
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e")),
+                PlaceholderFunction("today_is_monday")
+                )
+            ),
+        '(weather:today_rains & Pi > e) & today_is_monday()': And(
+            And(
+                PlaceholderVariable("today_rains", ("weather", )),
+                GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e"))
+                ),
+            PlaceholderFunction("today_is_monday")
+            ),
     }
     
     single_operands = {

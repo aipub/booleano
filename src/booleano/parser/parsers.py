@@ -114,7 +114,7 @@ class Parser(object):
         
         # Making the logical connectives:
         not_ = CaselessLiteral(self._grammar.get_token("not"))
-        and_ = CaselessLiteral(self._grammar.get_token("and"))
+        and_ = Suppress(self._grammar.get_token("and"))
         in_or = CaselessLiteral(self._grammar.get_token("or"))
         ex_or = CaselessLiteral(self._grammar.get_token("xor"))
         or_ = in_or | ex_or
@@ -126,7 +126,7 @@ class Parser(object):
             [
                 (relationals, 2, opAssoc.LEFT, self.make_relational),
                 #(not_, 1, opAssoc.RIGHT),
-                (and_, 2, opAssoc.LEFT),
+                (and_, 2, opAssoc.LEFT, self.make_and),
                 (or_, 2, opAssoc.LEFT),
             ]
         )
@@ -283,6 +283,23 @@ class Parser(object):
     def make_set(self, tokens):
         """Make a Set using the token passed."""
         return Set(*tokens[0])
+    
+    def make_and(self, tokens):
+        """Make an *And* connective using the tokens passed."""
+        operands = tokens[0]
+        
+        if len(operands) > 2:
+            # We're going to build the And operation from right to left, so it
+            # can be evaluated from left to right (a LIFO approach).
+            operation = And(operands[-2], operands[-1])
+            operands = operands[:-2]
+            operands.reverse()
+            for operand in operands:
+                operation = And(operand, operation)
+        else:
+            operation = And(operands[0], operands[1])
+        
+        return operation
     
     def make_relational(self, tokens):
         """Make a relational operation using the tokens passed."""
