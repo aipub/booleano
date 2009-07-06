@@ -284,23 +284,6 @@ class Parser(object):
         """Make a Set using the token passed."""
         return Set(*tokens[0])
     
-    def make_and(self, tokens):
-        """Make an *And* connective using the tokens passed."""
-        operands = tokens[0]
-        
-        if len(operands) > 2:
-            # We're going to build the And operation from right to left, so it
-            # can be evaluated from left to right (a LIFO approach).
-            operation = And(operands[-2], operands[-1])
-            operands = operands[:-2]
-            operands.reverse()
-            for operand in operands:
-                operation = And(operand, operation)
-        else:
-            operation = And(operands[0], operands[1])
-        
-        return operation
-    
     def make_relational(self, tokens):
         """Make a relational operation using the tokens passed."""
         left_op = tokens[0][0]
@@ -310,6 +293,29 @@ class Parser(object):
         operation = self.__operations__[operator]
         
         return operation(left_op, right_op)
+    
+    def make_and(self, tokens):
+        """Make an *And* connective using the tokens passed."""
+        return self.__make_binary_connective__(And, tokens[0])
+    
+    def __make_binary_connective__(self, operation_class, operands):
+        """
+        Return an operation represented by the binary connective 
+        ``operation_class`` and its ``operands``.
+        
+        """
+        if len(operands) == 2:
+            operation = operation_class(operands[0], operands[1])
+        else:
+            # We're going to build the operation from right to left, so it
+            # can be evaluated from left to right (a LIFO approach).
+            operation = operation_class(operands[-2], operands[-1])
+            operands = operands[:-2]
+            operands.reverse()
+            for operand in operands:
+                operation = operation_class(operand, operation)
+        
+        return operation
     
     #}
 
