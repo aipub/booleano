@@ -64,6 +64,39 @@ class TestDefaultGrammar(BaseGrammarTest):
             PlaceholderFunction("get_parents", None, String("Gustavo")),
             Set(String("Liliana"), String("Carlos"))
             ),
+        # Set-specific operations:
+        u'"hi" ∈ {"hi", "bye"}': BelongsTo(
+            String("hi"),
+            Set(String("hi"), String("bye"))
+            ),
+        u'salutation ∈ {"hi", "bye"}': BelongsTo(
+            PlaceholderVariable("salutation"),
+            Set(String("hi"), String("bye"))
+            ),
+        u'"good morning" ∈ salutations': BelongsTo(
+            String("good morning"),
+            PlaceholderVariable("salutations")
+            ),
+        u'relatives:sister ∈ relatives:siblings': BelongsTo(
+            PlaceholderVariable("sister", ("relatives", )),
+            PlaceholderVariable("siblings", ("relatives", ))
+            ),
+        u'{"hi", "bye"} ⊂ {"hello", "hi", "bye"}': IsSubset(
+            Set(String("hi"), String("bye")),
+            Set(String("hello"), String("hi"), String("bye"))
+            ),
+        u'salutations ⊂ {"morning", "hi", "bye", "later"}': IsSubset(
+            PlaceholderVariable("salutations"),
+            Set(String("morning"), String("hi"), String("bye"), String("later"))
+            ),
+        u'{"hi", "bye"} ⊂ salutations': IsSubset(
+            Set(String("hi"), String("bye")),
+            PlaceholderVariable("salutations")
+            ),
+        u'relatives:siblings ⊂ relatives:everyone': IsSubset(
+            PlaceholderVariable("siblings", ("relatives", )),
+            PlaceholderVariable("everyone", ("relatives", ))
+            ),
         # Relational operations:
         'now == today:time': Equal(PlaceholderVariable("now"),
                                    PlaceholderVariable("time", ("today", ))),
@@ -169,39 +202,6 @@ class TestDefaultGrammar(BaseGrammarTest):
                 GreaterThan(PlaceholderVariable("Pi"), PlaceholderVariable("e"))
                 ),
             PlaceholderFunction("today_is_monday")
-            ),
-        # Set-specific operations:
-        u'"hi" ∈ {"hi", "bye"}': BelongsTo(
-            String("hi"),
-            Set(String("hi"), String("bye"))
-            ),
-        u'salutation ∈ {"hi", "bye"}': BelongsTo(
-            PlaceholderVariable("salutation"),
-            Set(String("hi"), String("bye"))
-            ),
-        u'"good morning" ∈ salutations': BelongsTo(
-            String("good morning"),
-            PlaceholderVariable("salutations")
-            ),
-        u'relatives:sister ∈ relatives:siblings': BelongsTo(
-            PlaceholderVariable("sister", ("relatives", )),
-            PlaceholderVariable("siblings", ("relatives", ))
-            ),
-        u'{"hi", "bye"} ⊂ {"hello", "hi", "bye"}': IsSubset(
-            Set(String("hi"), String("bye")),
-            Set(String("hello"), String("hi"), String("bye"))
-            ),
-        u'salutations ⊂ {"morning", "hi", "bye", "later"}': IsSubset(
-            PlaceholderVariable("salutations"),
-            Set(String("morning"), String("hi"), String("bye"), String("later"))
-            ),
-        u'{"hi", "bye"} ⊂ salutations': IsSubset(
-            Set(String("hi"), String("bye")),
-            PlaceholderVariable("salutations")
-            ),
-        u'relatives:siblings ⊂ relatives:everyone': IsSubset(
-            PlaceholderVariable("siblings", ("relatives", )),
-            PlaceholderVariable("everyone", ("relatives", ))
             ),
     }
     
