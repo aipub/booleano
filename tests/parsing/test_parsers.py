@@ -175,9 +175,13 @@ class TestDefaultGrammar(BaseGrammarTest):
             String("hi"),
             Set(String("hi"), String("bye"))
             ),
-        u'greeting ∈ {"hi", "bye"}': BelongsTo(
-            PlaceholderVariable("greeting"),
+        u'salutation ∈ {"hi", "bye"}': BelongsTo(
+            PlaceholderVariable("salutation"),
             Set(String("hi"), String("bye"))
+            ),
+        u'"good morning" ∈ salutations': BelongsTo(
+            String("good morning"),
+            PlaceholderVariable("salutations")
             ),
         u'relatives:sister ∈ relatives:siblings': BelongsTo(
             PlaceholderVariable("sister", ("relatives", )),
@@ -403,6 +407,19 @@ class TestDefaultGrammar(BaseGrammarTest):
         "{element 1, element 2}",
         "{element1; element2; element3}",
         "{element == 'string'}",
+        # Default operators:
+        "==",
+        "!=",
+        "<",
+        ">",
+        "<=",
+        ">=",
+        "~",
+        "&",
+        "^",
+        "|",
+        u"∈",
+        u"⊂",
         # Miscellaneous:
         "-",
         "this is definitely not an operand",
