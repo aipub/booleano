@@ -203,6 +203,233 @@ class TestDefaultGrammar(BaseGrammarTest):
                 ),
             PlaceholderFunction("today_is_monday")
             ),
+        # Checking operator precedence rules:
+        'today == "monday" & yesterday != "sunday" ^ Y > 0': Xor(
+            And(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        '(today == "monday" & yesterday != "sunday") ^ Y > 0': Xor(
+            And(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'today == "monday" & (yesterday != "sunday" ^ Y > 0)': And(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            Xor(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" ^ yesterday != "sunday" & Y > 0': Xor(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            And(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" ^ (yesterday != "sunday" & Y > 0)': Xor(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            And(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        '(today == "monday" ^ yesterday != "sunday") & Y > 0': And(
+            Xor(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'today == "monday" & yesterday != "sunday" | Y > 0': Or(
+            And(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        '(today == "monday" & yesterday != "sunday") | Y > 0': Or(
+            And(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'today == "monday" & (yesterday != "sunday" | Y > 0)': And(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            Or(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" | yesterday != "sunday" & Y > 0': Or(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            And(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" | (yesterday != "sunday" & Y > 0)': Or(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            And(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        '(today == "monday" | yesterday != "sunday") & Y > 0': And(
+            Or(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'today == "monday" ^ yesterday != "sunday" | Y > 0': Or(
+            Xor(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        '(today == "monday" ^ yesterday != "sunday") | Y > 0': Or(
+            Xor(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'today == "monday" ^ (yesterday != "sunday" | Y > 0)': Xor(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            Or(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" | yesterday != "sunday" ^ Y > 0': Or(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            Xor(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        'today == "monday" | (yesterday != "sunday" ^ Y > 0)': Or(
+            Equal(PlaceholderVariable("today"), String("monday")),
+            Xor(
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday")),
+                GreaterThan(PlaceholderVariable("Y"), Number(0))
+                ),
+            ),
+        '(today == "monday" | yesterday != "sunday") ^ Y > 0': Xor(
+            Or(
+                Equal(PlaceholderVariable("today"), String("monday")),
+                NotEqual(PlaceholderVariable("yesterday"), String("sunday"))
+                ),
+            GreaterThan(PlaceholderVariable("Y"), Number(0))
+            ),
+        'W == 0   &   X != 1   ^   Y > 2   |   Z < 3': Or(
+            Xor(
+                And(
+                    Equal(PlaceholderVariable("W"), Number(0)),
+                    NotEqual(PlaceholderVariable("X"), Number(1))
+                    ),
+                GreaterThan(PlaceholderVariable("Y"), Number(2))
+                ),
+            LessThan(PlaceholderVariable("Z"), Number(3))
+            ),
+        'W == 0   |   X != 1   ^   Y > 2   &   Z < 3': Or(
+            Equal(PlaceholderVariable("W"), Number(0)),
+            Xor(
+                NotEqual(PlaceholderVariable("X"), Number(1)),
+                And(
+                    GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                    LessThan(PlaceholderVariable("Z"), Number(3))
+                    ),
+                ),
+            ),
+        'W == 0   |   (X != 1   ^   (Y > 2   &   Z < 3))': Or(
+            Equal(PlaceholderVariable("W"), Number(0)),
+            Xor(
+                NotEqual(PlaceholderVariable("X"), Number(1)),
+                And(
+                    GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                    LessThan(PlaceholderVariable("Z"), Number(3))
+                    ),
+                ),
+            ),
+        '(W == 0   |   X != 1)   ^   (Y > 2   &   Z < 3)': Xor(
+            Or(
+               Equal(PlaceholderVariable("W"), Number(0)),
+               NotEqual(PlaceholderVariable("X"), Number(1))
+               ),
+            And(
+                GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                LessThan(PlaceholderVariable("Z"), Number(3))
+                )
+            ),
+        '(W == 0   |   X != 1   ^   Y > 2)   &   Z < 3': And(
+            Or(
+               Equal(PlaceholderVariable("W"), Number(0)),
+               Xor(
+                   NotEqual(PlaceholderVariable("X"), Number(1)),
+                   GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                   )
+               ),
+            LessThan(PlaceholderVariable("Z"), Number(3))
+            ),
+        '((W == 0   |   X != 1)   ^   Y > 2)   &   Z < 3': And(
+            Xor(
+                Or(
+                   Equal(PlaceholderVariable("W"), Number(0)),
+                   NotEqual(PlaceholderVariable("X"), Number(1))
+                   ),
+                GreaterThan(PlaceholderVariable("Y"), Number(2))
+                ),
+            LessThan(PlaceholderVariable("Z"), Number(3))
+            ),
+        '(W == 0   |   (X != 1   ^   Y > 2))   &   Z < 3': And(
+            Or(
+                Equal(PlaceholderVariable("W"), Number(0)),
+                Xor(
+                   NotEqual(PlaceholderVariable("X"), Number(1)),
+                   GreaterThan(PlaceholderVariable("Y"), Number(2))
+                   )
+                ),
+            LessThan(PlaceholderVariable("Z"), Number(3))
+            ),
+        'W == 0   |   (X != 1   ^   Y > 2   &   Z < 3)': Or(
+            Equal(PlaceholderVariable("W"), Number(0)),
+            Xor(
+                NotEqual(PlaceholderVariable("X"), Number(1)),
+                And(
+                    GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                    LessThan(PlaceholderVariable("Z"), Number(3))
+                    )
+                )
+            ),
+        'W == 0   |   (X != 1   ^   (Y > 2   &   Z < 3))': Or(
+            Equal(PlaceholderVariable("W"), Number(0)),
+            Xor(
+                NotEqual(PlaceholderVariable("X"), Number(1)),
+                And(
+                    GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                    LessThan(PlaceholderVariable("Z"), Number(3))
+                    )
+                )
+            ),
+        'W == 0   |   ((X != 1   ^   Y > 2)   &   Z < 3)': Or(
+            Equal(PlaceholderVariable("W"), Number(0)),
+            And(
+                Xor(
+                    NotEqual(PlaceholderVariable("X"), Number(1)),
+                    GreaterThan(PlaceholderVariable("Y"), Number(2)),
+                    ),
+                LessThan(PlaceholderVariable("Z"), Number(3))
+                )
+            ),
     }
     
     single_operands = {
