@@ -35,7 +35,7 @@ import re
 from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
     nums, operatorPrecedence, opAssoc, Forward, ParseException, removeQuotes,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
-    Regex, Literal, delimitedList)
+    Regex, Literal, delimitedList, ParserElement)
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
@@ -46,6 +46,9 @@ from booleano.exc import BadExpressionError
 
 
 __all__ = ("EvaluableParser", "ConvertibleParser")
+
+# Let's enable packrat. It could make parsing even 33810x faster!
+ParserElement.enablePackrat()
 
 
 class Parser(object):
