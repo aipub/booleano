@@ -128,6 +128,63 @@ class TestDefaultGrammar(BaseGrammarTest):
         '3.00 <= Pi': LessEqual(Number(3.0), PlaceholderVariable("pi")),
         'Pi <= 3.00': LessEqual(PlaceholderVariable("pi"), Number(3.00)),
         # Logical connectives:
+        '~today_will_rain()': Not(PlaceholderFunction("today_will_rain")),
+        '~(today_will_rain())': Not(PlaceholderFunction("today_will_rain")),
+        '~ today_will_rain()': Not(PlaceholderFunction("today_will_rain")),
+        '~~today_will_rain()': Not(Not(PlaceholderFunction("today_will_rain"))),
+        '~ today_is_friday': Not(PlaceholderVariable("today_is_friday")),
+        '~ time:days:today > "1999-06-01"': Not(
+            GreaterThan(
+                  PlaceholderVariable("today", ("time", "days")),
+                  String("1999-06-01")
+                  )
+            ),
+        '~ (time:days:today > "1999-06-01")': Not(
+            GreaterThan(
+                  PlaceholderVariable("today", ("time", "days")),
+                  String("1999-06-01")
+                  )
+            ),
+        '~ today_is_friday & today_will_rain': And(
+            Not(PlaceholderVariable("today_is_friday")),
+            PlaceholderVariable("today_will_rain")
+            ),
+        '~ today_is_friday & ~ today_will_rain': And(
+            Not(PlaceholderVariable("today_is_friday")),
+            Not(PlaceholderVariable("today_will_rain"))
+            ),
+        'today_is_friday & ~ today_will_rain': And(
+            PlaceholderVariable("today_is_friday"),
+            Not(PlaceholderVariable("today_will_rain"))
+            ),
+        '~ (today_is_friday & today_will_rain)': Not(And(
+            PlaceholderVariable("today_is_friday"),
+            PlaceholderVariable("today_will_rain")
+            )),
+        '~ X > 3 & Z < X': And(
+            Not(GreaterThan(PlaceholderVariable("X"), Number(3))),
+            LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X"))
+            ),
+        '~ X > 3 & ~ Z < X': And(
+            Not(GreaterThan(PlaceholderVariable("X"), Number(3))),
+            Not(LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X")))
+            ),
+        'X > 3 & ~ Z < X': And(
+            GreaterThan(PlaceholderVariable("X"), Number(3)),
+            Not(LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X")))
+            ),
+        '~ (X > 3 & Z < X)': Not(And(
+            GreaterThan(PlaceholderVariable("X"), Number(3)),
+            LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X"))
+            )),
+        '~ (X > 3 ^ Z < X)': Not(Xor(
+            GreaterThan(PlaceholderVariable("X"), Number(3)),
+            LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X"))
+            )),
+        '~ (X > 3 | Z < X)': Not(Or(
+            GreaterThan(PlaceholderVariable("X"), Number(3)),
+            LessThan(PlaceholderVariable("Z"), PlaceholderVariable("X"))
+            )),
         'today_will_rain() & Pi > 3.0': And(
             PlaceholderFunction("today_will_rain"),
             GreaterThan(PlaceholderVariable("Pi"), Number(3.0))

@@ -120,7 +120,7 @@ class Parser(object):
         }
         
         # Making the logical connectives:
-        not_ = CaselessLiteral(self._grammar.get_token("not"))
+        not_ = Suppress(self._grammar.get_token("not"))
         and_ = Suppress(self._grammar.get_token("and"))
         in_or = Suppress(self._grammar.get_token("or"))
         ex_or = Suppress(self._grammar.get_token("xor"))
@@ -133,7 +133,7 @@ class Parser(object):
                 (relationals, 2, opAssoc.LEFT, self.make_relational),
                 (belongs_to, 2, opAssoc.LEFT, self.make_belongs_to),
                 (is_subset, 2, opAssoc.LEFT, self.make_is_subset),
-                #(not_, 1, opAssoc.RIGHT),
+                (not_, 1, opAssoc.RIGHT, self.make_not),
                 (and_, 2, opAssoc.LEFT, self.make_and),
                 (ex_or, 2, opAssoc.LEFT, self.make_xor),
                 (in_or, 2, opAssoc.LEFT, self.make_or),
@@ -319,6 +319,10 @@ class Parser(object):
         subset = tokens[0][0]
         superset = tokens[0][1]
         return IsSubset(subset, superset)
+    
+    def make_not(self, tokens):
+        """Make an *Not* connective using the token passed."""
+        return Not(tokens[0][0])
     
     def make_and(self, tokens):
         """Make an *And* connective using the tokens passed."""
