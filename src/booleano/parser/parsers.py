@@ -105,7 +105,7 @@ class Parser(object):
         gt = CaselessLiteral(t_gt)
         le = CaselessLiteral(t_le)
         ge = CaselessLiteral(t_ge)
-        relationals = eq ^ ne ^ lt ^ gt ^ le ^ ge
+        relationals = eq | ne | lt | gt | le | ge
         # TODO: Avoid doing this:
         self.__operations__ = {
             t_eq: Equal,
@@ -171,8 +171,7 @@ class Parser(object):
         variable.addParseAction(self.make_variable)
         
         # Defining the functions:
-        function_name = identifier.copy()
-        function_name = function_name.setResultsName("function_name")
+        function_name = identifier.setResultsName("function_name")
         function_name.setName("function_name")
         args_start = Suppress(self._grammar.get_token("arguments_start"))
         args_end = Suppress(self._grammar.get_token("arguments_end"))
@@ -180,7 +179,8 @@ class Parser(object):
         arguments = Optional(Group(delimitedList(operand, delim=args_sep)),
                              default=())
         arguments = arguments.setResultsName("arguments")
-        function = Group(function_name + args_start + arguments + args_end)
+        arguments.setParseAction(lambda tokens: tokens[0])
+        function = function_name + args_start + arguments + args_end
         function.setName("function")
         function.setParseAction(self.make_function)
         
@@ -242,26 +242,25 @@ class Parser(object):
         Return the syntax definition for an identifier.
         
         """
-        # Defining the individual identifiers:
-        def first_not_a_number(tokens):
-            if tokens[0][0].isdigit():
-                raise ParseException('"%s" must not start by a number for it '
-                                     'to be an identifier' % tokens[0])
+        # --- Defining the individual identifiers:
+        # Getting all the Unicode numbers in a single string:
+        unicode_numbers = "".join([unichr(n) for n in xrange(0x10000)
+                                   if unichr(n).isdigit()])
+        unicode_number_expr = Regex("[%s]" % unicode_numbers, re.UNICODE)
         space_char = re.escape(self._grammar.get_token("identifier_spacing"))
         identifier0 = Regex("[\w%s]+" % space_char, re.UNICODE)
-        identifier0.setParseAction(first_not_a_number)
+        # Identifiers cannot start with a number:
+        identifier0 = Combine(~unicode_number_expr + identifier0)
         identifier0.setName("individual_identifier")
         
-        # Now let's include the full identifier definition, which includes
-        # namespaces:
+        # --- Defining the namespaces:
         namespace_sep = Suppress(self._grammar.get_token("namespace_separator"))
         namespace = Group(ZeroOrMore(identifier0 + namespace_sep))
         namespace.setName("namespace")
         
-        # Finally, let's build the full identifier, which could have a
-        # namespace:
-        identifier = (namespace.setResultsName("namespace_parts") +
-                      identifier0.setResultsName("identifier"))
+        # --- The full identifier, which could have a namespace:
+        identifier = Combine(namespace.setResultsName("namespace_parts") +
+                             identifier0.setResultsName("identifier"))
         identifier.setName("full_identifier")
         
         return identifier
@@ -391,7 +390,8 @@ class ConvertibleParser(Parser):
     
     def make_function(self, tokens):
         """Make a Placeholder function using the token passed."""
-        tokens = tokens[0]
-        return PlaceholderFunction(tokens.identifier, tokens.namespace_parts,
-                                   *tokens.arguments[0])
+        function = tokens.function_name
+        return PlaceholderFunction(function.identifier,
+                                   function.namespace_parts,
+                                   *tokens.arguments)
 
