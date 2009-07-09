@@ -105,7 +105,7 @@ class Parser(object):
         gt = CaselessLiteral(t_gt)
         le = CaselessLiteral(t_le)
         ge = CaselessLiteral(t_ge)
-        relationals = eq | ne | lt | gt | le | ge
+        relationals = eq | ne | le | ge | lt | gt
         # TODO: Avoid doing this:
         self.__operations__ = {
             t_eq: Equal,
