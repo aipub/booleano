@@ -31,7 +31,6 @@ Test suite for the built-in parser implementation.
 """
 
 from booleano.parser import Grammar
-from booleano.parser.scope import Namespace
 from booleano.parser.testutils import BaseGrammarTest
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
