@@ -29,7 +29,7 @@
 Converters for Booleano parse tree structures.
 
 """
-from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
+from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, PlaceholderVariable, PlaceholderFunction)
 from booleano.operations.operators import UnaryOperator
@@ -43,7 +43,6 @@ class BaseConverter(object):
     
     converters = {
         # Operation converters:
-        Truth: "convert_truth",
         Not: "convert_not",
         And: "convert_and",
         Or: "convert_or",
@@ -121,15 +120,6 @@ class BaseConverter(object):
         return convert(master_operand, slave_operand)
     
     #{ Operation converters
-    
-    def convert_truth(self, operand):
-        """
-        Convert truth function whose argument is ``operand``.
-        
-        :param operand: The argument already converted.
-        
-        """
-        raise NotImplementedError
     
     def convert_not(self, operand):
         """

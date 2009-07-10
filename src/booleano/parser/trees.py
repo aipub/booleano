@@ -35,8 +35,6 @@ Booleano supports two kinds of parse trees:
 
 """
 
-from booleano.operations import Truth
-
 __all__ = ("EvaluableParseTree", "ConvertibleParseTree")
 
 
@@ -71,7 +69,7 @@ class EvaluableParseTree(ParseTree):
             doesn't support logical values.
         
         """
-        root_node = Truth.convert(root_node)
+        root_node.check_logical_support()
         super(EvaluableParseTree, self).__init__(root_node)
     
     def __call__(self, **helpers):

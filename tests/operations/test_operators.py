@@ -32,8 +32,8 @@ Tests for the operators.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
+from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
 from booleano.operations.operators import Operator
 from booleano.operations.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
@@ -68,62 +68,6 @@ class TestOperator(object):
         assert_raises(InvalidOperationError, bool, op)
 
 
-class TestTruth(object):
-    """Tests for the :class:`Truth`."""
-    
-    def test_constructor_with_boolean_operand(self):
-        traffic_light = TrafficLightVar()
-        Truth(traffic_light)
-    
-    @raises(InvalidOperationError)
-    def test_constructor_with_non_boolean_operand(self):
-        # Constants cannot act as booleans
-        constant = String("Paris")
-        Truth(constant)
-    
-    def test_evaluation(self):
-        # Setup:
-        traffic_light = TrafficLightVar()
-        operation = Truth(traffic_light)
-        # Evaluation:
-        ok_(operation( **dict(traffic_light="green") ))
-        assert_false(operation( **dict(traffic_light="") ))
-    
-    def test_equivalence(self):
-        """
-        Two truth operations are equivalent if they evaluate the same operand.
-        
-        """
-        op1 = Truth(BoolVar())
-        op2 = Truth(BoolVar())
-        op3 = Truth(PedestriansCrossingRoad())
-        
-        op1.check_equivalence(op2)
-        op2.check_equivalence(op1)
-        
-        assert_raises(AssertionError, op1.check_equivalence, op3)
-        assert_raises(AssertionError, op2.check_equivalence, op3)
-        assert_raises(AssertionError, op3.check_equivalence, op1)
-        assert_raises(AssertionError, op3.check_equivalence, op2)
-        
-        ok_(op1 == op2)
-        ok_(op2 == op1)
-        ok_(op1 != op3)
-        ok_(op2 != op3)
-        ok_(op3 != op1)
-        ok_(op3 != op2)
-    
-    def test_string_representation(self):
-        op = Truth(BoolVar())
-        as_unicode = unicode(op)
-        eq_(as_unicode, "Truth(Anonymous variable [BoolVar])")
-        eq_(as_unicode, str(op))
-    
-    def test_representation(self):
-        op = Truth(BoolVar())
-        eq_(repr(op), '<Truth <Anonymous variable [BoolVar]>>')
-
-
 class TestNot(object):
     """Tests for the :class:`Not`."""
     
@@ -134,7 +78,7 @@ class TestNot(object):
     def test_constructor_with_operator(self):
         """The Not operator must also support operators as operands"""
         traffic_light = TrafficLightVar()
-        Not(Truth(traffic_light))
+        Not(And(traffic_light, traffic_light))
     
     @raises(InvalidOperationError)
     def test_constructor_with_non_boolean_operand(self):

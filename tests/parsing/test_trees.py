@@ -76,13 +76,12 @@ class TestEvaluableTrees(object):
     def test_string(self):
         tree = EvaluableParseTree(BoolVar())
         as_unicode = unicode(tree)
-        expected = "Evaluable parse tree (Truth(Anonymous variable [BoolVar]))"
+        expected = "Evaluable parse tree (Anonymous variable [BoolVar])"
         eq_(as_unicode, expected)
     
     def test_representation(self):
         tree = EvaluableParseTree(BoolVar())
-        expected = "<Parse tree (evaluable) <Truth " \
-                   "<Anonymous variable [BoolVar]>>>"
+        expected = "<Parse tree (evaluable) <Anonymous variable [BoolVar]>>"
         eq_(repr(tree), expected)
 
 

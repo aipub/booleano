@@ -43,8 +43,8 @@ __all__ = (
     "String", "Number", "Set", "Variable", "Function", "PlaceholderVariable",
     "PlaceholderFunction",
     # Operators:
-    "Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
-    "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset",
+    "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan", "GreaterThan",
+    "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset",
 )
 
 
@@ -237,6 +237,6 @@ class OperationNode(object):
 # this namespace:
 from booleano.operations.operands import (String, Number, Set, Variable,
     Function, PlaceholderVariable, PlaceholderFunction, Operand)
-from booleano.operations.operators import (Truth, Not, And, Or, Xor, Equal,
-    NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
-    IsSubset, Operator)
+from booleano.operations.operators import (Not, And, Or, Xor, Equal, NotEqual,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
+    Operator)

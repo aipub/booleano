@@ -32,9 +32,9 @@ Tests for the parse tree converters.
 from nose.tools import eq_, assert_raises, raises
 
 from booleano.converters import BaseConverter
-from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, PlaceholderVariable, PlaceholderFunction)
+from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
+    Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import ConversionError
 
 from tests import AntiConverter
@@ -54,7 +54,6 @@ class TestBaseConverter(object):
         assert_raises(NotImplementedError, conv.convert_set, None)
         assert_raises(NotImplementedError, conv.convert_variable, None, ())
         assert_raises(NotImplementedError, conv.convert_function, None, ())
-        assert_raises(NotImplementedError, conv.convert_truth, None)
         assert_raises(NotImplementedError, conv.convert_not, None)
         assert_raises(NotImplementedError, conv.convert_and, None, None)
         assert_raises(NotImplementedError, conv.convert_or, None, None)
@@ -88,11 +87,6 @@ class TestActualConverter(object):
                             PlaceholderFunction("where_am_i", None),
                             String("Paris")),
         # Unary operators:
-        Truth(PlaceholderVariable("street_light", None)),
-        Truth(
-            PlaceholderFunction("near_paris", None,
-                                PlaceholderVariable("me", None))
-            ),
         Not(PlaceholderFunction("near_paris",
                                 None,
                                 PlaceholderVariable("moon", None))),

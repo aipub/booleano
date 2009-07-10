@@ -34,7 +34,7 @@ from booleano.operations import OPERATIONS, OperationNode
 from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError
 
-__all__ = ("Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
+__all__ = ("Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
            "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset")
 
 
@@ -190,92 +190,22 @@ class BinaryOperator(Operator):
         Return the Unicode representation for this binary operator, including
         its operands.
         
-        If one of the operands is wrapped around a truth operation, such a 
-        truth operation will be ignored in the representation.
-        
         """
-        if isinstance(self.master_operand, Truth):
-            master_operand = self.master_operand.operand
-        else:
-            master_operand = self.master_operand
-            
-        if isinstance(self.slave_operand, Truth):
-            slave_operand = self.slave_operand.operand
-        else:
-            slave_operand = self.slave_operand
-        
-        return u"%s(%s, %s)" % (self.__class__.__name__, master_operand,
-                                slave_operand)
+        return u"%s(%s, %s)" % (self.__class__.__name__, self.master_operand,
+                                self.slave_operand)
     
     def __repr__(self):
         """
         Return the representation for this binary operator, including its
         operands.
         
-        If one of the operands is wrapped around a truth operation, such a 
-        truth operation will be ignored in the representation.
-        
         """
-        if isinstance(self.master_operand, Truth):
-            master_operand = self.master_operand.operand
-        else:
-            master_operand = self.master_operand
-            
-        if isinstance(self.slave_operand, Truth):
-            slave_operand = self.slave_operand.operand
-        else:
-            slave_operand = self.slave_operand
-        
-        return "<%s %s %s>" % (self.__class__.__name__, repr(master_operand),
-                               repr(slave_operand))
+        return "<%s %s %s>" % (self.__class__.__name__,
+                               repr(self.master_operand),
+                               repr(self.slave_operand))
 
 
 #{ Unary operators
-
-
-class Truth(UnaryOperator):
-    """
-    The truth function.
-    
-    This is just a wrapper around the operand in order to get its truth value,
-    useful for other operators to check the logical value of one operand.
-    
-    In other words, this enables us to use an operand as a boolean expression.
-    
-    """
-    
-    def __init__(self, operand):
-        """
-        Check that ``operand`` supports boolean operations before storing it.
-        
-        :param operand: The operand in question.
-        :type operand: :class:`booleano.operations.operands.Operand`
-        :raises InvalidOperationError: If the ``operand`` doesn't support
-            boolean operations.
-        
-        """
-        operand.check_operation("boolean")
-        super(Truth, self).__init__(operand)
-    
-    def __call__(self, **helpers):
-        """Return the logical value of the operand."""
-        return self.operand(**helpers)
-    
-    @classmethod
-    def convert(cls, operand):
-        """
-        Turn ``operand`` into a truth operator, unless it's already an operator.
-        
-        :param operand: The operand to be converted.
-        :type operand: Operand or Operator
-        :return: The ``operand`` turned into a truth operator if it was an
-            actual operand; otherwise it'd be returned as is.
-        :rtype: Operator
-        
-        """
-        if not isinstance(operand, Operator):
-            return cls(operand)
-        return operand
 
 
 class Not(UnaryOperator):
@@ -287,8 +217,14 @@ class Not(UnaryOperator):
     """
     
     def __init__(self, operand):
-        """Turn ``operand`` into a truth operator before storing it."""
-        operand = Truth.convert(operand)
+        """
+        Turn ``operand`` into a truth operator before storing it.
+        
+        :raises InvalidOperationError: If ``operand`` doesn't have a logical
+            value.
+        
+        """
+        operand.check_logical_support()
         super(Not, self).__init__(operand)
     
     def __call__(self, **helpers):
@@ -297,27 +233,14 @@ class Not(UnaryOperator):
     
     def __unicode__(self):
         """
-        Return the Unicode representation for this operator and its operand,
-        removing the Truth function if present.
+        Return the Unicode representation for this operator and its operand.
         
         """
-        if isinstance(self.operand, Truth):
-            operand = unicode(self.operand.operand)
-        else:
-            operand = unicode(self.operand)
-        return u"%s(%s)" % (self.__class__.__name__, operand)
+        return u"%s(%s)" % (self.__class__.__name__, self.operand)
     
     def __repr__(self):
-        """
-        Return the representation for this operator and its operand,
-        removing the Truth function if present.
-        
-        """
-        if isinstance(self.operand, Truth):
-            operand = repr(self.operand.operand)
-        else:
-            operand = repr(self.operand)
-        return "<%s %s>" % (self.__class__.__name__, operand)
+        """Return the representation for this operator and its operand."""
+        return "<%s %s>" % (self.__class__.__name__, repr(self.operand))
 
 
 #{ Binary operators
@@ -332,12 +255,14 @@ class _ConnectiveOperator(BinaryOperator):
     
     def __init__(self, left_operand, right_operand):
         """
-        Turn the operands into truth operators so we can manipulate their
-        logic value easily and then store them.
+        Make sure both operands have logical values.
+        
+        :raises InvalidOperationError: If ``left_operand`` or ``right_operand``
+            doesn't have logical values.
         
         """
-        left_operand = Truth.convert(left_operand)
-        right_operand = Truth.convert(right_operand)
+        left_operand.check_logical_support()
+        right_operand.check_logical_support()
         super(_ConnectiveOperator, self).__init__(left_operand, right_operand)
 
 
@@ -348,9 +273,7 @@ class And(_ConnectiveOperator):
     Connective that checks if two operations evaluate to ``True``.
     
     With this binary operator, the operands can be actual operands or
-    operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`Truth`) so that they can be evaluated
-    as an operation.
+    operations.
     
     """
     
@@ -367,9 +290,7 @@ class Or(_ConnectiveOperator):
     ``True``.
     
     With this binary operator, the operands can be actual operands or
-    operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`Truth`) so that they can be evaluated
-    as an operation.
+    operations.
     
     """
     
@@ -386,9 +307,7 @@ class Xor(_ConnectiveOperator):
     ``True``.
     
     With this binary operator, the operands can be actual operands or
-    operations. If they are actual operands, they'll be wrapped around an
-    boolean operation (see :class:`Truth`) so that they can be evaluated
-    as an operation.
+    operations.
     
     """
     

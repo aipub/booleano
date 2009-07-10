@@ -35,10 +35,9 @@ This module contains utilities shared among the whole test suite.
 import logging
 
 from booleano.converters import BaseConverter
-from booleano.operations import (Truth, Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, Variable, Function, PlaceholderVariable,
-    PlaceholderFunction)
+from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
+    Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import InvalidOperationError, BadCallError
 
 
@@ -259,9 +258,6 @@ class AntiConverter(BaseConverter):
     This is the simplest way to check the converter.
     
     """
-    
-    def convert_truth(self, operand):
-        return Truth(operand)
     
     def convert_not(self, operand):
         return Not(operand)
