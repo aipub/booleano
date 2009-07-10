@@ -56,9 +56,9 @@ class _OperandMeta(type):
         """
         type.__init__(cls, name, bases, ns)
         if not ns.get("bypass_operation_check"):
-            cls.check_operations(name, bases, ns)
+            cls.check_operations(name)
     
-    def check_operations(cls, name, bases, ns):
+    def check_operations(cls, name):
         """
         Check that the operand supports all the relevant methods.
         
