@@ -45,7 +45,7 @@ __all__ = (
 )
 
 
-# Byte flag for the base operations:
+# The known/supported operations:
 OPERATIONS = set((
     "equality",           # ==, !=
     "inequality",         # >, <, >=, <=
