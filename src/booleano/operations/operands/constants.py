@@ -42,7 +42,7 @@ class Constant(Operand):
     The only operation that is common to all the constants is equality (see
     :meth:`equals`).
     
-    Constants don't rely on helpers -- they are constant!
+    Constants don't rely on the context -- they are constant!
     
     .. warning::
         This class is available as the base for the built-in :class:`String`,
@@ -60,14 +60,14 @@ class Constant(Operand):
         """
         self.constant_value = constant_value
     
-    def to_python(self, **helpers):
+    def to_python(self, context):
         """
         Return the value represented by this constant.
         
         """
         return self.constant_value
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """
         Check if this constant equals ``value``.
         
@@ -131,10 +131,10 @@ class String(Constant):
         string = unicode(string)
         super(String, self).__init__(string)
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """Turn ``value`` into a string if it isn't a string yet"""
         value = unicode(value)
-        return super(String, self).equals(value, **helpers)
+        return super(String, self).equals(value, context)
     
     def __unicode__(self):
         """Return the Unicode representation of this constant string."""
@@ -167,7 +167,7 @@ class Number(Constant):
         number = float(number)
         super(Number, self).__init__(number)
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """
         Check if this numeric constant equals ``value``.
         
@@ -178,9 +178,9 @@ class Number(Constant):
         support strings.
         
         """
-        return super(Number, self).equals(self._to_number(value), **helpers)
+        return super(Number, self).equals(self._to_number(value), context)
     
-    def greater_than(self, value, **helpers):
+    def greater_than(self, value, context):
         """
         Check if this numeric constant is greater than ``value``.
         
@@ -193,7 +193,7 @@ class Number(Constant):
         """
         return self.constant_value > self._to_number(value)
     
-    def less_than(self, value, **helpers):
+    def less_than(self, value, context):
         """
         Check if this numeric constant is less than ``value``.
         
@@ -257,21 +257,21 @@ class Set(Constant):
                                             item)
         super(Set, self).__init__(set(items))
     
-    def to_python(self, **helpers):
+    def to_python(self, context):
         """
         Return a set made up of the Python representation of the operands
         contained in this set.
         
         """
-        items = set(item.to_python(**helpers) for item in self.constant_value)
+        items = set(item.to_python(context) for item in self.constant_value)
         return items
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """Check if all the items in ``value`` are the same of this set."""
         value = set(value)
-        return value == self.to_python(**helpers)
+        return value == self.to_python(context)
     
-    def less_than(self, value, **helpers):
+    def less_than(self, value, context):
         """
         Check if this set has less items than the number represented in 
         ``value``.
@@ -289,7 +289,7 @@ class Set(Constant):
                                         'integer')
         return len(self.constant_value) < value
     
-    def greater_than(self, value, **helpers):
+    def greater_than(self, value, context):
         """
         Check if this set has more items than the number represented in 
         ``value``.
@@ -307,26 +307,26 @@ class Set(Constant):
                                         'integer')
         return len(self.constant_value) > value
     
-    def contains(self, value, **helpers):
+    def contains(self, value, context):
         """
         Check that this constant set contains the ``value`` item.
         
         """
         for item in self.constant_value:
             try:
-                if item.equals(value, **helpers):
+                if item.equals(value, context):
                     return True
             except InvalidOperationError:
                 continue
         return False
     
-    def is_subset(self, value, **helpers):
+    def is_subset(self, value, context):
         """
         Check that the ``value`` set is a subset of this constant set.
         
         """
         for item in value:
-            if not self.contains(item, **helpers):
+            if not self.contains(item, context):
                 return False
         return True
     

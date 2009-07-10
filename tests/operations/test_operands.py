@@ -61,19 +61,15 @@ class TestOperand(object):
         """Operands shouldn't support any operation by default"""
         eq_(0, len(self.op.operations))
     
-    def test_required_helpers(self):
-        """Operands shouldn't require any helper by default"""
-        eq_(0, len(self.op.required_helpers))
-    
     def test_operation_methods(self):
         """No operation should be supported by default"""
-        assert_raises(NotImplementedError, self.op.to_python)
-        assert_raises(NotImplementedError, self.op)
-        assert_raises(NotImplementedError, self.op.equals, None)
-        assert_raises(NotImplementedError, self.op.greater_than, None)
-        assert_raises(NotImplementedError, self.op.less_than, None)
-        assert_raises(NotImplementedError, self.op.contains, None)
-        assert_raises(NotImplementedError, self.op.is_subset, None)
+        assert_raises(NotImplementedError, self.op.to_python, None)
+        assert_raises(NotImplementedError, self.op, None)
+        assert_raises(NotImplementedError, self.op.equals, None, None)
+        assert_raises(NotImplementedError, self.op.greater_than, None, None)
+        assert_raises(NotImplementedError, self.op.less_than, None, None)
+        assert_raises(NotImplementedError, self.op.contains, None, None)
+        assert_raises(NotImplementedError, self.op.is_subset, None, None)
     
     def test_no_unicode_by_default(self):
         """Operands must not have a default Unicode representation."""
@@ -93,34 +89,34 @@ class TestOperand(object):
         """Valid operations should just work."""
         class EqualityOperand(Operand):
             operations = set(["equality"])
-            def to_python(self, value, **helpers):
+            def to_python(self, value, context):
                 pass
-            def equals(self, value, **helpers):
+            def equals(self, value, context):
                 pass
         
         class InequalityOperand(Operand):
             operations = set(["inequality"])
-            def to_python(self, value, **helpers):
+            def to_python(self, value, context):
                 pass
-            def less_than(self, value, **helpers):
+            def less_than(self, value, context):
                 pass
-            def greater_than(self, value, **helpers):
+            def greater_than(self, value, context):
                 pass
         
         class BooleanOperand(Operand):
             operations = set(["boolean"])
-            def to_python(self, value, **helpers):
+            def to_python(self, value, context):
                 pass
-            def __call__(self, value, **helpers):
+            def __call__(self, value, context):
                 pass
         
         class MembershipOperand(Operand):
             operations = set(["membership"])
-            def to_python(self, value, **helpers):
+            def to_python(self, value, context):
                 pass
-            def contains(self, value, **helpers):
+            def contains(self, value, context):
                 pass
-            def is_subset(self, value, **helpers):
+            def is_subset(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -140,7 +136,7 @@ class TestOperand(object):
         """Operands must define the .to_python() method."""
         class BadOperand(Operand):
             operations = set(["equality"])
-            def equals(self, value, **helpers):
+            def equals(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -151,7 +147,7 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["boolean"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     @raises(BadOperandError)
@@ -159,7 +155,7 @@ class TestOperand(object):
         """Operands supporting equality must define the .equals() method."""
         class BadOperand(Operand):
             operations = set(["equality"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     @raises(BadOperandError)
@@ -171,7 +167,7 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["inequality"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     @raises(BadOperandError)
@@ -182,9 +178,9 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["inequality"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
-            def greater_than(self, value, **helpers):
+            def greater_than(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -195,9 +191,9 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["inequality"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
-            def less_than(self, value, **helpers):
+            def less_than(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -209,7 +205,7 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["membership"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     @raises(BadOperandError)
@@ -220,9 +216,9 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["membership"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
-            def is_subset(self, value, **helpers):
+            def is_subset(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -233,9 +229,9 @@ class TestOperand(object):
         """
         class BadOperand(Operand):
             operations = set(["membership"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
-            def contains(self, value, **helpers):
+            def contains(self, value, context):
                 pass
     
     def test_bypassing_operation_check(self):
@@ -270,10 +266,10 @@ class TestVariable(object):
         class GreetingVariable(Variable):
             operations = set(["equality"])
             
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
             
-            def equals(self, value, **helpers):
+            def equals(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -281,15 +277,15 @@ class TestVariable(object):
         class GreetingVariable(Variable):
             operations = set(["equality"])
             
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     def test_checking_logical_support(self):
         class GreetingVariable(Variable):
             operations = set(["equality"])
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
-            def equals(self, value, **helpers):
+            def equals(self, value, context):
                 pass
         
         var1 = BoolVar()
@@ -343,10 +339,10 @@ class TestFunction(object):
         class GreetingFunction(Function):
             operations = set(["equality"])
             
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
             
-            def equals(self, value, **helpers):
+            def equals(self, value, context):
                 pass
     
     @raises(BadOperandError)
@@ -354,7 +350,7 @@ class TestFunction(object):
         class GreetingFunction(Function):
             operations = set(["equality"])
             
-            def to_python(self, **helpers):
+            def to_python(self, context):
                 pass
     
     def test_constructor_with_minimum_arguments(self):
@@ -588,25 +584,25 @@ class TestString(object):
     
     def test_python_value(self):
         op = String("carabobo")
-        eq_(op.to_python(), "carabobo")
+        eq_(op.to_python(None), "carabobo")
     
     def test_equality(self):
         op = String("freedomware")
-        ok_(op.equals("freedomware"))
-        assert_false(op.equals(" freedomware "))
-        assert_false(op.equals("microsoftware"))
+        ok_(op.equals("freedomware", None))
+        assert_false(op.equals(" freedomware ", None))
+        assert_false(op.equals("microsoftware", None))
     
     def test_number_support(self):
         """Strings given as a number must be converted first into a string"""
         # When the constant is defined as a number:
         op = String(10)
-        ok_(op.equals("10"))
+        ok_(op.equals("10", None))
         # When the constant is defined as a string:
         op = String("10")
-        ok_(op.equals(10))
+        ok_(op.equals(10, None))
         # When both are defined as numbers:
         op = String(10)
-        ok_(op.equals(10))
+        ok_(op.equals(10, None))
     
     def test_checking_logical_support(self):
         """Strings don't have logical support."""
@@ -672,66 +668,66 @@ class TestNumber(object):
     
     def test_python_value(self):
         op = Number(22)
-        eq_(op.to_python(), 22.00)
+        eq_(op.to_python(None), 22.00)
     
     def test_equality(self):
         # With an integer constant:
         op = Number(10)
-        ok_(op.equals(10))
-        ok_(op.equals(10.00))
-        assert_false(op.equals(9.99999))
-        assert_false(op.equals(10.00001))
+        ok_(op.equals(10, None))
+        ok_(op.equals(10.00, None))
+        assert_false(op.equals(9.99999, None))
+        assert_false(op.equals(10.00001, None))
         # With a float constant:
         op = Number(10.00)
-        ok_(op.equals(10))
-        ok_(op.equals(10.00))
-        assert_false(op.equals(9.99999))
-        assert_false(op.equals(10.00001))
+        ok_(op.equals(10, None))
+        ok_(op.equals(10.00, None))
+        assert_false(op.equals(9.99999, None))
+        assert_false(op.equals(10.00001, None))
         # Checking an invalid comparison:
-        assert_raises(InvalidOperationError, op.equals, "today")
+        assert_raises(InvalidOperationError, op.equals, "today", None)
     
     def test_greater_than(self):
         # With an integer constant:
         op = Number(10)
-        ok_(op.greater_than(9))
-        ok_(op.greater_than(9.99999))
-        assert_false(op.greater_than(10.00001))
+        ok_(op.greater_than(9, None))
+        ok_(op.greater_than(9.99999, None))
+        assert_false(op.greater_than(10.00001, None))
         # With a float constant:
         op = Number(10.00)
-        ok_(op.greater_than(9))
-        ok_(op.greater_than(9.99999))
-        assert_false(op.greater_than(10.00001))
+        ok_(op.greater_than(9, None))
+        ok_(op.greater_than(9.99999, None))
+        assert_false(op.greater_than(10.00001, None))
         # With everything but a number:
-        assert_raises(InvalidOperationError, op.greater_than, "ten")
+        assert_raises(InvalidOperationError, op.greater_than, "ten", None)
     
     def test_less_than(self):
         # With an integer constant:
         op = Number(10)
-        ok_(op.less_than(11))
-        ok_(op.less_than(10.00001))
-        assert_false(op.less_than(9.99999))
+        ok_(op.less_than(11, None))
+        ok_(op.less_than(10.00001, None))
+        assert_false(op.less_than(9.99999, None))
         # With a float constant:
         op = Number(10.00)
-        ok_(op.less_than(11))
-        ok_(op.less_than(10.00001))
-        assert_false(op.less_than(9.99999))
+        ok_(op.less_than(11, None))
+        ok_(op.less_than(10.00001, None))
+        assert_false(op.less_than(9.99999, None))
         # With everything but a number:
-        assert_raises(InvalidOperationError, op.less_than, "ten")
+        assert_raises(InvalidOperationError, op.less_than, "ten", None)
     
     def test_string_support(self):
         """Numbers given as strings must be converted first"""
         # The constant as a string:
         op = Number("10")
-        ok_(op.equals(10))
-        ok_(op.equals(10.00))
+        ok_(op.equals(10, None))
+        ok_(op.equals(10.00, None))
         # The other operand as string:
         op = Number(10)
-        ok_(op.equals("10"))
-        ok_(op.equals("10.00"))
-        ok_(op.less_than("11"))
-        ok_(op.greater_than("9"))
-        assert_false(op.less_than("9"))
-        assert_false(op.greater_than("11"))
+        ok_(op.equals("10", None))
+        ok_(op.equals("10.00", None))
+        ok_(op.less_than("11", None))
+        ok_(op.greater_than("9", None))
+        assert_false(op.less_than("9", None))
+        assert_false(op.greater_than("11", None))
     
     def test_checking_logical_support(self):
         """Numbers don't have logical support."""
@@ -793,7 +789,7 @@ class TestSet(object):
     
     def test_python_value(self):
         op = Set(Number(10), Number(1), String("paola"))
-        eq_(op.to_python(), set((10, 1, "paola")))
+        eq_(op.to_python(None), set((10, 1, "paola")))
     
     def test_instantiation(self):
         """All the members of a set must be operands"""
@@ -813,43 +809,43 @@ class TestSet(object):
         set3 = set([3, "hola", "something else"])
         set4 = set(["nothing to do"])
         # Comparing them...
-        ok_(op.equals(set1), "The constant equals %s" % op.constant_value)
-        assert_false(op.equals(set2))
-        assert_false(op.equals(set3))
-        assert_false(op.equals(set4))
+        ok_(op.equals(set1, None), "The constant equals %s" % op.constant_value)
+        assert_false(op.equals(set2, None))
+        assert_false(op.equals(set3, None))
+        assert_false(op.equals(set4, None))
     
     def test_less_than(self):
         op = Set(String("carla"), String("andreina"), String("liliana"))
-        ok_(op.less_than(4))
-        ok_(op.less_than("4"))
-        assert_false(op.less_than(2))
-        assert_false(op.less_than(1))
-        assert_raises(InvalidOperationError, op.less_than, "some string")
-        assert_raises(InvalidOperationError, op.less_than, 3.10)
+        ok_(op.less_than(4, None))
+        ok_(op.less_than("4", None))
+        assert_false(op.less_than(2, None))
+        assert_false(op.less_than(1, None))
+        assert_raises(InvalidOperationError, op.less_than, "some string", None)
+        assert_raises(InvalidOperationError, op.less_than, 3.10, None)
     
     def test_greater_than(self):
         op = Set(String("carla"), String("andreina"), String("liliana"))
-        ok_(op.greater_than(2))
-        ok_(op.greater_than("2"))
-        assert_false(op.greater_than(3))
-        assert_false(op.greater_than(4))
-        assert_raises(InvalidOperationError, op.greater_than, "some string")
-        assert_raises(InvalidOperationError, op.greater_than, 2.60)
+        ok_(op.greater_than(2, None))
+        ok_(op.greater_than("2", None))
+        assert_false(op.greater_than(3, None))
+        assert_false(op.greater_than(4, None))
+        assert_raises(InvalidOperationError, op.greater_than, "some string", 0)
+        assert_raises(InvalidOperationError, op.greater_than, 2.60, None)
     
     def test_contains(self):
         op = Set(String("arepa"), Number(4))
-        ok_(op.contains(4))
-        ok_(op.contains(4.00))
-        ok_(op.contains("arepa"))
-        assert_false(op.contains("something else"))
+        ok_(op.contains(4, None))
+        ok_(op.contains(4.00, None))
+        ok_(op.contains("arepa", None))
+        assert_false(op.contains("something else", None))
     
     def test_subset(self):
         op = Set(String("carla"), String("andreina"), String("liliana"))
-        ok_(op.is_subset(["carla"]))
-        ok_(op.is_subset(["carla", "liliana"]))
-        ok_(op.is_subset(["andreina", "carla"]))
-        assert_false(op.is_subset(["gustavo", "carlos"]))
-        assert_false(op.is_subset(["carla", "gustavo"]))
+        ok_(op.is_subset(["carla"], None))
+        ok_(op.is_subset(["carla", "liliana"], None))
+        ok_(op.is_subset(["andreina", "carla"], None))
+        assert_false(op.is_subset(["gustavo", "carlos"], None))
+        assert_false(op.is_subset(["carla", "gustavo"], None))
     
     def test_checking_logical_support(self):
         """Sets don't have logical support."""

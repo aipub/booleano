@@ -29,7 +29,7 @@
 Parse trees.
 
 Booleano supports two kinds of parse trees:
-- *Evaluable parse trees*, which are truth-evaluated against so-called helpers.
+- *Evaluable parse trees*, which are truth-evaluated against so-called context.
 - *Convertible parse trees*, which are converted into something else (e.g.,
   SQL "WHERE" clauses) using so-called parse tree converters.
 
@@ -72,16 +72,16 @@ class EvaluableParseTree(ParseTree):
         root_node.check_logical_support()
         super(EvaluableParseTree, self).__init__(root_node)
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         """
         Check if the parse tree evaluates to True with the context described by
-        the ``helpers``.
+        the ``context``.
         
         :return: Whether the parse tree evaluates to True.
         :rtype: bool
         
         """
-        return self.root_node(**helpers)
+        return self.root_node(context)
     
     def __unicode__(self):
         """Return the Unicode representation for this tree."""

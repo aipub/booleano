@@ -66,11 +66,13 @@ class OperationNode(object):
     
     """
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         """
-        Evaluate the operation, by passing the ``helpers`` to the inner
+        Evaluate the operation, by passing the ``context`` to the inner
         operands/operators.
         
+        :param context: The evaluation context.
+        :type context: object
         :return: The logical value of the operation node.
         :rtype: bool
         
@@ -163,7 +165,7 @@ class OperationNode(object):
         they can evaluate operation nodes à la Python, which could lead to
         serious problems because they'd always evaluate to ``True``.
         
-        Operation nodes must be evaluated passing the helpers explicitly.
+        Operation nodes must be evaluated passing the context explicitly.
         
         """
         raise InvalidOperationError("Operation nodes do not support Pythonic "

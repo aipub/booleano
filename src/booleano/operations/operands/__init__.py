@@ -125,11 +125,14 @@ class Operand(OperationNode):
     
     operations = set()
     
-    required_helpers = ()
-    
-    def to_python(self, **helpers):
+    def to_python(self, context):
         """
         Return the value of this operand as a Python value.
+        
+        :param context: The evaluation context.
+        :type context: object
+        :return: The operand, converted to an analogous Python object.
+        :rtype: object
         
         """
         raise NotImplementedError
@@ -152,12 +155,14 @@ class Operand(OperationNode):
     
     #{ Unary operations
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         """
         Return the truth value of the operand.
         
         This is the *boolean* operation.
         
+        :param context: The evaluation context.
+        :type context: object
         :return: The logical value of the operand.
         :rtype: bool
         
@@ -167,9 +172,12 @@ class Operand(OperationNode):
     
     #{ Binary operations
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """
         Check if this operand equals ``value``.
+        
+        :param context: The evaluation context.
+        :type context: object
         
         This is an *equality* operation.
         
@@ -177,9 +185,12 @@ class Operand(OperationNode):
         raise NotImplementedError
     equals.implemented = False
     
-    def greater_than(self, value, **helpers):
+    def greater_than(self, value, context):
         """
         Check if this operand is greater than ``value``.
+        
+        :param context: The evaluation context.
+        :type context: object
         
         This is an *inequality* operation.
         
@@ -187,9 +198,12 @@ class Operand(OperationNode):
         raise NotImplementedError
     greater_than.implemented = False
     
-    def less_than(self, value, **helpers):
+    def less_than(self, value, context):
         """
         Check if this operand is less than ``value``.
+        
+        :param context: The evaluation context.
+        :type context: object
         
         This is an *inequality* operation.
         
@@ -197,9 +211,12 @@ class Operand(OperationNode):
         raise NotImplementedError
     less_than.implemented = False
     
-    def contains(self, value, **helpers):
+    def contains(self, value, context):
         """
         Check if this operand contains ``value``.
+        
+        :param context: The evaluation context.
+        :type context: object
         
         This is a *membership* operation.
         
@@ -207,9 +224,12 @@ class Operand(OperationNode):
         raise NotImplementedError
     contains.implemented = False
     
-    def is_subset(self, value, **helpers):
+    def is_subset(self, value, context):
         """
         Check if ``value`` is a subset of this operand.
+        
+        :param context: The evaluation context.
+        :type context: object
         
         This is a *membership* operation.
         

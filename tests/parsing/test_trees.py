@@ -48,11 +48,11 @@ class TestEvaluableTrees(object):
         operand = TrafficLightVar()
         tree = EvaluableParseTree(operand)
         # True
-        helpers = {'traffic_light': "red"}
-        ok_(tree(**helpers))
+        context = {'traffic_light': "red"}
+        ok_(tree(context))
         # False
-        helpers = {'traffic_light': None}
-        assert_false(tree(**helpers))
+        context = {'traffic_light': None}
+        assert_false(tree(context))
     
     def test_non_boolean_operands(self):
         """Only operands that support logical values are supported."""
@@ -65,13 +65,13 @@ class TestEvaluableTrees(object):
                         DriversAwaitingGreenLightVar())
         tree = EvaluableParseTree(operation)
         # True
-        helpers = {'pedestrians_crossroad': ("gustavo", "carla"),
+        context = {'pedestrians_crossroad': ("gustavo", "carla"),
                    'drivers_trafficlight': ("andreina", "juan")}
-        ok_(tree(**helpers))
+        ok_(tree(context))
         # False
-        helpers = {'pedestrians_crossroad': (),
+        context = {'pedestrians_crossroad': (),
                    'drivers_traffic_light': ()}
-        assert_false(tree(**helpers))
+        assert_false(tree(context))
     
     def test_string(self):
         tree = EvaluableParseTree(BoolVar())

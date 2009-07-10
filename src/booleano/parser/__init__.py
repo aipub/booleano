@@ -52,7 +52,7 @@ class ParseManager(object):
     def get_parser(self, locale):
         raise NotImplementedError()
     
-    def parse_evaluable(self, expression, locale, helpers):
+    def parse_evaluable(self, expression, locale, context):
         raise NotImplementedError
     
     def parse_convertible(self, expression, locale):

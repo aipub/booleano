@@ -227,9 +227,15 @@ class Not(UnaryOperator):
         operand.check_logical_support()
         super(Not, self).__init__(operand)
     
-    def __call__(self, **helpers):
-        """Return the negate of the truth value for the operand."""
-        return not self.operand(**helpers)
+    def __call__(self, context):
+        """
+        Return the negate of the truth value for the operand.
+        
+        :param context: The evaluation context.
+        :type context: object
+        
+        """
+        return not self.operand(context)
     
     def __unicode__(self):
         """
@@ -277,9 +283,15 @@ class And(_ConnectiveOperator):
     
     """
     
-    def __call__(self, **helpers):
-        """Check if both operands evaluate to ``True``"""
-        return self.master_operand(**helpers) and self.slave_operand(**helpers)
+    def __call__(self, context):
+        """
+        Check if both operands evaluate to ``True``.
+        
+        :param context: The evaluation context.
+        :type context: objects
+        
+        """
+        return self.master_operand(context) and self.slave_operand(context)
 
 
 class Or(_ConnectiveOperator):
@@ -294,9 +306,15 @@ class Or(_ConnectiveOperator):
     
     """
     
-    def __call__(self, **helpers):
-        """Check if at least one of the operands evaluate to ``True``"""
-        return self.master_operand(**helpers) or self.slave_operand(**helpers)
+    def __call__(self, context):
+        """
+        Check if at least one of the operands evaluate to ``True``.
+        
+        :param context: The evaluation context.
+        :type context: object
+        
+        """
+        return self.master_operand(context) or self.slave_operand(context)
 
 
 class Xor(_ConnectiveOperator):
@@ -311,9 +329,15 @@ class Xor(_ConnectiveOperator):
     
     """
     
-    def __call__(self, **helpers):
-        """Check that only one of the operands evaluate to ``True``"""
-        return self.master_operand(**helpers) ^ self.slave_operand(**helpers)
+    def __call__(self, context):
+        """
+        Check that only one of the operands evaluate to ``True``.
+        
+        :param context: The evaluation context.
+        :type context: object
+        
+        """
+        return self.master_operand(context) ^ self.slave_operand(context)
 
 
 class Equal(BinaryOperator):
@@ -331,9 +355,9 @@ class Equal(BinaryOperator):
         super(Equal, self).__init__(left_operand, right_operand)
         self.master_operand.check_operation("equality")
     
-    def __call__(self, **helpers):
-        value = self.slave_operand.to_python(**helpers)
-        return self.master_operand.equals(value, **helpers)
+    def __call__(self, context):
+        value = self.slave_operand.to_python(context)
+        return self.master_operand.equals(value, context)
 
 
 # (x <> y) <=> ~(x == y)
@@ -347,8 +371,8 @@ class NotEqual(Equal):
     
     """
     
-    def __call__(self, **helpers):
-        return not super(NotEqual, self).__call__(**helpers)
+    def __call__(self, context):
+        return not super(NotEqual, self).__call__(context)
 
 
 class _InequalityOperator(BinaryOperator):
@@ -394,18 +418,18 @@ class _InequalityOperator(BinaryOperator):
         else:
             self.comparison = self._less_than
     
-    def __call__(self, **helpers):
-        return self.comparison(**helpers)
+    def __call__(self, context):
+        return self.comparison(context)
     
-    def _greater_than(self, **helpers):
+    def _greater_than(self, context):
         """Check if the master operand is greater than the slave"""
-        value = self.slave_operand.to_python(**helpers)
-        return self.master_operand.greater_than(value, **helpers)
+        value = self.slave_operand.to_python(context)
+        return self.master_operand.greater_than(value, context)
     
-    def _less_than(self, **helpers):
+    def _less_than(self, context):
         """Check if the master operand is less than the slave"""
-        value = self.slave_operand.to_python(**helpers)
-        return self.master_operand.less_than(value, **helpers)
+        value = self.slave_operand.to_python(context)
+        return self.master_operand.less_than(value, context)
 
 
 class LessThan(_InequalityOperator):
@@ -442,8 +466,8 @@ class LessEqual(GreaterThan):
     
     """
     
-    def __call__(self, **helpers):
-        return not super(LessEqual, self).__call__(**helpers)
+    def __call__(self, context):
+        return not super(LessEqual, self).__call__(context)
 
 
 # (x >= y) <=> ~(x < y)
@@ -455,8 +479,8 @@ class GreaterEqual(LessThan):
     
     """
     
-    def __call__(self, **helpers):
-        return not super(GreaterEqual, self).__call__(**helpers)
+    def __call__(self, context):
+        return not super(GreaterEqual, self).__call__(context)
 
 
 class _SetOperator(BinaryOperator):
@@ -486,9 +510,9 @@ class BelongsTo(_SetOperator):
     
     """
     
-    def __call__(self, **helpers):
-        value = self.slave_operand.to_python(**helpers)
-        return self.master_operand.contains(value, **helpers)
+    def __call__(self, context):
+        value = self.slave_operand.to_python(context)
+        return self.master_operand.contains(value, context)
 
 
 class IsSubset(_SetOperator):
@@ -499,9 +523,9 @@ class IsSubset(_SetOperator):
     
     """
     
-    def __call__(self, **helpers):
-        value = self.slave_operand.to_python(**helpers)
-        return self.master_operand.is_subset(value, **helpers)
+    def __call__(self, context):
+        value = self.slave_operand.to_python(context)
+        return self.master_operand.is_subset(value, context)
 
 
 #}

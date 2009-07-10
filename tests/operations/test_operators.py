@@ -48,7 +48,7 @@ class TestOperator(object):
     def test_no_evaluation_implemented(self):
         """Evaluations must not be implemented by default."""
         op = Operator()
-        assert_raises(NotImplementedError, op)
+        assert_raises(NotImplementedError, op, None)
     
     def test_type(self):
         """Operator nodes must be known as operators."""
@@ -91,8 +91,8 @@ class TestNot(object):
         traffic_light = TrafficLightVar()
         operation = Not(traffic_light)
         # Evaluation:
-        ok_(operation( **dict(traffic_light="") ))
-        assert_false(operation( **dict(traffic_light="green") ))
+        ok_(operation( dict(traffic_light="") ))
+        assert_false(operation( dict(traffic_light="green") ))
     
     def test_equivalent(self):
         """
@@ -162,15 +162,15 @@ class TestAnd(object):
     
     def test_with_both_results_as_true(self):
         operation = And(BoolVar(), TrafficLightVar())
-        ok_(operation( **dict(bool=True, traffic_light="red") ))
+        ok_(operation( dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
         operation = And(BoolVar(), TrafficLightVar())
-        assert_false(operation( **dict(bool=False, traffic_light="") ))
+        assert_false(operation( dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
         operation = And(BoolVar(), TrafficLightVar())
-        assert_false(operation( **dict(bool=False, traffic_light="red") ))
+        assert_false(operation( dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
         """
@@ -180,7 +180,8 @@ class TestAnd(object):
         """
         op1 = BoolVar()
         op2 = BoolVar()
-        And(op1, op2)(bool=False)
+        context = {'bool': False}
+        And(op1, op2)(context)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
     
@@ -251,15 +252,15 @@ class TestOr(object):
     
     def test_with_both_results_as_true(self):
         operation = Or(BoolVar(), TrafficLightVar())
-        ok_(operation( **dict(bool=True, traffic_light="red") ))
+        ok_(operation( dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
         operation = Or(BoolVar(), TrafficLightVar())
-        assert_false(operation( **dict(bool=False, traffic_light="") ))
+        assert_false(operation( dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
         operation = Or(BoolVar(), TrafficLightVar())
-        ok_(operation( **dict(bool=False, traffic_light="red") ))
+        ok_(operation( dict(bool=False, traffic_light="red") ))
     
     def test_evaluation_order(self):
         """
@@ -269,7 +270,8 @@ class TestOr(object):
         """
         op1 = BoolVar()
         op2 = BoolVar()
-        Or(op1, op2)(bool=True)
+        context = {'bool': True}
+        Or(op1, op2)(context)
         ok_(op1.evaluated)
         assert_false(op2.evaluated)
     
@@ -346,15 +348,15 @@ class TestXor(object):
     
     def test_with_both_results_as_true(self):
         operation = Xor(BoolVar(), TrafficLightVar())
-        assert_false(operation( **dict(bool=True, traffic_light="red") ))
+        assert_false(operation( dict(bool=True, traffic_light="red") ))
     
     def test_with_both_results_as_false(self):
         operation = Xor(BoolVar(), TrafficLightVar())
-        assert_false(operation( **dict(bool=False, traffic_light="") ))
+        assert_false(operation( dict(bool=False, traffic_light="") ))
     
     def test_with_mixed_results(self):
         operation = Xor(BoolVar(), TrafficLightVar())
-        ok_(operation( **dict(bool=False, traffic_light="red") ))
+        ok_(operation( dict(bool=False, traffic_light="red") ))
     
     def test_equivalent(self):
         """
@@ -501,8 +503,8 @@ class TestEqual():
     def test_constants_evaluation(self):
         operation1 = Equal(String("hola"), String("hola"))
         operation2 = Equal(String("hola"), String("chao"))
-        ok_(operation1())
-        assert_false(operation2())
+        ok_(operation1(None))
+        assert_false(operation2(None))
     
     def test_variables_evaluation(self):
         operation = Equal(PedestriansCrossingRoad(),
@@ -510,18 +512,18 @@ class TestEqual():
         
         # The pedestrians awaiting the green light to cross the street are
         # the same drivers... Must be a parallel universe!
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("gustavo", "carla"),
             'drivers_trafficlight': ("carla", "gustavo")
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # The pedestrians are different from the drivers... That's my universe!
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("gustavo", "carla"),
             'drivers_trafficlight': ("liliana", "carlos")
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_evaluation(self):
         operation = Equal(
@@ -530,12 +532,12 @@ class TestEqual():
         )
         
         # The same people:
-        helpers = {'pedestrians_crossroad': ("gustavo", "carla")}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("gustavo", "carla")}
+        ok_(operation(context))
         
         # Other people:
-        helpers = {'pedestrians_crossroad': ("liliana", "carlos")}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("liliana", "carlos")}
+        assert_false(operation(context))
 
 
 class TestNotEqual():
@@ -544,27 +546,27 @@ class TestNotEqual():
     def test_constants_evaluation(self):
         operation1 = NotEqual(String("hola"), String("chao"))
         operation2 = NotEqual(String("hola"), String("hola"))
-        ok_(operation1())
-        assert_false(operation2())
+        ok_(operation1(None))
+        assert_false(operation2(None))
     
     def test_variables_evaluation(self):
         operation = NotEqual(PedestriansCrossingRoad(),
                                      DriversAwaitingGreenLightVar())
         
         # The pedestrians are different from the drivers... That's my universe!
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("gustavo", "carla"),
             'drivers_trafficlight': ("liliana", "carlos")
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # The pedestrians awaiting the green light to cross the street are
         # the same drivers... Must be a parallel universe!
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("gustavo", "carla"),
             'drivers_trafficlight': ("carla", "gustavo")
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_evaluation(self):
         operation = NotEqual(
@@ -573,12 +575,12 @@ class TestNotEqual():
         )
         
         # Other people:
-        helpers = {'pedestrians_crossroad': ("liliana", "carlos")}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("liliana", "carlos")}
+        ok_(operation(context))
         
         # The same people:
-        helpers = {'pedestrians_crossroad': ("gustavo", "carla")}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("gustavo", "carla")}
+        assert_false(operation(context))
 
 
 class TestInequalities(object):
@@ -638,13 +640,13 @@ class TestLessThan(object):
         l_op = Number(3)
         r_op = Number(3)
         operation = LessThan(l_op, r_op)
-        assert_false(operation())
+        assert_false(operation(None))
     
     def test_two_constants(self):
         l_op = Number(3)
         r_op = Number(4)
         operation = LessThan(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
@@ -652,18 +654,18 @@ class TestLessThan(object):
         operation = LessThan(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", ),
             'num': 2,
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # |{"carla", "carlos"}| < 1   <=>   2 < 1
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 1,
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
@@ -671,12 +673,12 @@ class TestLessThan(object):
         operation = LessThan(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
-        helpers = {'pedestrians_crossroad': ("carla", )}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", )}
+        ok_(operation(context))
         
         # |{"carla", "carlos", "liliana"}| < 2   <=>   3 < 2
-        helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
+        assert_false(operation(context))
 
 
 class TestGreaterThan(object):
@@ -698,13 +700,13 @@ class TestGreaterThan(object):
         l_op = Number(3)
         r_op = Number(3)
         operation = GreaterThan(l_op, r_op)
-        assert_false(operation())
+        assert_false(operation(None))
     
     def test_two_constants(self):
         l_op = Number(4)
         r_op = Number(3)
         operation = GreaterThan(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
@@ -712,18 +714,18 @@ class TestGreaterThan(object):
         operation = GreaterThan(l_op, r_op)
         
         # |{"carla", "yolmary"}| > 1   <=>   2 > 1
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "yolmary"),
             'num': 1,
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # |{"carla", "carlos"}| > 3   <=>   2 > 3
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 3,
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
@@ -731,12 +733,12 @@ class TestGreaterThan(object):
         operation = GreaterThan(l_op, r_op)
         
         # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
-        helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
+        ok_(operation(context))
         
         # |{"carla"}| > 2   <=>   1 > 2
-        helpers = {'pedestrians_crossroad': ("carla", )}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", )}
+        assert_false(operation(context))
 
 
 class TestLessEqual(object):
@@ -746,13 +748,13 @@ class TestLessEqual(object):
         l_op = Number(3)
         r_op = Number(3)
         operation = LessEqual(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_constants(self):
         l_op = Number(3)
         r_op = Number(4)
         operation = LessEqual(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
@@ -760,18 +762,18 @@ class TestLessEqual(object):
         operation = LessEqual(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", ),
             'num': 2,
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # |{"carla", "carlos"}| < 1   <=>   2 < 1
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 1,
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
@@ -779,12 +781,12 @@ class TestLessEqual(object):
         operation = LessEqual(l_op, r_op)
         
         # |{"carla"}| < 2   <=>   1 < 2
-        helpers = {'pedestrians_crossroad': ("carla", )}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", )}
+        ok_(operation(context))
         
         # |{"carla", "carlos", "liliana"}| < 2   <=>   1 < 2
-        helpers = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", "carlos", "liliana")}
+        assert_false(operation(context))
 
 
 class TestGreaterEqual(object):
@@ -794,13 +796,13 @@ class TestGreaterEqual(object):
         l_op = Number(3)
         r_op = Number(3)
         operation = GreaterEqual(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_constants(self):
         l_op = Number(4)
         r_op = Number(3)
         operation = GreaterEqual(l_op, r_op)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_two_variables(self):
         l_op = PedestriansCrossingRoad()
@@ -808,18 +810,18 @@ class TestGreaterEqual(object):
         operation = GreaterEqual(l_op, r_op)
         
         # |{"carla", "yolmary"}| > 1   <=>   2 > 1
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "yolmary"),
             'num': 1,
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # |{"carla", "carlos"}| > 3   <=>   2 > 3
-        helpers = {
+        context = {
             'pedestrians_crossroad': ("carla", "carlos"),
             'num': 3,
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
     
     def test_mixed_arguments(self):
         l_op = PedestriansCrossingRoad()
@@ -827,12 +829,12 @@ class TestGreaterEqual(object):
         operation = GreaterEqual(l_op, r_op)
         
         # |{"carla", "yolmary", "manuel"}| > 2   <=>   3 > 2
-        helpers = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
-        ok_(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", "yolmary", "manuel")}
+        ok_(operation(context))
         
         # |{"carla"}| > 2   <=>   1 > 2
-        helpers = {'pedestrians_crossroad': ("carla", )}
-        assert_false(operation(**helpers))
+        context = {'pedestrians_crossroad': ("carla", )}
+        assert_false(operation(context))
 
 
 class TestBelongsTo(object):
@@ -854,7 +856,7 @@ class TestBelongsTo(object):
         item = Number(3)
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
         operation = BelongsTo(item, set_)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_variable_evaluation(self):
         item = NumVar()
@@ -862,18 +864,18 @@ class TestBelongsTo(object):
         operation = BelongsTo(item, set_)
         
         # 4 ∈ {"madrid", 4}
-        helpers = {
+        context = {
             'num': 4,
             'pedestrians_crossroad': ("madrid", 4)
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # 4 ∈ {"madrid", "paris", "london"}
-        helpers = {
+        context = {
             'num': 4,
             'pedestrians_crossroad': ("madrid", "paris", "london")
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
 
 
 class TestIsSubset(object):
@@ -895,7 +897,7 @@ class TestIsSubset(object):
         subset = Set(Number(3), Number(1), Number(7))
         set_ = Set(Number(1), Number(3), Number(5), Number(7), Number(11))
         operation = IsSubset(subset, set_)
-        ok_(operation())
+        ok_(operation(None))
     
     def test_variable_evaluation(self):
         subset = DriversAwaitingGreenLightVar()
@@ -903,18 +905,18 @@ class TestIsSubset(object):
         operation = IsSubset(subset, set_)
         
         # {"carla"} ⊂ {"carla", "andreina"}
-        helpers = {
+        context = {
             'drivers_trafficlight': ("carla", ),
             'pedestrians_crossroad': ("andreina", "carla")
         }
-        ok_(operation(**helpers))
+        ok_(operation(context))
         
         # {"liliana", "carlos"} ⊂ {"manuel", "yolmary", "carla"}
-        helpers = {
+        context = {
             'drivers_trafficlight': ("liliana", "carlos"),
             'pedestrians_crossroad': ("manuel", "yolmary", "carla")
         }
-        assert_false(operation(**helpers))
+        assert_false(operation(context))
 
 
 #{ Mock objects
@@ -922,26 +924,24 @@ class TestIsSubset(object):
 
 class NumVar(Variable):
     """
-    Mock variable which represents a numeric value stored in a helper called
-    ``num``.
+    Mock variable which represents a numeric value stored in a context item
+    called ``num``.
     
     """
     
     operations = set(["equality", "inequality"])
     
-    required_helpers = ("num", )
+    def to_python(self, context):
+        return context['num']
     
-    def to_python(self, **helpers):
-        return helpers['num']
+    def equals(self, value, context):
+        return context['num'] == value
     
-    def equals(self, value, **helpers):
-        return helpers['num'] == value
+    def less_than(self, value, context):
+        return context['num'] < value
     
-    def less_than(self, value, **helpers):
-        return helpers['num'] < value
-    
-    def greater_than(self, value, **helpers):
-        return helpers['num'] > value
+    def greater_than(self, value, context):
+        return context['num'] > value
 
 
 #}

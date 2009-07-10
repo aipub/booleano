@@ -46,32 +46,30 @@ from booleano.exc import InvalidOperationError, BadCallError
 
 class BoolVar(Variable):
     """
-    Mock variable which represents the boolean value stored in a helper called
-    ``bool``.
+    Mock variable which represents the boolean value stored in a context item
+    called ``bool``.
     
     """
     operations = set(("boolean", "equality"))
-    
-    required_helpers = ("bool", )
     
     def __init__(self):
         self.evaluated = False
         super(BoolVar, self).__init__()
     
-    def to_python(self, **helpers):
-        """Return the value of the ``bool`` helper"""
+    def to_python(self, context):
+        """Return the value of the ``bool`` context item"""
         self.evaluated = True
-        return helpers['bool']
+        return context['bool']
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """Does ``value`` equal this boolean variable?"""
         self.evaluated = True
-        return helpers['bool'] == value
+        return context['bool'] == value
     
-    def __call__(self, **helpers):
-        """Does the value of helper ``bool`` evaluate to True?"""
+    def __call__(self, context):
+        """Does the value of context item ``bool`` evaluate to True?"""
         self.evaluated = True
-        return bool(helpers['bool'])
+        return bool(context['bool'])
 
 
 class TrafficLightVar(Variable):
@@ -82,72 +80,69 @@ class TrafficLightVar(Variable):
     
     operations = set(("equality", "boolean"))
     
-    required_helpers = ("traffic_light", )
-    
     valid_colors = ("red", "amber", "green")
     
-    def to_python(self, **helpers):
+    def to_python(self, context):
         """Return the string that represents the current light color"""
-        return helpers['traffic_light']
+        return context['traffic_light']
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         """Is the traffic light working?"""
-        return bool(helpers['traffic_light'])
+        return bool(context['traffic_light'])
     
-    def equals(self, value, **helpers):
+    def equals(self, value, context):
         """Does the traffic light's color equal to ``value``?"""
         if value not in self.valid_colors:
             raise InvalidOperationError("Traffic lights can't be %s" % value)
-        return value == helpers['traffic_light']
+        return value == context['traffic_light']
 
 
 class VariableSet(Variable):
     """
-    Base class for a variable which finds its value in one of the helpers.
+    Base class for a variable which finds its value in one of the context.
     
-    Descendants have to define the helper that contains the set, in
-    the ``required_helpers`` attribute (it must not require more than one
-    helper).
+    Descendants have to define the context item that contains the set, in
+    the ``people_set`` attribute.
     
     """
     
     operations = set(("equality", "inequality", "boolean", "membership"))
     
-    def to_python(self, **helpers):
-        set_ = set(helpers[self.required_helpers[0]])
+    def to_python(self, context):
+        set_ = set(context[self.people_set])
         return set_
     
-    def __call__(self, **helpers):
-        set_ = set(helpers[self.required_helpers[0]])
+    def __call__(self, context):
+        set_ = set(context[self.people_set])
         return bool(set_)
     
-    def equals(self, value, **helpers):
-        set_ = set(helpers[self.required_helpers[0]])
+    def equals(self, value, context):
+        set_ = set(context[self.people_set])
         value = set(value)
         return value == set_
     
-    def less_than(self, value, **helpers):
-        set_ = helpers[self.required_helpers[0]]
+    def less_than(self, value, context):
+        set_ = context[self.people_set]
         return len(set_) < value
     
-    def greater_than(self, value, **helpers):
-        set_ = helpers[self.required_helpers[0]]
+    def greater_than(self, value, context):
+        set_ = context[self.people_set]
         return len(set_) > value
     
-    def contains(self, value, **helpers):
-        set_ = helpers[self.required_helpers[0]]
+    def contains(self, value, context):
+        set_ = context[self.people_set]
         return value in set_
     
-    def is_subset(self, value, **helpers):
+    def is_subset(self, value, context):
         value = set(value)
-        set_ = set(helpers[self.required_helpers[0]])
+        set_ = set(context[self.people_set])
         return value.issubset(set_)
 
 
 class PedestriansCrossingRoad(VariableSet):
     """Variable that represents the pedestrians crossing the street."""
     
-    required_helpers = ["pedestrians_crossroad"]
+    people_set = "pedestrians_crossroad"
 
 
 class DriversAwaitingGreenLightVar(VariableSet):
@@ -157,7 +152,7 @@ class DriversAwaitingGreenLightVar(VariableSet):
     
     """
     
-    required_helpers = ["drivers_trafficlight"]
+    people_set = "drivers_trafficlight"
 
 
 #{ Mock functions
@@ -179,10 +174,10 @@ class PermissiveFunction(Function):
         """Do nothing -- Allow any kind of arguments."""
         pass
     
-    def to_python(self, **helpers):
+    def to_python(self, context):
         return self.arguments
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         return True
 
 
@@ -203,16 +198,16 @@ class TrafficViolationFunc(Function):
         if light not in ("pedestrians", "drivers"):
             raise BadCallError("Only pedestrians and drivers have lights")
     
-    def to_python(self, **helpers):
+    def to_python(self, context):
         return self.arguments
     
-    def __call__(self, **helpers):
+    def __call__(self, context):
         if self.arguments['light'] == "pedestrians":
-            return helpers['pedestrians_light'] == "red" and \
-                   len(helpers['people_crossing'])
+            return context['pedestrians_light'] == "red" and \
+                   len(context['people_crossing'])
         # It's the drivers' light.
-        return helpers['drivers_light'] == "red" and \
-               len(helpers['cars_crossing'])
+        return context['drivers_light'] == "red" and \
+               len(context['cars_crossing'])
 
 
 #{ Miscellaneous stuff
