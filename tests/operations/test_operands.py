@@ -83,6 +83,10 @@ class TestOperand(object):
         """Operands must not have a default representation."""
         assert_raises(NotImplementedError, repr, self.op)
     
+    def test_python_bool(self):
+        """Operands must not support Pythonic truth evaluation."""
+        assert_raises(InvalidOperationError, bool, self.op)
+    
     #{ Operations support
     
     def test_checking_valid_operations(self):

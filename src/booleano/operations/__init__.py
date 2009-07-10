@@ -35,6 +35,9 @@ using the classes provided by this package.
 
 """
 
+from booleano.exc import InvalidOperationError
+
+
 __all__ = (
     # Operands:
     "String", "Number", "Set", "Variable", "Function", "PlaceholderVariable",
@@ -125,6 +128,22 @@ class OperationNode(object):
         error_msg = 'Nodes "%s" and "%s" are not equivalent'
         assert isinstance(node, self.__class__), error_msg % (repr(node),
                                                               repr(self))
+    
+    def __nonzero__(self):
+        """
+        Cancel the pythonic truth evaluation by raising an exception.
+        
+        :raises InvalidOperationError: To cancel the pythonic truth evaluation.
+        
+        This is disabled in order to prevent users from mistakenly assuming 
+        they can evaluate operation nodes à la Python, which could lead to
+        serious problems because they'd always evaluate to ``True``.
+        
+        Operation nodes must be evaluated passing the helpers explicitly.
+        
+        """
+        raise InvalidOperationError("Operation nodes do not support Pythonic "
+                                    "truth evaluation")
     
     def __eq__(self, other):
         """

@@ -61,6 +61,11 @@ class TestOperator(object):
         op = Operator()
         ok_(op.is_branch())
         assert_false(op.is_leaf())
+    
+    def test_python_bool(self):
+        """Operators must not support Pythonic truth evaluation."""
+        op = Operator()
+        assert_raises(InvalidOperationError, bool, op)
 
 
 class TestTruth(object):
