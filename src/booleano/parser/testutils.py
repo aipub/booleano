@@ -90,6 +90,18 @@ class BaseGrammarTest(object):
             
             yield check
     
+    def test_badformed_expressions(self):
+        """Expressions with an invalid syntax must not yield a parse tree."""
+        for expression in self.badformed_expressions:
+            
+            # Making a Nose test generator:
+            @raises(ParseException)
+            def check():
+                self.parser(expression)
+            check.description = "'%s' is an invalid expression" % expression
+            
+            yield check
+    
     def test_single_operands(self):
         """
         Expressions made up of a single operand must yield the expected operand.

@@ -489,6 +489,16 @@ class TestDefaultGrammar(BaseGrammarTest):
             ),
     }
     
+    badformed_expressions = (
+        "",
+        " ",
+        "\t",
+        "\n",
+        "\r",
+        "== 3 4",
+        "3 4 ==",
+        )
+    
     single_operands = {
         # ----- Strings
         '"oneword"': String("oneword"),
