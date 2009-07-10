@@ -97,7 +97,7 @@ class PlaceholderOperand(Operand):
         raise InvalidOperationError("Placeholders cannot be evaluated!")
     
     # All the evaluation-related operation raise an InvalidOperationError
-    to_python = get_logical_value = equals = less_than = greater_than = \
+    to_python = __call__ = equals = less_than = greater_than = \
     contains = is_subset = no_evaluation
     
     def _namespace_to_unicode(self):

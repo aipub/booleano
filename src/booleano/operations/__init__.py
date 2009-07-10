@@ -66,6 +66,17 @@ class OperationNode(object):
     
     """
     
+    def __call__(self, **helpers):
+        """
+        Evaluate the operation, by passing the ``helpers`` to the inner
+        operands/operators.
+        
+        :return: The logical value of the operation node.
+        :rtype: bool
+        
+        """
+        raise NotImplementedError()
+    
     def is_leaf(self):
         """
         Check if this is a leaf node.

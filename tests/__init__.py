@@ -69,7 +69,7 @@ class BoolVar(Variable):
         self.evaluated = True
         return helpers['bool'] == value
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         """Does the value of helper ``bool`` evaluate to True?"""
         self.evaluated = True
         return bool(helpers['bool'])
@@ -91,7 +91,7 @@ class TrafficLightVar(Variable):
         """Return the string that represents the current light color"""
         return helpers['traffic_light']
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         """Is the traffic light working?"""
         return bool(helpers['traffic_light'])
     
@@ -118,7 +118,7 @@ class VariableSet(Variable):
         set_ = set(helpers[self.required_helpers[0]])
         return set_
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         set_ = set(helpers[self.required_helpers[0]])
         return bool(set_)
     
@@ -183,7 +183,7 @@ class PermissiveFunction(Function):
     def to_python(self, **helpers):
         return self.arguments
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         return True
 
 
@@ -207,7 +207,7 @@ class TrafficViolationFunc(Function):
     def to_python(self, **helpers):
         return self.arguments
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         if self.arguments['light'] == "pedestrians":
             return helpers['pedestrians_light'] == "red" and \
                    len(helpers['people_crossing'])

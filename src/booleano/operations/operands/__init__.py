@@ -77,9 +77,9 @@ class _OperandMeta(type):
                                   "method" % name)
         # Checking the operations supported:
         if ("boolean" in cls.operations and 
-            not cls.is_implemented(cls.get_logical_value)):
-            raise BadOperandError("Operand %s must define the  "
-                                  ".get_logical_value() method" % name)
+            not cls.is_implemented(cls.__call__)):
+            raise BadOperandError("Operand %s must return its truth value "
+                                  "through .__call__() method" % name)
         if "equality" in cls.operations and not cls.is_implemented(cls.equals):
             raise BadOperandError("Operand %s must define the .equals() "
                                   "method because it supports equalities" %
@@ -152,15 +152,18 @@ class Operand(OperationNode):
     
     #{ Unary operations
     
-    def get_logical_value(self, **helpers):
+    def __call__(self, **helpers):
         """
         Return the truth value of the operand.
         
-        This is a *boolean* operation.
+        This is the *boolean* operation.
+        
+        :return: The logical value of the operand.
+        :rtype: bool
         
         """
         raise NotImplementedError
-    get_logical_value.implemented = False
+    __call__.implemented = False
     
     #{ Binary operations
     

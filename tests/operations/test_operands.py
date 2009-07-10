@@ -68,7 +68,7 @@ class TestOperand(object):
     def test_operation_methods(self):
         """No operation should be supported by default"""
         assert_raises(NotImplementedError, self.op.to_python)
-        assert_raises(NotImplementedError, self.op.get_logical_value)
+        assert_raises(NotImplementedError, self.op)
         assert_raises(NotImplementedError, self.op.equals, None)
         assert_raises(NotImplementedError, self.op.greater_than, None)
         assert_raises(NotImplementedError, self.op.less_than, None)
@@ -111,7 +111,7 @@ class TestOperand(object):
             operations = set(["boolean"])
             def to_python(self, value, **helpers):
                 pass
-            def get_logical_value(self, value, **helpers):
+            def __call__(self, value, **helpers):
                 pass
         
         class MembershipOperand(Operand):
@@ -146,8 +146,7 @@ class TestOperand(object):
     @raises(BadOperandError)
     def test_checking_no_logic_value(self):
         """
-        Operands supporting truth values must define the .get_logical_value()
-        method.
+        Operands supporting truth values must define the .__call__() method.
         
         """
         class BadOperand(Operand):
@@ -917,7 +916,7 @@ class TestPlaceholderVariable(object):
         """Placeholder variables don't support operations."""
         var = PlaceholderVariable("var", None)
         assert_raises(InvalidOperationError, var.to_python)
-        assert_raises(InvalidOperationError, var.get_logical_value)
+        assert_raises(InvalidOperationError, var)
         assert_raises(InvalidOperationError, var.equals, None)
         assert_raises(InvalidOperationError, var.less_than, None)
         assert_raises(InvalidOperationError, var.greater_than, None)
@@ -1084,7 +1083,7 @@ class TestPlaceholderFunction(object):
         """Placeholder functions don't support operations."""
         func = PlaceholderFunction("func", ())
         assert_raises(InvalidOperationError, func.to_python)
-        assert_raises(InvalidOperationError, func.get_logical_value)
+        assert_raises(InvalidOperationError, func)
         assert_raises(InvalidOperationError, func.equals, None)
         assert_raises(InvalidOperationError, func.less_than, None)
         assert_raises(InvalidOperationError, func.greater_than, None)

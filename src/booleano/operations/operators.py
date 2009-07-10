@@ -45,14 +45,7 @@ class Operator(OperationNode):
     The operands to be used by the operator must be passed in the constructor.
     
     """
-    
-    def __call__(self, **helpers):
-        """
-        Evaluate the operation, by passing the ``helpers`` to the inner
-        operands/operators.
-        
-        """
-        raise NotImplementedError
+    pass
 
 
 class UnaryOperator(Operator):
@@ -244,9 +237,8 @@ class Truth(UnaryOperator):
     """
     The truth function.
     
-    This is just a wrapper around the ``get_logical_value`` method of the 
-    operand, useful for other operators to check the logical value of one
-    operand.
+    This is just a wrapper around the operand in order to get its truth value,
+    useful for other operators to check the logical value of one operand.
     
     In other words, this enables us to use an operand as a boolean expression.
     
@@ -267,7 +259,7 @@ class Truth(UnaryOperator):
     
     def __call__(self, **helpers):
         """Return the logical value of the operand."""
-        return self.operand.get_logical_value(**helpers)
+        return self.operand(**helpers)
     
     @classmethod
     def convert(cls, operand):
