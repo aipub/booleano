@@ -67,7 +67,7 @@ class _OperandMeta(type):
         
         """
         if not cls.operations.issubset(OPERATIONS):
-            raise BadOperandError("Operand %s supports invalid operations" %
+            raise BadOperandError("Operand %s supports unknown operations" %
                                   name)
         if len(cls.operations) == 0:
             raise BadOperandError("Operand %s must support at least one "
