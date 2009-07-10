@@ -270,8 +270,6 @@ class TestVariable(object):
         class GreetingVariable(Variable):
             operations = set(["equality"])
             
-            default_names = {'fr': "bonjour"}
-            
             def to_python(self, **helpers):
                 pass
             
@@ -282,8 +280,6 @@ class TestVariable(object):
     def test_checking_unsupported_operations(self):
         class GreetingVariable(Variable):
             operations = set(["equality"])
-            
-            default_names = {'fr': "bonjour"}
             
             def to_python(self, **helpers):
                 pass
@@ -347,8 +343,6 @@ class TestFunction(object):
         class GreetingFunction(Function):
             operations = set(["equality"])
             
-            default_names = {'fr': "bonjour"}
-            
             def to_python(self, **helpers):
                 pass
             
@@ -359,8 +353,6 @@ class TestFunction(object):
     def test_checking_unsupported_operations(self):
         class GreetingFunction(Function):
             operations = set(["equality"])
-            
-            default_names = {'fr': "bonjour"}
             
             def to_python(self, **helpers):
                 pass
