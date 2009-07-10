@@ -35,7 +35,7 @@ from booleano.operations.operands import Variable
 from booleano.exc import InvalidOperationError
 
 __all__ = ("Truth", "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
-    "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset", )
+           "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset")
 
 
 class Operator(OperationNode):
