@@ -288,6 +288,20 @@ class TestVariable(object):
             def to_python(self, **helpers):
                 pass
     
+    def test_checking_logical_support(self):
+        class GreetingVariable(Variable):
+            operations = set(["equality"])
+            def to_python(self, **helpers):
+                pass
+            def equals(self, value, **helpers):
+                pass
+        
+        var1 = BoolVar()
+        var2 = GreetingVariable()
+        # Checking logical support:
+        var1.check_logical_support()
+        assert_raises(InvalidOperationError, var2.check_logical_support)
+    
     def test_equivalence(self):
         """Two variables are equivalent if they share the same class."""
         var1 = TrafficLightVar()
@@ -472,6 +486,19 @@ class TestFunction(object):
             bypass_operation_check = True
             optional_arguments = {'arg': 1}
     
+    def test_checking_logical_support(self):
+        class NoBoolFunction(Function):
+            operations = set(["equality"])
+            def equals(self, node): pass
+            def to_python(self): pass
+            def check_arguments(self): pass
+        
+        func1 = PermissiveFunction(String("foo"))
+        func2 = NoBoolFunction()
+        # Checking logical support:
+        func1.check_logical_support()
+        assert_raises(InvalidOperationError, func2.check_logical_support)
+    
     def test_equivalence(self):
         """
         Two functions are equivalent not only if they share the same class,
@@ -588,6 +615,11 @@ class TestString(object):
         # When both are defined as numbers:
         op = String(10)
         ok_(op.equals(10))
+    
+    def test_checking_logical_support(self):
+        """Strings don't have logical support."""
+        op = String("hey there")
+        assert_raises(InvalidOperationError, op.check_logical_support)
     
     def test_equivalence(self):
         """
@@ -709,6 +741,11 @@ class TestNumber(object):
         assert_false(op.less_than("9"))
         assert_false(op.greater_than("11"))
     
+    def test_checking_logical_support(self):
+        """Numbers don't have logical support."""
+        op = Number(9)
+        assert_raises(InvalidOperationError, op.check_logical_support)
+    
     def test_equivalence(self):
         """
         Two constant numbers are equivalent if they represent the same number.
@@ -822,6 +859,11 @@ class TestSet(object):
         assert_false(op.is_subset(["gustavo", "carlos"]))
         assert_false(op.is_subset(["carla", "gustavo"]))
     
+    def test_checking_logical_support(self):
+        """Sets don't have logical support."""
+        op = Set(Number(9), String("carla"))
+        assert_raises(InvalidOperationError, op.check_logical_support)
+    
     def test_equivalence(self):
         """
         Two constant sets A and B are equivalent if each element in A is
@@ -922,6 +964,11 @@ class TestPlaceholderVariable(object):
         assert_raises(InvalidOperationError, var.greater_than, None)
         assert_raises(InvalidOperationError, var.contains, None)
         assert_raises(InvalidOperationError, var.is_subset, None)
+    
+    def test_checking_logical_support(self):
+        """Placeholder variables always have logical support."""
+        op = PlaceholderVariable("foo")
+        op.check_logical_support()
     
     def test_equivalence(self):
         """
@@ -1089,6 +1136,11 @@ class TestPlaceholderFunction(object):
         assert_raises(InvalidOperationError, func.greater_than, None)
         assert_raises(InvalidOperationError, func.contains, None)
         assert_raises(InvalidOperationError, func.is_subset, None)
+    
+    def test_checking_logical_support(self):
+        """Placeholder functions always have logical support."""
+        op = PlaceholderFunction("foo")
+        op.check_logical_support()
     
     def test_equivalence(self):
         """

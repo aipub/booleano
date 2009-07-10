@@ -77,6 +77,19 @@ class OperationNode(object):
         """
         raise NotImplementedError()
     
+    def check_logical_support(self):
+        """
+        Make sure this node has and can return its logical value.
+        
+        :raises InvalidOperationError: If the node is an **operand** which
+            doesn't support boolean operations.
+        
+        All the operators have logical values.
+        
+        """
+        if self.is_operand():
+            self.check_operation("boolean")
+    
     def is_leaf(self):
         """
         Check if this is a leaf node.
