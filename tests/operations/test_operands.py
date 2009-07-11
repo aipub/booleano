@@ -896,11 +896,14 @@ class TestSet(object):
         eq_(as_unicode, str(set_))
     
     def test_representation(self):
-        set_ = Set(Number(3), Number(5))
-        eq_(repr(set_), "<Set <Number 3.0>, <Number 5.0>>")
+        set1 = Set(Number(3), Number(5))
+        eq_(repr(set1), "<Set <Number 3.0>, <Number 5.0>>")
         # Now with an empty set:
-        set_ = Set()
-        eq_(repr(set_), "<Set>")
+        set2 = Set()
+        eq_(repr(set2), "<Set>")
+        # Now with Unicode stuff in it:
+        set3 = Set(String(u"España"), String(u"carabobeño"))
+        eq_(repr(set3), '<Set <String "España">, <String "carabobeño">>')
 
 
 #{ Placeholders

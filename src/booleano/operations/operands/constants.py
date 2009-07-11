@@ -366,7 +366,7 @@ class Set(Constant):
     def __repr__(self):
         """Return the representation for this constant set."""
         elements = [repr(element) for element in self.constant_value]
-        elements = u", ".join(elements)
+        elements = ", ".join(elements)
         if elements:
             elements = " " + elements
         return '<Set%s>' % elements
