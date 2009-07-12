@@ -236,17 +236,6 @@ class Not(UnaryOperator):
         
         """
         return not self.operand(context)
-    
-    def __unicode__(self):
-        """
-        Return the Unicode representation for this operator and its operand.
-        
-        """
-        return u"%s(%s)" % (self.__class__.__name__, self.operand)
-    
-    def __repr__(self):
-        """Return the representation for this operator and its operand."""
-        return "<%s %s>" % (self.__class__.__name__, repr(self.operand))
 
 
 #{ Binary operators
