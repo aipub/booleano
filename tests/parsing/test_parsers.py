@@ -30,11 +30,15 @@ Test suite for the built-in parser implementation.
 
 """
 
-from booleano.parser import Grammar
+from nose.tools import eq_
+
+from booleano.parser import Grammar, ConvertibleParser
 from booleano.parser.testutils import BaseGrammarTest
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
+
+from tests import StringConverter
 
 
 class TestDefaultGrammar(BaseGrammarTest):
@@ -716,4 +720,41 @@ class TestDefaultGrammar(BaseGrammarTest):
         "-",
         "this is definitely not an operand",
     )
+    
+    def test_custom_tokens_against_trees(self):
+        """
+        All the custom tokens in the grammar must be taken into account by the
+        parser.
+        
+        To test that custom tokens are used, and in order to test many scenarios
+        writen few lines of code, we're going to convert operation nodes into
+        boolean expressions (using the relevant grammar), and then these
+        expressions will be parsed to check if the result is the original
+        tree.
+        
+        """
+        
+        grammar = Grammar(eq="equals", ne="different-from", lt="less-than",
+            le="less-equal", gt="greater-than", ge="greater-equal",
+            belongs_to="belongs-to", is_subset="is-subset-of",
+            set_start="\\", set_end="/", element_separator=";",
+            arguments_start="[", arguments_end="]", arguments_separator=";",
+            namespace_separator=".")
+        
+        parser = ConvertibleParser(grammar)
+        convert_to_string = StringConverter(grammar)
+        
+        for operation in self.expressions.values():
+            expression = convert_to_string(operation)
+            
+            # Using a Nose test generator:
+            def check():
+                new_operation = parser(expression).root_node
+                eq_(operation, new_operation,
+                    u'Original operation: %s --- Returned operation: %s' %
+                    (repr(operation), repr(new_operation)))
+            check.description = (u"The following expression is valid in the "
+                                 u"grammar with custom tokens: %s" % expression)
+            
+            yield check
 
