@@ -497,7 +497,7 @@ class TestNonConnectiveBinaryOperators(object):
         eq_(repr(op), expected)
 
 
-class TestEqual():
+class TestEqual(object):
     """Tests for the Equality operator."""
     
     def test_constants_evaluation(self):
@@ -540,7 +540,7 @@ class TestEqual():
         assert_false(operation(context))
 
 
-class TestNotEqual():
+class TestNotEqual(object):
     """Tests for the "not equal" operator."""
     
     def test_constants_evaluation(self):
