@@ -30,15 +30,20 @@ Test suite for the built-in parser implementation.
 
 """
 
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 
-from booleano.parser import Grammar, ConvertibleParser
-from booleano.parser.testutils import BaseGrammarTest
+from booleano.parser import Grammar, ConvertibleParser, EvaluableParser
+from booleano.parser.scope import Namespace
+from booleano.parser.parsers import Parser
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
+from booleano.parser.testutils import BaseGrammarTest
+from booleano.exc import ScopeError, BadExpressionError
 
-from tests import StringConverter
+from tests import (StringConverter, BoolVar, TrafficLightVar, 
+                   PedestriansCrossingRoad, DriversAwaitingGreenLightVar,
+                   PermissiveFunction, TrafficViolationFunc)
 
 
 class TestDefaultGrammar(BaseGrammarTest):
@@ -757,4 +762,109 @@ class TestDefaultGrammar(BaseGrammarTest):
                                  u"grammar with custom tokens: %s" % expression)
             
             yield check
+
+
+class TestBaseParser(object):
+    """
+    Tests for the parsers' abstract base class.
+    
+    """
+    
+    def test_abstract_methods(self):
+        parser = Parser(Grammar())
+        assert_raises(NotImplementedError, parser.make_variable, None)
+        assert_raises(NotImplementedError, parser.make_function, None)
+
+
+class TestEvaluableParser(object):
+    """Tests for the evaluable parser."""
+    
+    global_objects = {
+        'bool': BoolVar(),
+        'message': String("Hello world"),
+        'foo': PermissiveFunction,
+    }
+    
+    traffic_objects = {
+        'traffic_light': TrafficLightVar(),
+        'pedestrians_crossing_road': PedestriansCrossingRoad(),
+        'drivers_awaiting_green_light': DriversAwaitingGreenLightVar(),
+        'traffic_violation': TrafficViolationFunc,
+    }
+    
+    root_namespace = Namespace(global_objects,
+        {
+        'traffic': Namespace(traffic_objects),
+        })
+    
+    parser = EvaluableParser(Grammar(), root_namespace)
+    
+    #{ Tests for the parse action that makes the variables
+    
+    def test_existing_variable_without_namespace(self):
+        parse_tree = self.parser("~ bool")
+        eq_(parse_tree.root_node, Not(self.global_objects['bool']))
+    
+    def test_existing_variable_with_namespace(self):
+        parse_tree = self.parser('traffic:traffic_light == "green"')
+        expected_node = Equal(self.traffic_objects['traffic_light'],
+                              String("green"))
+        eq_(parse_tree.root_node, expected_node)
+    
+    def test_non_existing_variable_without_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ non_existing_var")
+    
+    def test_non_existing_variable_with_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ traffic:non_existing_var")
+    
+    def test_variable_in_non_existing_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ bar:foo")
+    
+    def test_function_instead_of_variable(self):
+        # "foo" is a function, so it cannot be used as a variable (without
+        # parenthesis):
+        try:
+            self.parser('~ foo')
+        except BadExpressionError, exc:
+            eq_('"foo" represents a function, not a variable', unicode(exc))
+        else:
+            assert 0, '"foo" is a function, not a variable!'
+    
+    def test_named_constant(self):
+        """Named constants must be supported."""
+        parse_tree = self.parser('message == "Hello earth"')
+        expected_node = Equal(String("Hello world"), String("Hello earth"))
+        eq_(parse_tree.root_node, expected_node)
+    
+    #{ Tests for the parse action that makes the functions
+    
+    def test_existing_function_without_namespace(self):
+        parse_tree = self.parser('~ foo("baz")')
+        eq_(parse_tree.root_node, Not(PermissiveFunction(String("baz"))))
+    
+    def test_existing_function_with_namespace(self):
+        parse_tree = self.parser('~ traffic:traffic_violation("pedestrians")')
+        expected_node = Not(TrafficViolationFunc(String("pedestrians")))
+        eq_(parse_tree.root_node, expected_node)
+    
+    def test_non_existing_function_without_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ non_existing_function()")
+    
+    def test_non_existing_function_with_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ traffic:non_existing_func()")
+    
+    def test_function_in_non_existing_namespace(self):
+        assert_raises(ScopeError, self.parser, "~ bar:foo(123)")
+    
+    def test_variable_instead_of_function(self):
+        # "bool" is a variable, so it cannot be used as a function (with
+        # parenthesis):
+        try:
+            self.parser('~ bool()')
+        except BadExpressionError, exc:
+            eq_('"bool" is not a function', unicode(exc))
+        else:
+            assert 0, '"bool" is a variable, not a function!'
+    
+    #}
 

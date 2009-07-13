@@ -278,12 +278,12 @@ class Parser(object):
         return Number(tokens[0])
     
     def make_variable(self, tokens):
-        """Make a variable using the token passed."""
+        """Make a variable using the tokens passed."""
         raise NotImplementedError("It's up to the actual parser to make "
                                   "the variables")
     
     def make_function(self, tokens):
-        """Make a function using the token passed."""
+        """Make a function using the tokens passed."""
         raise NotImplementedError("It's up to the actual parser to make "
                                   "the functions")
     
@@ -370,16 +370,52 @@ class EvaluableParser(Parser):
         super(EvaluableParser, self).__init__(grammar)
     
     def make_variable(self, tokens):
-        """Make a Variable using the token passed."""
-        var = self._namespace.get_object(tokens[1], tokens[0])
-        # TODO: Check that it's a variable!!!
+        """
+        Return the :class:`Variable` represented by the ``tokens`` passed.
+        
+        :return: The Booleano variable/constant represented in the ``tokens``.
+        :rtype: Operand
+        :raises ScopeError: If the variable's identifier is not found (including
+            its parent namespace, if any).
+        :raises BadExpressionError: If the identifier is found, but represents
+            a function, not a variable.
+        
+        """
+        var = self._namespace.get_object(tokens.identifier,
+                                         tokens.namespace_parts)
+        if isinstance(var, type) and issubclass(var, Function):
+            orig_id = self.__get_original_identifier__(tokens)
+            raise BadExpressionError(u'"%s" represents a function, not a '
+                                     'variable' % orig_id)
         return var
     
     def make_function(self, tokens):
-        """Make a Function using the token passed."""
-        func = self._namespace.get_object(tokens[1], tokens[0])
-        # TODO: Check that it's a function!!!
-        return func
+        """
+        Return the :class:`Function` call represented by the ``tokens`` passed.
+        
+        :return: The Booleano function call represented in the ``tokens``.
+        :rtype: Function
+        :raises ScopeError: If the function name is not found (including its
+            parent namespace, if any).
+        :raises BadExpressionError: If the identifier is found, but represents
+            a variable or constant, not a function call.
+        
+        """
+        func_name = tokens.function_name
+        func = self._namespace.get_object(func_name.identifier,
+                                          func_name.namespace_parts)
+        if not (isinstance(func, type) and issubclass(func, Function)):
+            orig_id = self.__get_original_identifier__(func_name)
+            raise BadExpressionError(u'"%s" is not a function' % orig_id)
+        function_call = func(*tokens.arguments)
+        return function_call
+    
+    def __get_original_identifier__(self, tokens):
+        """Build the original identifier from a Pyparsing ``tokens``."""
+        ns_sep = unicode(self._grammar.get_token("namespace_separator"))
+        id_parts = list(tokens.namespace_parts) + [tokens.identifier]
+        id_ = ns_sep.join(id_parts)
+        return id_
 
 
 class ConvertibleParser(Parser):
