@@ -53,6 +53,21 @@ class ParseTree(object):
         
         """
         self.root_node = root_node
+    
+    def __eq__(self, other):
+        """
+        Check if the ``other`` parse tree is equivalent to this one.
+        
+        """
+        return (isinstance(other, self.__class__) and
+                other.root_node == self.root_node)
+    
+    def __ne__(self, other):
+        """
+        Check if the ``other`` parse tree is **not** equivalent to this one.
+        
+        """
+        return not self.__eq__(other)
 
 
 class EvaluableParseTree(ParseTree):

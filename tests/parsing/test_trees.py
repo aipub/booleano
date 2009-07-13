@@ -73,6 +73,27 @@ class TestEvaluableTrees(object):
                    'drivers_traffic_light': ()}
         assert_false(tree(context))
     
+    def test_equivalence(self):
+        tree1 = EvaluableParseTree(BoolVar())
+        tree2 = EvaluableParseTree(BoolVar())
+        tree3 = EvaluableParseTree(PedestriansCrossingRoad())
+        tree4 = ConvertibleParseTree(PlaceholderVariable("my_variable"))
+        
+        ok_(tree1 == tree2)
+        ok_(tree2 == tree1)
+        
+        ok_(tree1 != None)
+        ok_(tree1 != tree3)
+        ok_(tree1 != tree4)
+        ok_(tree2 != tree3)
+        ok_(tree2 != tree4)
+        ok_(tree3 != tree1)
+        ok_(tree3 != tree2)
+        ok_(tree3 != tree4)
+        ok_(tree4 != tree1)
+        ok_(tree4 != tree2)
+        ok_(tree4 != tree3)
+    
     def test_string(self):
         tree = EvaluableParseTree(BoolVar())
         as_unicode = unicode(tree)
@@ -95,6 +116,27 @@ class TestConvertibleTrees(object):
         converter = AntiConverter()
         conversion = tree(converter)
         eq_(operand, conversion)
+    
+    def test_equivalence(self):
+        tree1 = ConvertibleParseTree(PlaceholderVariable("my_variable"))
+        tree2 = ConvertibleParseTree(PlaceholderVariable("my_variable"))
+        tree3 = ConvertibleParseTree(String("hello"))
+        tree4 = EvaluableParseTree(BoolVar())
+        
+        ok_(tree1 == tree2)
+        ok_(tree2 == tree1)
+        
+        ok_(tree1 != None)
+        ok_(tree1 != tree3)
+        ok_(tree1 != tree4)
+        ok_(tree2 != tree3)
+        ok_(tree2 != tree4)
+        ok_(tree3 != tree1)
+        ok_(tree3 != tree2)
+        ok_(tree3 != tree4)
+        ok_(tree4 != tree1)
+        ok_(tree4 != tree2)
+        ok_(tree4 != tree3)
     
     def test_string(self):
         tree = ConvertibleParseTree(BoolVar())
