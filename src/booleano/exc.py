@@ -35,6 +35,9 @@ class BooleanoException(Exception):
     """
     Base class for the exceptions.
     
+    It is never raised directly, but you can use it to handle any kind of
+    exception raised by Booleano.
+    
     """
     pass
 
@@ -91,7 +94,10 @@ class BadFunctionError(BadOperandError):
 
 class ParsingException(BooleanoException):
     """
-    Exception raised when something goes wrong with the parser.
+    Base class for exceptions raised when parsing goes wrong.
+    
+    It is never raised directly, but you can use it to handle any kind of
+    exception raised by the parser.
     
     """
     pass
