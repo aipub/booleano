@@ -153,8 +153,8 @@ While the parser-specific features include:
   localization.
 
 
-Contents
---------
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 2
@@ -162,14 +162,17 @@ Contents
    tutorials/index
    manual/index
    api/index
+
+
+About Booleano
+--------------
+
+If you want to learn more about Booleano, you'll find the following resources
+handy:
+
+.. toctree::
+   :maxdepth: 2
+   
    about
    changes
-
-
-Indices and tables
-^^^^^^^^^^^^^^^^^^
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
