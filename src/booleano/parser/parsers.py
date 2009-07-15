@@ -90,10 +90,6 @@ class Parser(object):
         grp_start = Suppress(self._grammar.get_token("group_start"))
         grp_end = Suppress(self._grammar.get_token("group_end"))
         
-        # Making the set-specific operations:
-        belongs_to = Suppress(self._grammar.get_token("belongs_to"))
-        is_subset = Suppress(self._grammar.get_token("is_subset"))
-        
         # Making the relational operations:
         t_eq = self._grammar.get_token("eq")
         t_ne = self._grammar.get_token("ne")
@@ -107,9 +103,9 @@ class Parser(object):
         gt = CaselessLiteral(t_gt)
         le = CaselessLiteral(t_le)
         ge = CaselessLiteral(t_ge)
-        relationals = eq | ne | le | ge | lt | gt
+        relationals = eq ^ ne ^ le ^ ge ^ lt ^ gt
         # TODO: Avoid doing this:
-        self.__operations__ = {
+        self.__relationals__ = {
             t_eq: Equal,
             t_ne: NotEqual,
             t_lt: LessThan,
@@ -118,11 +114,27 @@ class Parser(object):
             t_ge: GreaterEqual,
         }
         
+        # Making the set-specific operations:
+        t_belongs_to = self._grammar.get_token("belongs_to")
+        t_is_subset = self._grammar.get_token("is_subset")
+        belongs_to = CaselessLiteral(t_belongs_to)
+        is_subset = CaselessLiteral(t_is_subset)
+        membership = belongs_to ^ is_subset
+        # TODO: Avoid doing this:
+        self.__membership_operators__ = {
+            t_belongs_to: BelongsTo,
+            t_is_subset: IsSubset,
+        }
+        
         # Making the logical connectives:
         not_ = Suppress(self._grammar.get_token("not"))
         and_ = Suppress(self._grammar.get_token("and"))
         in_or = Suppress(self._grammar.get_token("or"))
         ex_or = Suppress(self._grammar.get_token("xor"))
+        
+        # Now let's prevent higher precedence operators from hiding those
+        # operators with a lower precedence:
+        relationals = ~membership + relationals
         
         operand = self.define_operand()
         
@@ -130,8 +142,7 @@ class Parser(object):
             operand,
             [
                 (relationals, 2, opAssoc.LEFT, self.make_relational),
-                (belongs_to, 2, opAssoc.LEFT, self.make_belongs_to),
-                (is_subset, 2, opAssoc.LEFT, self.make_is_subset),
+                (membership, 2, opAssoc.LEFT, self.make_membership),
                 (not_, 1, opAssoc.RIGHT, self.make_not),
                 (and_, 2, opAssoc.LEFT, self.make_and),
                 (ex_or, 2, opAssoc.LEFT, self.make_xor),
@@ -297,27 +308,23 @@ class Parser(object):
         operator = tokens[0][1]
         right_op = tokens[0][2]
         
-        operation = self.__operations__[operator]
+        operation = self.__relationals__[operator]
         
         return operation(left_op, right_op)
     
-    def make_belongs_to(self, tokens):
+    def make_membership(self, tokens):
         """
-        Make a **belongs to** operation using the operands passed in ``tokens``.
+        Make a membership operation using the operands passed in ``tokens``.
         
         """
+        print tokens
         element = tokens[0][0]
-        set_ = tokens[0][1]
-        return BelongsTo(element, set_)
-    
-    def make_is_subset(self, tokens):
-        """
-        Make a **is sub-set** operation using the operands passed in ``tokens``.
+        operator = tokens[0][1]
+        set_ = tokens[0][2]
+        print element, operator, set_
+        operation = self.__membership_operators__[operator]
         
-        """
-        subset = tokens[0][0]
-        superset = tokens[0][1]
-        return IsSubset(subset, superset)
+        return operation(element, set_)
     
     def make_not(self, tokens):
         """Make an *Not* connective using the token passed."""

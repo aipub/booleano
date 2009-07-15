@@ -739,29 +739,48 @@ class TestDefaultGrammar(BaseGrammarTest):
         
         """
         
-        grammar = Grammar(eq="equals", ne="different-from", lt="less-than",
-            le="less-equal", gt="greater-than", ge="greater-equal",
-            belongs_to="belongs-to", is_subset="is-subset-of",
-            set_start="\\", set_end="/", element_separator=";",
-            arguments_start="[", arguments_end="]", arguments_separator=";",
-            namespace_separator=".")
+        grammars = (
+            # A grammar that overrides all the default tokens:
+            Grammar(**{
+                'not': "not", 'and': "and", 'xor': "xor", 'or': "or",
+                'eq': "equals", 'ne': "different-from", 'lt': "less-than",
+                'le': "less-equal", 'gt': "greater-than", 'ge': "greater-equal",
+                'belongs_to': "belongs-to", 'is_subset': "is-subset-of",
+                'set_start': "\\", 'set_end': "/", 'element_separator': ";",
+                'arguments_start': "[", 'arguments_end': "]",
+                'arguments_separator': ";", 'namespace_separator': ".",
+                }
+            ),
+            # Now let's try a grammar where some operators represent the
+            # initial characters of other operators:
+            Grammar(**{
+                'eq': "is", 'ne': "isn't", 'lt': "is less than",
+                'gt': "is greater than", 'le': "is less than or equal to",
+                'ge': "is greater than or equal to",
+                'belongs_to': "is included in", 'is_subset': "is subset of",
+                }
+            )
+        )
         
-        parser = ConvertibleParser(grammar)
-        convert_to_string = StringConverter(grammar)
-        
-        for operation in self.expressions.values():
-            expression = convert_to_string(operation)
+        for grammar_num in range(len(grammars)):
+            grammar = grammars[grammar_num]
+            parser = ConvertibleParser(grammar)
+            convert_to_string = StringConverter(grammar)
             
-            # Using a Nose test generator:
-            def check():
-                new_operation = parser(expression).root_node
-                eq_(operation, new_operation,
-                    u'Original operation: %s --- Returned operation: %s' %
-                    (repr(operation), repr(new_operation)))
-            check.description = (u"The following expression is valid in the "
-                                 u"grammar with custom tokens: %s" % expression)
-            
-            yield check
+            for operation in self.expressions.values():
+                expression = convert_to_string(operation)
+                
+                # Using a Nose test generator:
+                def check():
+                    new_operation = parser(expression).root_node
+                    eq_(operation, new_operation,
+                        u'Original operation: %s --- Returned operation: %s' %
+                        (repr(operation), repr(new_operation)))
+                check.description = (u"The following expression is valid in "
+                                     u"the grammar #%s: %s" % (grammar_num,
+                                                               expression))
+                
+                yield check
 
 
 class TestBaseParser(object):
