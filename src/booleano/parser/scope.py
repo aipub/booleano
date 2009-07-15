@@ -193,8 +193,8 @@ class Bind(_Identifier):
         symbol table (if any).
         
         """
-        description = u'Operand %s bound as "%s"' % (self.operand,
-                                                     self.global_name)
+        description = 'Operand %s bound as "%s"' % (self.operand,
+                                                    self.global_name)
         if self.symbol_table:
             description = "%s (in %s)" % (description, self.symbol_table)
         return description
