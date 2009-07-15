@@ -35,13 +35,13 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-version = open(os.path.join(here, 'VERSION.txt')).readline().rstrip()
+HERE = os.path.abspath(os.path.dirname(__file__))
+VERSION = open(os.path.join(HERE, 'VERSION.txt')).readline().rstrip()
+README = open(os.path.join(HERE, 'README.rst')).read()
 
-setup(name='booleano',
-      version=version,
-      description=('Evaluation of boolean expressions in natural languages'),
+setup(name="booleano",
+      version=VERSION,
+      description=("Boolean Expressions Interpreter"),
       long_description=README,
       classifiers=[
         "Development Status :: 2 - Pre-Alpha",
@@ -54,22 +54,22 @@ setup(name='booleano',
         "Topic :: Software Development :: Libraries",
         "Topic :: Text Processing :: Linguistic",
         ],
-      keywords='boolean expression natural language condition',
+      keywords="boolean expression natural language condition conditions",
       author="Gustavo Narea",
       author_email="me@gustavonarea.net",
       url="http://code.gustavonarea.net/booleano/",
       license="MIT X License (http://www.opensource.org/licenses/mit-license.php)",
       namespace_packages = ["booleano"],
-      packages=find_packages('src', exclude=['tests']),
-      package_dir={'': 'src'},
+      packages=find_packages("src", exclude=["tests"]),
+      package_dir={'': "src"},
       package_data={
-        '': ['VERSION.txt', 'README.rst'],
-        'docs': ['Makefile', 'conf.py', '**.rst', '_templates/*', '_static/*']},
-      exclude_package_data={'': ['README.txt', 'docs']},
+        '': ["VERSION.txt", "README.rst"],
+        'docs': ["Makefile", "conf.py", "**.rst", "_templates/*", "_static/*"]},
+      exclude_package_data={'': ["README.txt", "docs"]},
       include_package_data=True,
       zip_safe=False,
-      tests_require = ['coverage', 'nose >= 0.11.0'],
-      install_requires=['pyparsing >= 1.5.2'],
+      tests_require = ["coverage >= 3.0", "nose >= 0.11.0"],
+      install_requires=["pyparsing >= 1.5.2"],
       test_suite="nose.collector",
       entry_points = """\
       """
