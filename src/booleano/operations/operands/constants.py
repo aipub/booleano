@@ -279,14 +279,7 @@ class Set(Constant):
         :raises InvalidOperationError: If ``value`` is not an integer.
         
         """
-        try:
-            value = float(value)
-            if not value.is_integer():
-                raise ValueError
-        except ValueError:
-            raise InvalidOperationError('To compare the amount of items in a '
-                                        'set, the operand "%s" has to be an '
-                                        'integer')
+        value = self._to_int(value)
         return len(self.constant_value) < value
     
     def greater_than(self, value, context):
@@ -297,14 +290,7 @@ class Set(Constant):
         :raises InvalidOperationError: If ``value`` is not an integer.
         
         """
-        try:
-            value = float(value)
-            if not value.is_integer():
-                raise ValueError
-        except ValueError:
-            raise InvalidOperationError('To compare the amount of items in a '
-                                        'set, the operand "%s" has to be an '
-                                        'integer')
+        value = self._to_int(value)
         return len(self.constant_value) > value
     
     def contains(self, value, context):
@@ -370,4 +356,29 @@ class Set(Constant):
         if elements:
             elements = " " + elements
         return '<Set%s>' % elements
+    
+    @classmethod
+    def _to_int(cls, value):
+        """
+        Convert ``value`` is to integer if possible.
+        
+        :param value: The value to be verified.
+        :return: ``value`` as integer.
+        :rtype: int
+        :raises InvalidOperationError: If ``value`` is not an integer.
+        
+        This is a workaround for Python < 2.6, where floats didn't have the
+        ``.is_integer()`` method.
+        
+        """
+        try:
+            value_as_int = int(value)
+            is_int = value_as_int == float(value)
+        except (ValueError, TypeError):
+            is_int = False
+        if not is_int:
+            raise InvalidOperationError("To compare the amount of items in a "
+                                        "set, the operand %s has to be an "
+                                        "integer" % repr(value))
+        return value_as_int
 
