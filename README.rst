@@ -1,30 +1,21 @@
-Evaluation of boolean expressions in natural languages
-======================================================
+*****************************************
+Booleano: Boolean Expressions Interpreter
+*****************************************
 
-TODO: Complete this document.
+:Website: http://code.gustavonarea.net/booleano/
 
-Supported grammar
------------------
+**Booleano** is an interpreter of `boolean expressions
+<http://en.wikipedia.org/wiki/Boolean_expression>`_, a library to **define
+and run filters** available as text (e.g., in a natural language) or in 
+`Python <http://python.org/>`_ code.
 
-The following Backus-Naur Form (BNF) defines the supported grammar::
+In order to handle text-based filters, Booleano ships with a fully-featured
+parser whose grammar is :term:`adaptive <adaptive grammar>`. Many
+properties can be overridden using simple configuration directives, but
+because it's powered by `Pyparsing <http://pyparsing.wikispaces.com/>`_,
+you can use it to define complex grammars too.
 
-    <boolean-expression> ::= <operations>
-    
-    <operation> ::= 
-    
-    <flat-operation> ::= <or-operation>*
-    <or-operation> ::= <and-operation> ["OR" <and-operation>]
-    <and-operation> ::= <basic-operation> ["AND" <basic-operation>]
-    
-    <basic-operation> ::= ["NOT"] <atom-operand>
-    <atom-operand> ::= <number> | <quoted-string> | <variable>
-    
-    <number> ::= <digit>+ [<decimal-separator> <digit>+]
-    <digit> ::= "0".."9"
-    <decimal-separator> ::= "."                                   -- replaceable
-    <variable> ::= <word> ["." <word>]
+On the other hand, the library exposes a pythonic API for filters written
+in pure Python. These filters are particularly useful to build reusable
+conditions from objects provided by a third party library.
 
-Where the following constants can be translated:
-
-- ``"NOT"``.
-- ``"."``.
