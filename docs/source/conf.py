@@ -202,3 +202,6 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 # -- autodoc settings ----------------------------------------------------------
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
+
+# -- todo settings -------------------------------------------------------------
+todo_include_todos = True
