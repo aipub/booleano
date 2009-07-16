@@ -8,10 +8,8 @@ and run filters** available as text (e.g., in a natural language) or in
 
 In order to handle text-based filters, Booleano ships with a fully-featured
 parser whose grammar is `adaptive
-<http://en.wikipedia.org/wiki/Adaptive_grammar>`_. Many
-properties can be overridden using simple configuration directives, but
-because it's powered by `Pyparsing <http://pyparsing.wikispaces.com/>`_,
-you can use it to define complex grammars too.
+<http://en.wikipedia.org/wiki/Adaptive_grammar>`_: Its properties
+can be overridden using simple configuration directives.
 
 On the other hand, the library exposes a pythonic API for filters written
 in pure Python. These filters are particularly useful to build reusable
