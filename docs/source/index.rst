@@ -15,10 +15,8 @@ Booleano: Boolean Expressions Interpreter
     `Python <http://python.org/>`_ code.
     
     In order to handle text-based filters, Booleano ships with a fully-featured
-    parser whose grammar is :term:`adaptive <adaptive grammar>`. Many
-    properties can be overridden using simple configuration directives, but
-    because it's powered by `Pyparsing <http://pyparsing.wikispaces.com/>`_,
-    you can use it to define complex grammars too.
+    parser whose grammar is :term:`adaptive <adaptive grammar>`: Its properties
+    can be overridden using simple configuration directives.
     
     On the other hand, the library exposes a pythonic API for filters written
     in pure Python. These filters are particularly useful to build reusable
@@ -59,9 +57,10 @@ the books that meet all the requirements below:
 
 * The book title contains the word "python".
 * The book falls into the category "computing".
-* The book has an average rating of at least 3 **or** it was published after
+* The book has an average rating greater than 3 **or** it was published after
   2006.
-* If the books ships with a software CD, the software must work under Linux.
+* If the books ships with software (e.g., in a CD), the software must work
+  under Linux.
 
 Of course, Booleano could also handle a simpler expression.
 
@@ -94,7 +93,7 @@ the file is excluded from the results; otherwise, it's included.
 With the fictitious command above, only those HTML documents that meet at least
 one of the following conditions are included:
 
-* The owner of the file belongs to the "www-data" group (i.e., is a webmaster).
+* The owner of the file is a member of the group "www-data".
 * The owner of the file is the user that is running the command.
 
 Again, Booleano could also handle a simpler expression (such as
@@ -104,24 +103,33 @@ Again, Booleano could also handle a simpler expression (such as
 Evaluate Python-based conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Say you're using a third party Web `authorization 
+Say you're using a third party `authorization 
 <http://en.wikipedia.org/wiki/Authorization>`_ library which grants access if
 and only if the callable you pass to it returns ``True``. On the other hand,
 the library provides you with one Booleano variable (which is an stateless
-object) called "current_user", that represents the name of the current user (if
-he is authenticated).
+Python object) called "current_user", that represents the name of the current
+user.
 
 You could build your Python-based condition like this::
 
-    >>> from authorization_library import current_user
+    >>> from authorization_library import current_user, set_condition
     >>> condition = current_user == "foo"
     >>> condition
     <Equal <Variable "current_user"> <String "foo">>
+    >>> set_condition(condition)
 
 So ``condition`` represents an stateless object which the authorization
 library uses when it needs to find what requests should be allowed or forbidden.
-Internally, it executes ``condition`` by passing all the request variables, so
-all the operations inside ``condition`` can find if they are met or not.
+Internally, it executes ``condition`` by passing all the environment variables,
+so all the operations inside ``condition`` can find if they are met or not, like
+this::
+
+    >>> environment1 = {'user': "gustavo"}
+    >>> environment2 = {'user': "foo"}
+    >>> condition(environment1)
+    False
+    >>> condition(environment2)
+    True
 
 
 Features
@@ -144,13 +152,16 @@ The general features of Booleano include:
 
 While the parser-specific features include:
 
-* :term:`Binding` support (the operands can be bound to :term:`identifiers
-  <identifier>`).
-* :term:`Namespace` support (the identifiers may belong to namespaces).
-* Boolean expressions can contain any Unicode character. Even identifiers can
-  contain non-ASCII characters.
-* Localization support. It's easy to have one grammar per supported
-  localization.
+* The operands can be :term:`bound <binding>` to :term:`identifiers
+  <identifier>`.
+* The identifiers can be available under :term:`namespaces <namespace>`.
+* Boolean expressions can contain any Unicode character, even in identifiers.
+* It's easy to have one grammar per localization.
+* The grammar is :term:`adaptive <adaptive grammar>`. You can customize it
+  with simple parameters or via `Pyparsing <http://pyparsing.wikispaces.com/>`_.
+* Expressions can span multiple lines. Whitespace makes no difference, so they
+  can contain tabs as well.
+* No nesting level limit. Expressions can be a deep as you want.
 
 
 Documentation
