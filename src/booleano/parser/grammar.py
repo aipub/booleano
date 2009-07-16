@@ -83,28 +83,32 @@ class Grammar(object):
         'identifier_spacing': "_",
         'namespace_separator': ":",
     }
+    """The default tokens."""
     
     default_settings = {
         'superset_right_in_is_subset': True,
         'set_right_in_contains': True,
         'optional_positive_sign': True,
     }
+    """The default settings for the grammar."""
     
     known_generators = set([
         "operation",
         "string",
         "number",
     ])
+    """The known/valid generators."""
     
     def __init__(self, settings=None, generators=None, **tokens):
         """
-        Set up a grammar, possibly customizing its properties.
         
-        :param custom_settings: The grammar settings to be overridden, if any.
-        :type custom_settings: dict
-        :param custom_generators: The custom generators for the parser to be
-            generated, if any.
-        :type custom_generators: dict
+        :param settings: The grammar settings to be overridden, if any.
+        :type settings: dict
+        :param generators: The custom Pyparsing generators for some of the
+            elements in the grammar, if any.
+        :type generators: dict
+        :raises booleano.exc.GrammarError: If at least one of the ``settings``,
+            ``generators`` or ``tokens`` are not valid.
         
         Keyword arguments represent the tokens to be overridden.
         
@@ -132,7 +136,7 @@ class Grammar(object):
         :type token_name: basestring
         :return: The requested token.
         :rtype: basestring
-        :raises GrammarError: If the ``token_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``token_name`` is unknown.
         
         If the token doesn't have a custom value, the default value will be
         returned instead.
@@ -150,7 +154,7 @@ class Grammar(object):
         :type token_name: basestring
         :param token: The new value of the token.
         :type token: basestring
-        :raises GrammarError: If the ``token_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``token_name`` is unknown.
         
         """
         self._check_token_existence(token_name)
@@ -162,7 +166,7 @@ class Grammar(object):
         
         :param token_name: The token's name.
         :type token_name: basestring
-        :raises GrammarError: If the ``token_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``token_name`` is unknown.
         
         """
         if token_name not in self.default_tokens:
@@ -177,7 +181,7 @@ class Grammar(object):
         :param setting_name: The name of the setting to be retrieved.
         :type setting_name: basestring
         :return: The setting value.
-        :raises GrammarError: If the ``setting_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``setting_name`` is unknown.
         
         """
         self._check_setting_existence(setting_name)
@@ -192,8 +196,8 @@ class Grammar(object):
         :type setting_name: basestring
         :param setting: The new value of the setting.
         :type setting: basestring
-        :raises GrammarError: If the ``setting_name`` is unknown or ``setting``
-            is an invalid value for ``setting_name``.
+        :raises booleano.exc.GrammarError: If the ``setting_name`` is
+            unknown or ``setting`` is an invalid value for ``setting_name``.
         
         Settings whose expected value is a Python boolean are not validated.
         
@@ -207,7 +211,7 @@ class Grammar(object):
         
         :param setting_name: The setting's name.
         :type setting_name: basestring
-        :raises GrammarError: If the ``setting_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``setting_name`` is unknown.
         
         """
         if setting_name not in self.default_settings:
@@ -222,7 +226,7 @@ class Grammar(object):
         :param generator_name: The name of the generator to be retrieved.
         :type generator_name: basestring
         :return: The generator value or ``None`` if it's not been set.
-        :raises GrammarError: If the ``generator_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``generator_name`` is unknown.
         
         """
         self._check_generator_existence(generator_name)
@@ -236,7 +240,7 @@ class Grammar(object):
         :param generator_name: The name of the generator to be overridden.
         :type generator_name: basestring
         :param generator: The custom generator (a Python callable).
-        :raises GrammarError: If the ``generator_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``generator_name`` is unknown.
         
         """
         self._check_generator_existence(generator_name)
@@ -248,7 +252,7 @@ class Grammar(object):
         
         :param generator_name: The generator's name.
         :type generator_name: basestring
-        :raises GrammarError: If the ``generator_name`` is unknown.
+        :raises booleano.exc.GrammarError: If the ``generator_name`` is unknown.
         
         """
         if generator_name not in self.known_generators:

@@ -47,17 +47,16 @@ class ParseManager(object):
     """
     Base class for parse managers.
     
-    A parse managers controls the parsers to be used in a single kind of
+    A parse manager controls the parsers to be used in a single kind of
     expression, with one parser per supported grammar.
     
     """
     
     def __init__(self, generic_grammar, cache_limit=0, **localized_grammars):
         """
-        Set up the parsers for the supported grammars.
         
         :param generic_grammar: The default grammar.
-        :type generic_grammar: Grammar
+        :type generic_grammar: :class:`Grammar`
         :param cache_limit: The maximum amount of expressions to be cached
             internally (use ``None`` for no limit or ``0`` to disable caching).
         :type cache_limit: int
@@ -82,12 +81,13 @@ class ParseManager(object):
             (or ``None`` if it uses the generic grammar).
         :type locale: basestring
         :return: The parse tree for ``expression``.
-        :rtype: ParseTree
-        :raises BadExpressionError: If ``expression`` is bad-formed
-            according to the ``locale`` grammar.
-        :raises InvalidOperationError: If ``expression`` has an invalid
-            operation.
-        :raises ScopeError: If ``expression`` contains unknown identifiers.
+        :rtype: :class:`booleano.parser.trees.ParseTree`
+        :raises booleano.exc.BadExpressionError: If ``expression`` is bad-formed
+            according to the grammar ``locale``.
+        :raises booleano.exc.InvalidOperationError: If ``expression`` has an 
+            invalid operation.
+        :raises booleano.exc.ScopeError: If ``expression`` contains unknown 
+            identifiers.
         
         If caching is enabled and the ``expression`` was cached previously,
         ``expression`` won't be parsed again and its cached parse tree will
@@ -115,7 +115,7 @@ class ParseManager(object):
         :param locale: The locale of the ``grammar``.
         :type locale: basestring
         :param grammar: The grammar of the parser to be created.
-        :type grammar: Grammar
+        :type grammar: :class:`Grammar`
         
         """
         if locale in self._parsers:
@@ -171,12 +171,11 @@ class EvaluableParseManager(ParseManager):
     def __init__(self, symbol_table, generic_grammar, cache_limit=0,
                  **localized_grammars):
         """
-        Set up the evaluable parsers for the supported grammars.
         
         :param symbol_table: The symbol table for the supported expressions.
-        :type symbol_table: SymbolTable
+        :type symbol_table: :class:`SymbolTable`
         :param generic_grammar: The default grammar.
-        :type generic_grammar: Grammar
+        :type generic_grammar: :class:`Grammar`
         :param cache_limit: The maximum amount of expressions to be cached
             internally (use ``None`` for no limit or ``0`` to disable caching).
         :type cache_limit: int

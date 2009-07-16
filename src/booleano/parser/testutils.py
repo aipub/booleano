@@ -26,7 +26,7 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Utilities to test Booleano grammars and parsers.
+Semi-automatic utilities to test Booleano grammars and parsers.
 
 """
 from nose.tools import eq_, ok_, raises
@@ -45,21 +45,45 @@ class BaseGrammarTest(object):
     work.
     
     .. attribute:: grammar
-    
+        
         An instance of the grammar to be tested. **This attribute must be set
         in the subclasses**, like this::
         
-            from booleano.parser.generic import Grammar
+            from booleano.parser import Grammar
             
             class TestMyGrammar(BaseGrammarTest):
             
                 grammar = Grammar(ne="<>")
+    
+        :type: :class:`booleano.parser.Grammar`
     
     .. attribute:: expressions
     
         A dictionary with all the valid expressions recognized by the grammar,
         where each key is the expression itself and its item is the mock
         representation of the operation.
+        
+        :type: dict
+    
+    .. attribute:: badformed_expressions
+    
+        A list of expressions that are bad-formed in the :attr:`grammar`.
+        
+        :type: list
+    
+    .. attribute:: single_operands
+    
+        A dictionary where the key is an expression that contains a single
+        operand (i.e., no operator) and the item is the :term:`root node` of the
+        expected :term:`parse tree`.
+        
+        :type: dict
+    
+    .. attribute:: invalid_operands
+    
+        A list of expressions which contain a single operand and it is invalid.
+        
+        :type: list
     
     """
     

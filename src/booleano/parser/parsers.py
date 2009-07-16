@@ -59,6 +59,12 @@ class Parser(object):
     parse_tree_class = None
     
     def __init__(self, grammar):
+        """
+        
+        :param grammar: The grammar used by the parser.
+        :type grammar: :class:`booleano.parser.Grammar`
+        
+        """
         self._parser = None
         self._grammar = grammar
     
@@ -373,6 +379,15 @@ class EvaluableParser(Parser):
     parse_tree_class = EvaluableParseTree
     
     def __init__(self, grammar, namespace):
+        """
+        
+        :param grammar: The grammar used by the parser.
+        :type grammar: :class:`booleano.parser.Grammar`
+        :param namespace: The namespace that contains the objects used by the
+            expressions to be parsed.
+        :type namespace: :class:`booleano.parser.scope.Namespace`
+        
+        """
         self._namespace = namespace
         super(EvaluableParser, self).__init__(grammar)
     

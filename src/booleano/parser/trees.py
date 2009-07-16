@@ -29,8 +29,10 @@
 Parse trees.
 
 Booleano supports two kinds of parse trees:
-- *Evaluable parse trees*, which are truth-evaluated against so-called context.
-- *Convertible parse trees*, which are converted into something else (e.g.,
+
+* **Evaluable parse trees**, which are truth-evaluated against so-called
+  context.
+* **Convertible parse trees**, which are converted into something else (e.g.,
   SQL "WHERE" clauses) using so-called parse tree converters.
 
 """
@@ -46,10 +48,9 @@ class ParseTree(object):
     
     def __init__(self, root_node):
         """
-        Instantiate a parse tree whose root node is ``root_node``.
         
         :param root_node: The root node of the parse tree.
-        :type root_node: OperationNode
+        :type root_node: :class:`booleano.operations.OperationNode`
         
         """
         self.root_node = root_node
@@ -78,10 +79,11 @@ class EvaluableParseTree(ParseTree):
     
     def __init__(self, root_node):
         """
-        Wrap ``root_node`` into the truth function.
         
-        :raises InvalidOperationError: If the ``root_node`` is an operand that
-            doesn't support logical values.
+        :param root_node: The root node of the parse tree.
+        :type root_node: :class:`booleano.operations.OperationNode`
+        :raises booleano.exc.InvalidOperationError: If the ``root_node`` is an 
+            operand that doesn't support logical values.
         
         """
         root_node.check_logical_support()
@@ -120,6 +122,7 @@ class ConvertibleParseTree(ParseTree):
         :param converter: The converter to be used.
         :type converter: booleano.converters.BaseConverter
         :return: The conversion result.
+        :rtype: object
         
         """
         return converter(self.root_node)

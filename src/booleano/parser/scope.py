@@ -157,11 +157,26 @@ class _Identifier(object):
 
 class Bind(_Identifier):
     """
-    Operand binding.
+    Operand binder.
+    
+    Each instance is a name :term:`binding`, which assigns an identifier to an
+    operand (even in different languages).
     
     """
     
     def __init__(self, global_name, operand, **names):
+        """
+        
+        :param global_name: The identifier string (excludes parent names, if
+            any).
+        :type global_name: basestring
+        :param operand: The operand to be bound.
+        :type operand: :class:`booleano.operations.operands.Operand`
+        
+        Additional keyword arguments represent the translations of the
+        ``global_name`` into other languages.
+        
+        """
         self.operand = operand
         super(Bind, self).__init__(global_name, **names)
     
@@ -210,13 +225,14 @@ class SymbolTable(_Identifier):
     
     def __init__(self, global_name, objects, *subtables, **names):
         """
-        Create a new symbol table called ``global_name``.
         
         :param global_name: The name of the symbol table (excludes parent
             symbol tables, if any).
         :type global_name: basestring
         :param objects: List of bound operands available in this symbol table.
         :type objects: list
+        :raises booleano.exc.ScopeError: If an object/subtable is already 
+            included or already belongs to another symbol table.
         
         Additional positional arguments represent the sub-tables of this
         symbol table.
@@ -238,9 +254,9 @@ class SymbolTable(_Identifier):
         Add the ``obj`` object to this symbol table.
         
         :param obj: The bound operand to be added.
-        :type obj: Bind
-        :raises ScopeError: If ``obj`` is already included or it already
-            belongs to another symbol table.
+        :type obj: :class:`Bind`
+        :raises booleano.exc.ScopeError: If ``obj`` is already included or it 
+            already belongs to another symbol table.
         
         """
         # Checking if it's safe to include the object:
@@ -260,8 +276,8 @@ class SymbolTable(_Identifier):
         Include ``table`` in the child tables of this symbol table.
         
         :param table: The symbol table to be added.
-        :type table: SymbolTable
-        :raises ScopeError: If ``table`` is already included or it
+        :type table: :class:`SymbolTable`
+        :raises booleano.exc.ScopeError: If ``table`` is already included or it
             already belongs to another symbol table.
         
         """
@@ -281,8 +297,8 @@ class SymbolTable(_Identifier):
         """
         Make sure there's no name clash in the symbol table.
         
-        :raise ScopeError: If a name clash in found, either in the global names
-            or with the localized names.
+        :raise booleano.exc.ScopeError: If a name clash in found, either in the
+            global names or with the localized names.
         
         Users may want to run this in their test suite, instead of in
         production, for performance reasons.
@@ -344,7 +360,7 @@ class SymbolTable(_Identifier):
             names will be used instead.
         :param locale: basestring
         :return: The namespace in ``locale``.
-        :rtype: Namespace
+        :rtype: :class:`booleano.parser.scope.Namespace`
         
         """
         objects = self._get_objects(locale)
@@ -473,7 +489,6 @@ class Namespace(object):
     
     def __init__(self, objects, subnamespaces={}):
         """
-        Create a namespace made up of ``objects`` and ``subnamespaces``.
         
         :param objects: The objects that belong to the table.
         :type objects: dict
