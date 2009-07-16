@@ -44,16 +44,8 @@ class PlaceholderInstance(Operand):
     """
     Base class for placeholders of Booleano class instances.
     
-    Initially, placeholder operands support all the operations.
-    
-    .. attribute:: name
-    
-        The name of the object represented by the placeholder.
-    
-    .. attribute:: namespace_parts
-    
-        The namespace that contains the placeholder, represented by a list of
-        the identifiers in the namespace string.
+    Initially, placeholder operands support all the operations. It's up to the
+    converter to verify if the instance is used correctly.
     
     """
     
@@ -61,7 +53,6 @@ class PlaceholderInstance(Operand):
     
     def __init__(self, name, namespace_parts=None):
         """
-        Name this placeholder operand as ``name``.
         
         :param name: The name for this placeholder.
         :type name: basestring
@@ -114,9 +105,6 @@ class PlaceholderVariable(PlaceholderInstance):
     """
     Placeholder variable.
     
-    .. attribute:: name
-        The name of the variable being represented.
-    
     """
     
     def __unicode__(self):
@@ -138,20 +126,12 @@ class PlaceholderVariable(PlaceholderInstance):
 
 class PlaceholderFunction(PlaceholderInstance):
     """
-    Placeholder function.
-    
-    .. attribute:: name
-        The name of the function being represented.
-    
-    .. attribute:: arguments
-        The operands passed as arguments for this function.
+    Placeholder for a function call.
     
     """
     
     def __init__(self, function_name, namespace_parts=None, *arguments):
         """
-        Check that all the  ``arguments`` are operands before creating the
-        placeholder for the function called ``function_name``.
         
         :param function_name: The name of the function to be represented.
         :type function_name: basestring

@@ -123,65 +123,9 @@ class Function(Class):
     Instances of this Python class represent calls of the function, not the
     function itself.
     
-    A Booleano function is a `factory object
-    <http://en.wikipedia.org/wiki/Factory_object>`_ because its evaluation
-    returns a Booleano operand.
-    
     Subclasses must override :meth:`check_arguments` to verify the validity of
-    the arguments, or to do nothing if it's not necessary.
-    
-    .. attribute:: required_arguments = ()
-    
-        The names of the required arguments.
-        
-        For example, if you have a binary function whose required arguments
-        are ``"name"`` and ``"address"``, your function should be defined as::
-        
-            class MyFunction(Function):
-                
-                required_arguments = ("name", "address")
-                
-                # (...)
-    
-    .. attribute:: optional_arguments = {}
-    
-        The optional arguments along with their default values.
-        
-        This is a dictionary whose keys are the argument names and the items
-        are their respective default values.
-        
-        For example, if you have a binary function whose arguments are both
-        optional (``"name"`` and ``"address"``), your function should be 
-        defined as::
-        
-            class MyFunction(Function):
-                
-                # (...)
-                
-                optional_arguments = {
-                    'name': "Gustavo",
-                    'address': "Somewhere in Madrid",
-                    }
-                
-                # (...)
-        
-        Then when it's called without these arguments, their default values
-        will be taken.
-    
-    .. attribute:: arguments
-    
-        This is an instance attribute which represents the dictionary for the
-        received arguments and their values (or their default values, for those
-        optional arguments not set explicitly).
-    
-    .. attribute:: arity
-    
-        The arity of the function (i.e., the sum of the amount of the required
-        arguments and the amount of optional arguments)
-    
-    .. attribute:: all_args
-    
-        The names of all the arguments, required and optional.
+    the arguments, or to do nothing if it's not necessary. They must also
+    define :attr:`required_arguments` and :attr:`optional_arguments`.
     
     """
     
@@ -191,16 +135,85 @@ class Function(Class):
     bypass_operation_check = True
     
     required_arguments = ()
+    """
+    The names of the required arguments.
+    
+    :type: tuple
+    
+    For example, if you have a binary function whose required arguments
+    are ``"name"`` and ``"address"``, your function should be defined as::
+    
+        from booleano.operations import Function
+        
+        class MyFunction(Function):
+            
+            # (...)
+            
+            required_arguments = ("name", "address")
+            
+            # (...)
+    
+    """
     
     optional_arguments = {}
+    """
+    The optional arguments along with their default values.
+    
+    :type: dict
+    
+    This is a dictionary whose keys are the argument names and the items
+    are their respective default values.
+    
+    For example, if you have a binary function whose arguments are both
+    optional (``"name"`` and ``"address"``), your function should be 
+    defined as::
+    
+        from booleano.operations import String, Number, Function
+        
+        class MyFunction(Function):
+            
+            # (...)
+            
+            optional_arguments = {
+                'id': Number(5),
+                'name': String("Gustavo"),
+                'address': String("Somewhere in Madrid"),
+                }
+            
+            # (...)
+    
+    Then when it's called without these arguments, their default values
+    will be taken.
+    
+    """
+    
+    arity = 0
+    """
+    The arity of the function (i.e., the sum of the amount of the required
+    arguments and the amount of optional arguments).
+    
+    :type: int
+    
+    This is set automatically when the class is defined.
+    
+    """
+    
+    all_args = ()
+    """
+    The names of all the arguments, required and optional.
+    
+    :type: tuple
+    
+    This is set automatically when the class is defined.
+    
+    """
     
     def __init__(self, *arguments):
         """
-        Store the ``arguments`` and validate them.
         
-        :raises BadCallError: If :meth:`check_arguments` finds that the
-            ``arguments`` are invalid, or if few arguments are passed, or
-            if too much arguments are passed.
+        :raises booleano.exc.BadCallError: If :meth:`check_arguments` finds 
+            that the ``arguments`` are invalid, or if few arguments are passed,
+            or if too much arguments are passed.
         
         """
         super(Function, self).__init__()
@@ -227,7 +240,8 @@ class Function(Class):
         """
         Check if all the arguments are correct.
         
-        :raises BadCallError: If at least one of the arguments are incorrect.
+        :raises booleano.exc.BadCallError: If at least one of the arguments are
+            incorrect.
         
         **This method must be overridden in subclasses**.
         

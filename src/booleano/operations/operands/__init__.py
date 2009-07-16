@@ -108,21 +108,17 @@ class _OperandMeta(type):
 
 class Operand(OperationNode):
     """
-    Base class for *unbound* operands.
-    
-    .. attribute:: operations = set()
-        The set of operations supported by this operand.
-    
-    .. attribute:: bypass_operation_check = True
-        Whether it should be checked that the operand really supports the
-        operations it claims to support.
+    Base class for operands.
     
     """
     
     __metaclass__ = _OperandMeta
     
+    #: Whether it should be checked that the operand really supports the
+    #: operations it claims to support.
     bypass_operation_check = True
     
+    #: The set of operations supported by this operand.
     operations = set()
     
     def to_python(self, context):

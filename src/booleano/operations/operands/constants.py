@@ -47,7 +47,8 @@ class Constant(Operand):
     .. warning::
         This class is available as the base for the built-in :class:`String`,
         :class:`Number` and :class:`Set` classes. User-defined constants aren't
-        supported; use :class:`Variable` instead.
+        supported, but you can assign a name to a constant (see
+        :term:`binding`).
     
     """
     
@@ -55,7 +56,10 @@ class Constant(Operand):
     
     def __init__(self, constant_value):
         """
-        Initialize this constant as ``constant_value``.
+        
+        :param constant_value: The Python value represented by the Booleano
+            constant.
+        :type constant_value: :class:`object`
         
         """
         self.constant_value = constant_value
@@ -101,7 +105,7 @@ class String(Constant):
         Although both sets and strings are item collections, the former is 
         unordered and the later is ordered. If they were supported, there would
         some ambiguities to sort out, because users would expect the following
-        operation results::
+        operation results:
         
         - ``"ao" ⊂ "hola"`` is false: If strings were also sets, then the 
           resulting operation would be ``{"a", "o"} ⊂ {"h", "o", "l", "a"}``,
@@ -122,12 +126,21 @@ class String(Constant):
         case-sensitivity.
         
         Therefore, if this functionality is needed, developers should create
-        function operators to handle it.
+        functions to handle it.
     
     """
     
     def __init__(self, string):
-        """Turn ``string`` into a string if it isn't a string yet"""
+        """
+        
+        :param string: The Python string to be represented by this Booleano
+            string.
+        :type string: :class:`basestring`
+        
+        ``string`` will be converted to :class:`unicode`, so it doesn't
+        have to be a :class:`basestring` initially.
+        
+        """
         string = unicode(string)
         super(String, self).__init__(string)
     
@@ -147,13 +160,10 @@ class String(Constant):
 
 class Number(Constant):
     """
-    Float and integer constants.
+    Numeric constant.
     
     These constants support inequality operations; see :meth:`greater_than`
     and :meth:`less_than`.
-    
-    Internally, this number is treated like a float, even if it was an
-    integer initially.
     
     """
     
@@ -161,7 +171,12 @@ class Number(Constant):
     
     def __init__(self, number):
         """
-        Turn ``number`` into a float before instantiating this constant.
+        
+        :param number: The number to be represented, as a Python object.
+        :type number: :class:`object`
+        
+        ``number`` is converted into a :class:`float` internally, so it can
+        be an :class:`string <basestring>` initially.
         
         """
         number = float(number)
@@ -243,11 +258,9 @@ class Set(Constant):
     
     def __init__(self, *items):
         """
-        Check that each item in ``items`` is an operand before setting up this
-        set.
         
-        :raises InvalidOperationError: If at least one of the ``items`` is not
-            an instance of :class:`Operand`.
+        :raises booleano.exc.InvalidOperationError: If at least one of the 
+            ``items`` is not an operand.
         
         """
         for item in items:

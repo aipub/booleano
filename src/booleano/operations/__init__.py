@@ -26,7 +26,7 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Supported operations represented in Python objects.
+Boolean operation nodes and utilities.
 
 In other words, this package contains the elements of the parse trees.
 
@@ -48,7 +48,7 @@ __all__ = (
 )
 
 
-# The known/supported operations:
+#: The known/supported operations.
 OPERATIONS = set((
     "equality",           # ==, !=
     "inequality",         # >, <, >=, <=
@@ -83,8 +83,8 @@ class OperationNode(object):
         """
         Make sure this node has and can return its logical value.
         
-        :raises InvalidOperationError: If the node is an **operand** which
-            doesn't support boolean operations.
+        :raises booleano.exc.InvalidOperationError: If the node is an
+            **operand** which doesn't support boolean operations.
         
         All the operators have logical values.
         
@@ -144,7 +144,7 @@ class OperationNode(object):
         Make sure ``node`` and this node are equivalent.
         
         :param node: The other node which may be equivalent to this one.
-        :type node: OperationNode
+        :type node: :class:`OperationNode`
         :raises AssertionError: If both nodes have different classes.
         
         Operands and operations must extend this method to check for other
