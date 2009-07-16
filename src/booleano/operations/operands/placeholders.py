@@ -40,9 +40,9 @@ from booleano.exc import BadCallError, InvalidOperationError
 __all__ = ("PlaceholderVariable", "PlaceholderFunction")
 
 
-class PlaceholderOperand(Operand):
+class PlaceholderInstance(Operand):
     """
-    Base class for placeholder operands.
+    Base class for placeholders of Booleano class instances.
     
     Initially, placeholder operands support all the operations.
     
@@ -81,7 +81,7 @@ class PlaceholderOperand(Operand):
             a placeholder but its name is not equal to current one's.
         
         """
-        super(PlaceholderOperand, self).check_equivalence(node)
+        super(PlaceholderInstance, self).check_equivalence(node)
         assert (self.name == node.name and
                 self.namespace_parts == node.namespace_parts), \
                'Placeholders "%s" and "%s" are not equivalent' % (self, node)
@@ -110,7 +110,7 @@ class PlaceholderOperand(Operand):
         return ":".join(parts)
 
 
-class PlaceholderVariable(PlaceholderOperand):
+class PlaceholderVariable(PlaceholderInstance):
     """
     Placeholder variable.
     
@@ -136,7 +136,7 @@ class PlaceholderVariable(PlaceholderOperand):
         return msg + ">"
 
 
-class PlaceholderFunction(PlaceholderOperand):
+class PlaceholderFunction(PlaceholderInstance):
     """
     Placeholder function.
     
