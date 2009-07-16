@@ -494,6 +494,28 @@ class TestDefaultGrammar(BaseGrammarTest):
                 LessThan(PlaceholderVariable("Z"), Number(3))
                 )
             ),
+        # Let's make sure whitespace doesn't change anything:
+        '''
+        
+        variable == "hi"
+        
+        ''': Equal(PlaceholderVariable("variable"), String("hi")),
+        '''
+        
+        variable 
+        == 
+        
+        "hi"
+        
+        ''': Equal(PlaceholderVariable("variable"), String("hi")),
+        '''
+        \t variable == "hi"
+        &
+        \t today_is_thursday()
+        ''': And(
+                 Equal(PlaceholderVariable("variable"), String("hi")),
+                 PlaceholderFunction("today_is_thursday")
+            ),
     }
     
     badformed_expressions = (
