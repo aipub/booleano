@@ -218,10 +218,9 @@ class Not(UnaryOperator):
     
     def __init__(self, operand):
         """
-        Turn ``operand`` into a truth operator before storing it.
         
-        :raises InvalidOperationError: If ``operand`` doesn't have a logical
-            value.
+        :raises booleano.exc.InvalidOperationError: If ``operand`` doesn't have
+            a logical value.
         
         """
         operand.check_logical_support()
@@ -250,10 +249,9 @@ class _ConnectiveOperator(BinaryOperator):
     
     def __init__(self, left_operand, right_operand):
         """
-        Make sure both operands have logical values.
         
-        :raises InvalidOperationError: If ``left_operand`` or ``right_operand``
-            doesn't have logical values.
+        :raises booleano.exc.InvalidOperationError: If ``left_operand`` or 
+            ``right_operand`` doesn't have logical values.
         
         """
         left_operand.check_logical_support()
@@ -340,7 +338,17 @@ class Equal(BinaryOperator):
     """
     
     def __init__(self, left_operand, right_operand):
-        """Check that the master operand supports equality operations."""
+        """
+        
+        :param left_operand: The left-hand operand handled by this operator.
+        :type left_operand: :class:`booleano.operations.operands.Operand`
+        :param right_operand: The right-hand operand handled by this operator.
+        :type right_operand: :class:`booleano.operations.operands.Operand`
+        :raises booleano.exc.InvalidOperationError: If the master operand
+            between ``left_operand`` or ``right_operand`` doesn't support
+            equality operations.
+        
+        """
         super(Equal, self).__init__(left_operand, right_operand)
         self.master_operand.check_operation("equality")
     
@@ -480,7 +488,9 @@ class _SetOperator(BinaryOperator):
     
     def __init__(self, left_operand, right_operand):
         """
-        Check if the set (right-hand operand) supports memberships operations.
+        
+        :raises booleano.exc.InvalidOperationError: If ``right_operand``
+            doesn't support membership operations.
         
         """
         super(_SetOperator, self).__init__(left_operand, right_operand)
