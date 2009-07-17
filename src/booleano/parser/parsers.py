@@ -323,11 +323,9 @@ class Parser(object):
         Make a membership operation using the operands passed in ``tokens``.
         
         """
-        print tokens
         element = tokens[0][0]
         operator = tokens[0][1]
         set_ = tokens[0][2]
-        print element, operator, set_
         operation = self.__membership_operators__[operator]
         
         return operation(element, set_)
