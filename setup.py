@@ -28,23 +28,21 @@
 
 import os
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
+from ez_setup import use_setuptools
+use_setuptools()
+
+from setuptools import setup, find_packages
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-VERSION = open(os.path.join(HERE, 'VERSION.txt')).readline().rstrip()
-README = open(os.path.join(HERE, 'README.rst')).read()
+VERSION = open(os.path.join(HERE, "VERSION.txt")).readline().rstrip()
+README = open(os.path.join(HERE, "README.rst")).read()
 
 setup(name="booleano",
       version=VERSION,
-      description=("Boolean Expressions Interpreter"),
+      description="Boolean Expressions Interpreter",
       long_description=README,
       classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
@@ -61,18 +59,11 @@ setup(name="booleano",
       download_url="https://launchpad.net/booleano/+download",
       license="MIT X License (http://www.opensource.org/licenses/mit-license.php)",
       namespace_packages = ["booleano"],
-      packages=find_packages("src", exclude=["tests"]),
       package_dir={'': "src"},
-      package_data={
-        '': ["VERSION.txt", "README.rst"],
-        'docs': ["Makefile", "conf.py", "**.rst", "_templates/*", "_static/*"]},
-      exclude_package_data={'': ["README.txt", "docs"]},
-      include_package_data=True,
+      packages=find_packages("src"),
       zip_safe=False,
       tests_require = ["coverage >= 3.0", "nose >= 0.11.0"],
       install_requires=["pyparsing >= 1.5.2"],
       test_suite="nose.collector",
-      entry_points = """\
-      """
       )
 
