@@ -94,3 +94,14 @@ Membership operators
 .. autoclass:: BelongsTo
 
 .. autoclass:: IsSubset
+
+
+Parse tree converters
+=====================
+
+.. automodule:: booleano.operations.converters
+    
+    .. autoclass:: BaseConverter
+        :members:
+        
+        .. automethod:: __call__
