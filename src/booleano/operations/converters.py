@@ -26,7 +26,8 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Converters for Booleano parse tree structures.
+Converters for Booleano parse tree structures (the convertible, not the
+evaluable ones).
 
 """
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual,
@@ -39,9 +40,15 @@ __all__ = ("BaseConverter", )
 
 
 class BaseConverter(object):
-    """The base class for converters."""
+    """
+    The base class for converters.
     
-    converters = {
+    All the methods of this class are abstract, except for :meth:`__call__`
+    and :meth:`convert`.
+    
+    """
+    
+    __converters__ = {
         # Operation converters:
         Not: "convert_not",
         And: "convert_and",
@@ -68,15 +75,16 @@ class BaseConverter(object):
         Convert ``root_node``.
         
         :param root_node: The root of the tree to be converted.
-        :type root_node: OperationNode
+        :type root_node: :class:`booleano.operations.OperationNode`
         :return: The tree converted.
-        :raises ConversionError: If the type of ``root_node`` is unknown.
+        :raises booleano.exc.ConversionError: If the type of ``root_node`` is
+            unknown.
         
         If ``node`` is a branch, its children will be converted first.
         
         """
         root_node_type = root_node.__class__
-        if root_node_type not in self.converters:
+        if root_node_type not in self.__converters__:
             raise ConversionError("Unknown tree node type: %s" % root_node_type)
         return self.convert(root_node)
     
@@ -85,13 +93,17 @@ class BaseConverter(object):
         Convert ``node``.
         
         :param node: The node to be converted.
-        :type node: OperationNode
+        :type node: :class:`booleano.operations.OperationNode`
         :return: The node converted.
         
         If ``node`` is a branch, its children will be converted first.
         
+        This is the method in charge of calling the right conversion method for
+        the type of ``node`` and **it should not be called directly** (use
+        :meth:`__call__` instead).
+        
         """
-        convert = getattr(self, self.converters[node.__class__])
+        convert = getattr(self, self.__converters__[node.__class__])
         
         if node.is_leaf():
             if isinstance(node, PlaceholderVariable):
@@ -126,6 +138,8 @@ class BaseConverter(object):
         Convert negation function whose argument is ``operand``.
         
         :param operand: The argument already converted.
+        :type operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -136,7 +150,10 @@ class BaseConverter(object):
         and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -147,7 +164,10 @@ class BaseConverter(object):
         and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -158,7 +178,10 @@ class BaseConverter(object):
         and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -169,7 +192,10 @@ class BaseConverter(object):
         and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -180,7 +206,10 @@ class BaseConverter(object):
         ``master_operand`` and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -191,7 +220,10 @@ class BaseConverter(object):
         ``master_operand`` and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -202,7 +234,10 @@ class BaseConverter(object):
         ``master_operand`` and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -213,7 +248,10 @@ class BaseConverter(object):
         ``master_operand`` and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -224,7 +262,10 @@ class BaseConverter(object):
         ``master_operand`` and right-hand operand is ``slave_operand``.
         
         :param master_operand: The left-hand operand, already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The right-hand operand, already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -235,7 +276,10 @@ class BaseConverter(object):
         ``master_operand`` and the element is ``slave_operand``.
         
         :param master_operand: The set already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The element already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -246,7 +290,10 @@ class BaseConverter(object):
         ``master_operand`` and the subset is ``slave_operand``.
         
         :param master_operand: The superset already converted.
+        :type master_operand: :class:`object`
         :param slave_operand: The subset already converted.
+        :type slave_operand: :class:`object`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -258,7 +305,8 @@ class BaseConverter(object):
         Convert the literal string ``text``.
         
         :param text: The contents of the literal string.
-        :type text: basestring
+        :type text: :class:`basestring`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -268,7 +316,8 @@ class BaseConverter(object):
         Convert the literal number ``number``.
         
         :param number: The literal number.
-        :type number: float
+        :type number: :class:`float`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -276,6 +325,8 @@ class BaseConverter(object):
     def convert_set(self, *elements):
         """
         Convert the literal set with the ``elements``.
+        
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -285,10 +336,11 @@ class BaseConverter(object):
         Convert the variable called ``name``.
         
         :param name: The name of the variable.
-        :type name: basestring
+        :type name: :class:`basestring`
         :param namespace_parts: The namespace of the variable (if any),
             represented by the identifiers that make it up.
-        :type namespace_parts: list
+        :type namespace_parts: :class:`list`
+        :rtype: :class:`object`
         
         """
         raise NotImplementedError
@@ -299,10 +351,11 @@ class BaseConverter(object):
         arguments as the arguments of the call.
         
         :param name: The name of the function being called.
-        :type name: basestring
+        :type name: :class:`basestring`
         :param namespace_parts: The namespace of the function (if any),
             represented by the identifiers that make it up.
-        :type namespace_parts: list
+        :type namespace_parts: :class:`list`
+        :rtype: :class:`object`
         
         The arguments will be received converted.
         
