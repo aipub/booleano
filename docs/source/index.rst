@@ -178,6 +178,8 @@ Documentation
     to read the rough draft of the :doc:`tutorial </tutorials/index>` you're 
     interested in to learn the steps to set up a project and complement this 
     information with the :doc:`API documentation </api/index>` if necessary.
+    Also, you can always use the `mailing list 
+    <http://groups.google.com/group/booleano>`_ when you need help.
 
 
 .. toctree::
