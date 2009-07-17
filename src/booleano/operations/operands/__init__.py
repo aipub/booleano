@@ -94,10 +94,10 @@ class _OperandMeta(type):
                                   "supports inequalities" % name)
         if ("membership" in cls.operations and
             not (
-                 cls.is_implemented(cls.contains) and 
+                 cls.is_implemented(cls.belongs_to) and 
                  cls.is_implemented(cls.is_subset))
             ):
-            raise BadOperandError("Operand %s must define the .contains() "
+            raise BadOperandError("Operand %s must define the .belongs_to() "
                                   "and .is_subset() methods because it "
                                   "supports memberships" % name)
     
@@ -207,7 +207,7 @@ class Operand(OperationNode):
         raise NotImplementedError
     less_than.implemented = False
     
-    def contains(self, value, context):
+    def belongs_to(self, value, context):
         """
         Check if this operand contains ``value``.
         
@@ -218,7 +218,7 @@ class Operand(OperationNode):
         
         """
         raise NotImplementedError
-    contains.implemented = False
+    belongs_to.implemented = False
     
     def is_subset(self, value, context):
         """

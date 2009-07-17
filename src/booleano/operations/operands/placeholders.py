@@ -89,7 +89,7 @@ class PlaceholderInstance(Operand):
     
     # All the evaluation-related operation raise an InvalidOperationError
     to_python = __call__ = equals = less_than = greater_than = \
-    contains = is_subset = no_evaluation
+    belongs_to = is_subset = no_evaluation
     
     def _namespace_to_unicode(self):
         """Return the namespace as a single Unicode string."""

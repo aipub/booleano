@@ -68,7 +68,7 @@ class TestOperand(object):
         assert_raises(NotImplementedError, self.op.equals, None, None)
         assert_raises(NotImplementedError, self.op.greater_than, None, None)
         assert_raises(NotImplementedError, self.op.less_than, None, None)
-        assert_raises(NotImplementedError, self.op.contains, None, None)
+        assert_raises(NotImplementedError, self.op.belongs_to, None, None)
         assert_raises(NotImplementedError, self.op.is_subset, None, None)
     
     def test_no_unicode_by_default(self):
@@ -114,7 +114,7 @@ class TestOperand(object):
             operations = set(["membership"])
             def to_python(self, value, context):
                 pass
-            def contains(self, value, context):
+            def belongs_to(self, value, context):
                 pass
             def is_subset(self, value, context):
                 pass
@@ -199,7 +199,7 @@ class TestOperand(object):
     @raises(BadOperandError)
     def test_checking_no_contains_nor_issubset(self):
         """
-        Operands supporting membership must define the .contains() and
+        Operands supporting membership must define the .belongs_to() and
         .is_subset() methods.
         
         """
@@ -209,9 +209,9 @@ class TestOperand(object):
                 pass
     
     @raises(BadOperandError)
-    def test_checking_no_contains(self):
+    def test_checking_no_belongs_to(self):
         """
-        Operands supporting membership must define the .contains() method.
+        Operands supporting membership must define the .belongs_to() method.
         
         """
         class BadOperand(Operand):
@@ -231,7 +231,7 @@ class TestOperand(object):
             operations = set(["membership"])
             def to_python(self, context):
                 pass
-            def contains(self, value, context):
+            def belongs_to(self, value, context):
                 pass
     
     def test_bypassing_operation_check(self):
@@ -832,12 +832,12 @@ class TestSet(object):
         assert_raises(InvalidOperationError, op.greater_than, "some string", 0)
         assert_raises(InvalidOperationError, op.greater_than, 2.60, None)
     
-    def test_contains(self):
+    def test_belongs_to(self):
         op = Set(String("arepa"), Number(4))
-        ok_(op.contains(4, None))
-        ok_(op.contains(4.00, None))
-        ok_(op.contains("arepa", None))
-        assert_false(op.contains("something else", None))
+        ok_(op.belongs_to(4, None))
+        ok_(op.belongs_to(4.00, None))
+        ok_(op.belongs_to("arepa", None))
+        assert_false(op.belongs_to("something else", None))
     
     def test_subset(self):
         op = Set(String("carla"), String("andreina"), String("liliana"))
@@ -953,7 +953,7 @@ class TestPlaceholderVariable(object):
         assert_raises(InvalidOperationError, var.equals, None)
         assert_raises(InvalidOperationError, var.less_than, None)
         assert_raises(InvalidOperationError, var.greater_than, None)
-        assert_raises(InvalidOperationError, var.contains, None)
+        assert_raises(InvalidOperationError, var.belongs_to, None)
         assert_raises(InvalidOperationError, var.is_subset, None)
     
     def test_checking_logical_support(self):
@@ -1125,7 +1125,7 @@ class TestPlaceholderFunction(object):
         assert_raises(InvalidOperationError, func.equals, None)
         assert_raises(InvalidOperationError, func.less_than, None)
         assert_raises(InvalidOperationError, func.greater_than, None)
-        assert_raises(InvalidOperationError, func.contains, None)
+        assert_raises(InvalidOperationError, func.belongs_to, None)
         assert_raises(InvalidOperationError, func.is_subset, None)
     
     def test_checking_logical_support(self):

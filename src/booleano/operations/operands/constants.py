@@ -306,7 +306,7 @@ class Set(Constant):
         value = self._to_int(value)
         return len(self.constant_value) > value
     
-    def contains(self, value, context):
+    def belongs_to(self, value, context):
         """
         Check that this constant set contains the ``value`` item.
         
@@ -325,7 +325,7 @@ class Set(Constant):
         
         """
         for item in value:
-            if not self.contains(item, context):
+            if not self.belongs_to(item, context):
                 return False
         return True
     

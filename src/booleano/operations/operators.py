@@ -511,7 +511,7 @@ class BelongsTo(_SetOperator):
     
     def __call__(self, context):
         value = self.slave_operand.to_python(context)
-        return self.master_operand.contains(value, context)
+        return self.master_operand.belongs_to(value, context)
 
 
 class IsSubset(_SetOperator):

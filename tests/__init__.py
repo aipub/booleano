@@ -129,7 +129,7 @@ class VariableSet(Variable):
         set_ = context[self.people_set]
         return len(set_) > value
     
-    def contains(self, value, context):
+    def belongs_to(self, value, context):
         set_ = context[self.people_set]
         return value in set_
     
