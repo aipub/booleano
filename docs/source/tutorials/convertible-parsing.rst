@@ -83,10 +83,8 @@ expressions are parsed::
     <Parse tree (convertible) <Not <Equal <Placeholder variable "today"> <String "2009-07-17">>>>
     >>> parse_manager.parse('today > "2009-07-17"')
     <Parse tree (convertible) <GreaterThan <Placeholder variable "today"> <String "2009-07-17">>>
-    >>> parse_manager.parse('time:days:yesterday < time:days:today')
-    <Parse tree (convertible) <LessThan <Placeholder variable "yesterday" at namespace="time:days"> <Placeholder variable "today" at namespace="time:days">>>
-    >>> parse_manager.parse('time:today == "sunday" & ~weather:will_it_rain("paris")')
-    <Parse tree (convertible) <And <Equal <Placeholder variable "today" at namespace="time"> <String "sunday">> <Not <Placeholder function call "will_it_rain"(<String "paris">) at namespace="weather">>>>
+    >>> parse_manager.parse('time:today == "sunday" & ~weather:will_it_rain_today("paris")')
+    <Parse tree (convertible) <And <Equal <Placeholder variable "today" at namespace="time"> <String "sunday">> <Not <Placeholder function call "will_it_rain_today"(<String "paris">) at namespace="weather">>>>
 
 OK, it seems like all the expressions above were parsed as expected.
 
@@ -98,3 +96,4 @@ For example::
     >>> the_conversion_result = parse_tree(converter)
 
 And ``the_conversion_result`` will be, well, the conversion result.
+
