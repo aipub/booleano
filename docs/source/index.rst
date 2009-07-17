@@ -167,6 +167,19 @@ While the parser-specific features include:
 Documentation
 -------------
 
+.. warning::
+
+    Booleano has just gotten its first developers' preview release and
+    its documentation is far from complete, in spite of the package being
+    **absolutely usable**. This issue will be solved by the `second alpha 
+    <https://launchpad.net/booleano/+milestone/1.0a2>`_ release. 
+    
+    In the mean time, the best you can do to understand and try Booleano, is
+    to read the rough draft of the :doc:`tutorial </tutorials/index>` you're 
+    interested in to learn the steps to set up a project and complement this 
+    information with the :doc:`API documentation </api/index>` if necessary.
+
+
 .. toctree::
    :maxdepth: 2
    
