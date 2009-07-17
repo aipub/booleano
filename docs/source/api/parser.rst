@@ -3,7 +3,7 @@
 ====================================================
 
 .. automodule:: booleano.parser
-    :synopsis: Boolean expressions parser
+    :synopsis: Boolean parsers and utilities
 
 
 Grammar definition
