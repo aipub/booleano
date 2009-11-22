@@ -18,6 +18,6 @@ conditions from objects provided by a third party library.
 Links
 -----
 
-* `Web site <http://code.gustavonarea.net/booleano/>`_.
+* `Web site <http://booleano.efous.org/>`_.
 * `Mailing list <http://groups.google.com/group/booleano>`_.
 * `Bug reports <https://bugs.launchpad.net/booleano>`_.

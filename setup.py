@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2009 by Gustavo Narea <http://gustavonarea.net/>.
 #
-# This file is part of Booleano <http://code.gustavonarea.net/booleano/>.
+# This file is part of Booleano <http://booleano.efous.org/>.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ setup(name="booleano",
       keywords="boolean expression natural language condition conditions",
       author="Gustavo Narea",
       author_email="me@gustavonarea.net",
-      url="http://code.gustavonarea.net/booleano/",
+      url="http://booleano.efous.org/",
       download_url="https://launchpad.net/booleano/+download",
       license="MIT X License (http://www.opensource.org/licenses/mit-license.php)",
       namespace_packages = ["booleano"],
