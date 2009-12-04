@@ -1,6 +1,1 @@
-.project
-.pydevproject
-tests/.coverage
-src/booleano.egg-info
-build
-dist
+
