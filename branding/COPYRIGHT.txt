@@ -1,11 +1,14 @@
 The logo of Booleano [1] is copyright (c) 2009 by Gustavo Narea [2] and it is
-licensed under the Creative Commons Attribution-No Derivative Works 3.0 Spain
-License.
+licensed under the Creative Commons Attribution-No Derivative Works 2.0 UK:
+England & Wales License.
 
 To view a copy of this license, visit
-http://creativecommons.org/licenses/by-nd/3.0/es/deed.en_US or send a letter to
-Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105,
-USA. 
+http://creativecommons.org/licenses/by-nd/2.0/uk/ or send a letter to:
 
-[1] http://code.gustavonarea.net/booleano/
+Creative Commons
+171 Second Street, Suite 300.
+San Francisco, California, 94105.
+United States of America. 
+
+[1] http://booleano.com/
 [2] http://gustavonarea.net/

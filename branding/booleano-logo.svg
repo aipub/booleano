@@ -113,10 +113,10 @@
         </dc:subject>
         <dc:description>The logo of Python library Booleano</dc:description>
         <cc:license
-           rdf:resource="http://creativecommons.org/licenses/by-nd/3.0/es/deed.en_US" />
+           rdf:resource="http://creativecommons.org/licenses/by-nd/2.0/uk/" />
       </cc:Work>
       <cc:License
-         rdf:about="http://creativecommons.org/licenses/by-nd/3.0/">
+         rdf:about="http://creativecommons.org/licenses/by-nd/2.0/uk/">
         <cc:permits
            rdf:resource="http://creativecommons.org/ns#Reproduction" />
         <cc:permits

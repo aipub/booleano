@@ -8,7 +8,11 @@ Version 1.0 Alpha 2 (unreleased)
 
 - Changed licensing terms:
 
-  - Booleano is now available under the terms of the GNU GPL Version 3 or later.
+  - Booleano is now available under the terms of the *GNU GPL Version 3* or
+    later (it was the *MIT/X License*).
+  - The logo is now licensed under the *Creative Commons Attribution-No
+    Derivative Works 2.0 UK: England & Wales License* (it was the *Creative
+    Commons Attribution-No Derivative Works 3.0 Spain License*).
   
   The documentation is still available under the Creative Commons
   Attribution-Share Alike 3.0 Unported License.

@@ -117,5 +117,5 @@ contributing documentation to the project, you accept to license your work under
 the terms of the same license.
 
 Finally, the logo, also copyright 2009 by Gustavo Narea, is available 
-under the terms of `Creative Commons Attribution-No Derivative Works 3.0 Spain 
-License <http://creativecommons.org/licenses/by-nd/3.0/es/deed.en_US>`_.
+under the terms of `Creative Commons Attribution-No Derivative Works 2.0 UK:
+England & Wales License <http://creativecommons.org/licenses/by-nd/2.0/uk/>`_.
