@@ -4,27 +4,17 @@
 #
 # This file is part of Booleano <http://booleano.efous.org/>.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, distribute with
-# modifications, sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject to the following
-# conditions:
+# This program respects your freedom: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
 #
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# ABOVE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-# IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# Except as contained in this notice, the name(s) of the above copyright
-# holders shall not be used in advertising or otherwise to promote the sale,
-# use or other dealings in this Software without prior written authorization.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
@@ -44,7 +34,7 @@ setup(name="booleano",
       classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
@@ -57,7 +47,7 @@ setup(name="booleano",
       author_email="me@gustavonarea.net",
       url="http://booleano.efous.org/",
       download_url="https://launchpad.net/booleano/+download",
-      license="MIT X License (http://www.opensource.org/licenses/mit-license.php)",
+      license="GNU GPL v3 (http://www.gnu.org/licenses/gpl-3.0-standalone.html)",
       namespace_packages = ["booleano"],
       package_dir={'': "src"},
       packages=find_packages("src"),

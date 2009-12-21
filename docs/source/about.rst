@@ -103,39 +103,17 @@ Legal stuff (aka "boring stuff")
 Except for the logo and this documentation, or unless explicitly told otherwise,
 any resource that is part of the Booleano project, including but not limited to
 source code in the Python Programming Language and its in-code documentation 
-("docstrings"), is available under the terms of the MIT/X License:
+("docstrings"), is available under the terms of the `GNU General Public License
+Version 3 <http://www.gnu.org/licenses/gpl-3.0-standalone.html>`_ or any later
+version published by the Free Software Foundation.
 
-    Copyright (c) 2009 by Gustavo Narea.
-    
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, distribute with
-    modifications, sublicense, and/or sell copies of the Software, and to permit
-    persons to whom the Software is furnished to do so, subject to the following
-    conditions:
-    
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-    
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    ABOVE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-    IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    
-    Except as contained in this notice, the name(s) of the above copyright
-    holders shall not be used in advertising or otherwise to promote the sale,
-    use or other dealings in this Software without prior written authorization.
-
-When you contribute software source code to the project, you accept to license 
-your work under the terms of this license.
+By contributing software source code to the project, you accept to license 
+your work under these terms.
 
 This documentation, on the other hand, copyright 2009 by Gustavo Narea, is 
 available under the terms of the `Creative Commons Attribution-Share Alike 3.0 
-Unported  License <http://creativecommons.org/licenses/by-sa/3.0/>`_. When you 
-contribute documentation to the project, you accept to license your work under 
+Unported  License <http://creativecommons.org/licenses/by-sa/3.0/>`_. By
+contributing documentation to the project, you accept to license your work under 
 the terms of the same license.
 
 Finally, the logo, also copyright 2009 by Gustavo Narea, is available 
