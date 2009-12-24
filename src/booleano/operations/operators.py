@@ -20,9 +20,8 @@ Built-in operators.
 
 """
 
-from booleano.operations import OPERATIONS, OperationNode
+from booleano.operations import OperationNode
 from booleano.operations.operands import Variable
-from booleano.exc import InvalidOperationError
 
 __all__ = ("Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
            "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset")
