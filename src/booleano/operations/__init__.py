@@ -142,6 +142,7 @@ class OperationNode(object):
         
         """
         error_msg = 'Nodes "%s" and "%s" are not equivalent'
+        # TODO: AssertionError exceptions must not be raised!
         assert isinstance(node, self.__class__), error_msg % (repr(node),
                                                               repr(self))
     
