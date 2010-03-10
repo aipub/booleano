@@ -26,7 +26,7 @@ There are two types of Booleano classes:
 
 """
 from booleano.operations.operands import Operand, _OperandMeta
-from booleano.exc import BadOperandError, BadCallError, BadFunctionError
+from booleano.exc import BadCallError, BadFunctionError
 
 __all__ = ["Variable", "Function"]
 
