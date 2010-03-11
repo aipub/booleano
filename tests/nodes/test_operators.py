@@ -32,10 +32,10 @@ Tests for the operators.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
-from booleano.operations.operators import Operator
-from booleano.operations.operands import String, Number, Set, Variable
+from booleano.nodes.operators import Operator
+from booleano.nodes.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad,

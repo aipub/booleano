@@ -25,7 +25,7 @@ from nose.tools import eq_, assert_raises
 from booleano.parser import Grammar, ConvertibleParser, EvaluableParser
 from booleano.parser.scope import Namespace
 from booleano.parser.parsers import Parser
-from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.parser.testutils import BaseGrammarTest

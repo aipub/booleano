@@ -23,7 +23,7 @@ Tests for the parse trees.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
-from booleano.operations import And, String, PlaceholderVariable
+from booleano.nodes import And, String, PlaceholderVariable
 from booleano.exc import InvalidOperationError
 
 from tests import (TrafficLightVar, PedestriansCrossingRoad, BoolVar,

@@ -31,8 +31,8 @@ Tests for the parse tree converters.
 """
 from nose.tools import eq_, assert_raises, raises
 
-from booleano.operations.converters import BaseConverter
-from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+from booleano.nodes.converters import BaseConverter
+from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import ConversionError

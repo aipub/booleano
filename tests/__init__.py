@@ -34,8 +34,8 @@ This module contains utilities shared among the whole test suite.
 
 import logging
 
-from booleano.operations.converters import BaseConverter
-from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+from booleano.nodes.converters import BaseConverter
+from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import InvalidOperationError, BadCallError

@@ -19,7 +19,7 @@
 Constant operands.
 
 """
-from booleano.operations.operands import Operand
+from booleano.nodes.operands import Operand
 from booleano.exc import InvalidOperationError
 
 __all__ = ["String", "Number", "Set"]

@@ -20,10 +20,10 @@ Converters for Booleano parse tree structures (the convertible, not the
 evaluable ones).
 
 """
-from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual,
+from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
     String, Number, Set, PlaceholderVariable, PlaceholderFunction)
-from booleano.operations.operators import UnaryOperator
+from booleano.nodes.operators import UnaryOperator
 from booleano.exc import ConversionError
 
 __all__ = ("BaseConverter", )
@@ -65,7 +65,7 @@ class BaseConverter(object):
         Convert ``root_node``.
         
         :param root_node: The root of the tree to be converted.
-        :type root_node: :class:`booleano.operations.OperationNode`
+        :type root_node: :class:`booleano.nodes.OperationNode`
         :return: The tree converted.
         :raises booleano.exc.ConversionError: If the type of ``root_node`` is
             unknown.
@@ -83,7 +83,7 @@ class BaseConverter(object):
         Convert ``node``.
         
         :param node: The node to be converted.
-        :type node: :class:`booleano.operations.OperationNode`
+        :type node: :class:`booleano.nodes.OperationNode`
         :return: The node converted.
         
         If ``node`` is a branch, its children will be converted first.

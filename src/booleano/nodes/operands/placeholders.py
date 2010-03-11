@@ -23,8 +23,8 @@ A placeholder operand is an object whose evaluation is not done by Booleano
 parser won't verify its existence.
 
 """
-from booleano.operations import OPERATIONS
-from booleano.operations.operands import Operand
+from booleano.nodes import OPERATIONS
+from booleano.nodes.operands import Operand
 from booleano.exc import BadCallError, InvalidOperationError
 
 __all__ = ("PlaceholderVariable", "PlaceholderFunction")

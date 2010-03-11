@@ -25,7 +25,7 @@ There are two types of Booleano classes:
 **Python classes and Booleano classes are two different things!**
 
 """
-from booleano.operations.operands import Operand, _OperandMeta
+from booleano.nodes.operands import Operand, _OperandMeta
 from booleano.exc import BadCallError, BadFunctionError
 
 __all__ = ["Variable", "Function"]
@@ -133,7 +133,7 @@ class Function(Class):
     For example, if you have a binary function whose required arguments
     are ``"name"`` and ``"address"``, your function should be defined as::
     
-        from booleano.operations import Function
+        from booleano.nodes import Function
         
         class MyFunction(Function):
             
@@ -158,7 +158,7 @@ class Function(Class):
     optional (``"name"`` and ``"address"``), your function should be 
     defined as::
     
-        from booleano.operations import String, Number, Function
+        from booleano.nodes import String, Number, Function
         
         class MyFunction(Function):
             
