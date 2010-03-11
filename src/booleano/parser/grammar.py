@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2009 by Gustavo Narea <http://gustavonarea.net/>.
+# Copyright (c) 2009-2010 by Gustavo Narea <http://gustavonarea.net/>.
 #
 # This file is part of Booleano <http://booleano.efous.org/>.
 #
