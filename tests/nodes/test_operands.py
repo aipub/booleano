@@ -32,9 +32,8 @@ Tests for unbounded operands.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.nodes import (String, Number, Set, Variable, Function,
-                                 PlaceholderVariable, PlaceholderFunction)
-from booleano.nodes.operands import Operand
+from booleano.nodes.operands import (Operand, String, Number, Set, Variable,
+    Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import (InvalidOperationError, BadOperandError, BadCallError,
                           BadFunctionError)
 

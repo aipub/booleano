@@ -28,14 +28,7 @@ using the classes provided by this package.
 from booleano.exc import InvalidOperationError
 
 
-__all__ = (
-    # Operands:
-    "String", "Number", "Set", "Variable", "Function", "PlaceholderVariable",
-    "PlaceholderFunction",
-    # Operators:
-    "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan", "GreaterThan",
-    "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset",
-)
+__all__ = ("OperationNode", "OPERATIONS")
 
 
 #: The known/supported operations.
@@ -79,6 +72,7 @@ class OperationNode(object):
         All the operators have logical values.
         
         """
+        from booleano.nodes.operands import Operand
         if isinstance(self, Operand):
             self.check_operation("boolean")
     
@@ -93,6 +87,8 @@ class OperationNode(object):
         :class:`PlaceholderVariable`.
         
         """
+        from booleano.nodes.operands import Set, PlaceholderFunction, Function
+        from booleano.nodes.operators import Operator
         return not isinstance(self,
                               (Operator, Set, PlaceholderFunction, Function))
     
@@ -205,11 +201,3 @@ class OperationNode(object):
         raise NotImplementedError("Node %s doesn't have an "
                                   "representation" % type(self))
 
-
-# Importing the built-in operands and operators so they can be available from
-# this namespace:
-from booleano.nodes.operands import (String, Number, Set, Variable,
-    Function, PlaceholderVariable, PlaceholderFunction, Operand)
-from booleano.nodes.operators import (Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    Operator)

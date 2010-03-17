@@ -22,15 +22,16 @@ Generic Pyparsing-based parser implementation.
 
 import re
 
-from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
-    nums, operatorPrecedence, opAssoc, Forward, ParseException, removeQuotes,
+from pyparsing import (Suppress, CaselessLiteral, Word, quotedString,
+    nums, operatorPrecedence, opAssoc, Forward, removeQuotes,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
     Regex, Literal, delimitedList, ParserElement)
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
-from booleano.nodes import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
-    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
-    Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
+from booleano.nodes.operators import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
+from booleano.nodes.operands import (String, Number,
+    Set, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import BadExpressionError
 
 
