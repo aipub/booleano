@@ -52,11 +52,6 @@ class TestOperand(object):
         """Create an instance of Operand"""
         self.op = Operand()
     
-    def test_type(self):
-        """Operand nodes must be known as operands."""
-        ok_(self.op.is_operand())
-        assert_false(self.op.is_operator())
-    
     def test_supported_operations(self):
         """Operands shouldn't support any operation by default"""
         eq_(0, len(self.op.operations))

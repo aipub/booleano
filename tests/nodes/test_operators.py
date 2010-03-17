@@ -50,12 +50,6 @@ class TestOperator(object):
         op = Operator()
         assert_raises(NotImplementedError, op, None)
     
-    def test_type(self):
-        """Operator nodes must be known as operators."""
-        op = Operator()
-        ok_(op.is_operator())
-        assert_false(op.is_operand())
-    
     def test_node_type(self):
         """Operators are all branch nodes."""
         op = Operator()

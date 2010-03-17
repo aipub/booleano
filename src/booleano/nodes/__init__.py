@@ -79,7 +79,7 @@ class OperationNode(object):
         All the operators have logical values.
         
         """
-        if self.is_operand():
+        if isinstance(self, Operand):
             self.check_operation("boolean")
     
     def is_leaf(self):
@@ -93,10 +93,8 @@ class OperationNode(object):
         :class:`PlaceholderVariable`.
         
         """
-        if (self.is_operator() or self.__class__ in (Set, PlaceholderFunction)
-            or isinstance(self, Function)):
-            return False
-        return True
+        return not isinstance(self,
+                              (Operator, Set, PlaceholderFunction, Function))
     
     def is_branch(self):
         """
@@ -110,24 +108,6 @@ class OperationNode(object):
         
         """
         return not self.is_leaf()
-    
-    def is_operand(self):
-        """
-        Check if this node is an operand.
-        
-        :rtype: bool
-        
-        """
-        return isinstance(self, Operand)
-    
-    def is_operator(self):
-        """
-        Check if this node is an operation.
-        
-        :rtype: bool
-        
-        """
-        return isinstance(self, Operator)
     
     def check_equivalence(self, node):
         """
