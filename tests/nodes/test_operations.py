@@ -32,7 +32,7 @@ Tests for the operators.
 
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
-from booleano.nodes.operators import (Operator, Not, And, Or, Xor, Equal,
+from booleano.nodes.operations import (Operation, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
     IsSubset)
 from booleano.nodes.operands import String, Number, Set, Variable
@@ -42,23 +42,23 @@ from tests import (TrafficLightVar, PedestriansCrossingRoad,
                    DriversAwaitingGreenLightVar, BoolVar)
 
 
-class TestOperator(object):
-    """Tests for the base Operator class."""
+class TestOperation(object):
+    """Tests for the base Operation class."""
     
     def test_no_evaluation_implemented(self):
         """Evaluations must not be implemented by default."""
-        op = Operator()
+        op = Operation()
         assert_raises(NotImplementedError, op, None)
     
     def test_node_type(self):
-        """Operators are all branch nodes."""
-        op = Operator()
+        """Operations are all branch nodes."""
+        op = Operation()
         ok_(op.is_branch())
         assert_false(op.is_leaf())
     
     def test_python_bool(self):
-        """Operators must not support Pythonic truth evaluation."""
-        op = Operator()
+        """Operations must not support Pythonic truth evaluation."""
+        op = Operation()
         assert_raises(InvalidOperationError, bool, op)
 
 
@@ -403,14 +403,14 @@ class TestXor(object):
         eq_(repr(op), expected)
 
 
-class TestNonConnectiveBinaryOperators(object):
+class TestNonConnectiveBinaryOperations(object):
     """
     Tests for non-connective, binary operators.
     
     This is, all the binary operators, excluding And, Or and Xor.
     
     For these tests, I'll use the equality operator to avoid importing the
-    base :class:`BinaryOperator`.
+    base :class:`BinaryOperation`.
     
     """
     
@@ -581,7 +581,7 @@ class TestInequalities(object):
     """
     Tests for common functionalities in the inequality operators.
     
-    Because we shouldn't the base :class:`_InequalityOperator`, we're going to
+    Because we shouldn't the base :class:`_InequalityOperation`, we're going to
     use one of its subclasses: LessThan.
     
     """

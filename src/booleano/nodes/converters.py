@@ -20,11 +20,11 @@ Converters for Booleano parse tree structures (the convertible, not the
 evaluable ones).
 
 """
-from booleano.nodes.operators import (Not, And, Or, Xor, Equal, NotEqual,
+from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
 from booleano.nodes.operands import (String, Number, Set, PlaceholderVariable,
     PlaceholderFunction)
-from booleano.nodes.operators import UnaryOperator
+from booleano.nodes.operations import UnaryOperation
 from booleano.exc import ConversionError
 
 __all__ = ("BaseConverter", )
@@ -113,7 +113,7 @@ class BaseConverter(object):
         
         # At this point, node must be an operator.
         
-        if isinstance(node, UnaryOperator):
+        if isinstance(node, UnaryOperation):
             operand = self.convert(node.operand)
             return convert(operand)
         

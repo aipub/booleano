@@ -88,9 +88,9 @@ class OperationNode(object):
         
         """
         from booleano.nodes.operands import Set, PlaceholderFunction, Function
-        from booleano.nodes.operators import Operator
+        from booleano.nodes.operations import Operation
         return not isinstance(self,
-                              (Operator, Set, PlaceholderFunction, Function))
+                              (Operation, Set, PlaceholderFunction, Function))
     
     def is_branch(self):
         """

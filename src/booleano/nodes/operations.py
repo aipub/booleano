@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
-Built-in operators.
+Built-in operations.
 
 """
 
@@ -27,19 +27,19 @@ __all__ = ("Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
            "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset")
 
 
-class Operator(OperationNode):
+class Operation(OperationNode):
     """
-    Base class for logical operators.
+    Base class for logical operations.
     
-    The operands to be used by the operator must be passed in the constructor.
+    The operands to be used by the operation must be passed in the constructor.
     
     """
     pass
 
 
-class UnaryOperator(Operator):
+class UnaryOperation(Operation):
     """
-    Base class for unary logical operators.
+    Base class for unary logical operations.
     
     """
     
@@ -60,12 +60,12 @@ class UnaryOperator(Operator):
         equivalent.
         
         :param node: The other operator which may be equivalent to this one.
-        :type node: UnaryOperator
+        :type node: UnaryOperation
         :raises AssertionError: If ``node`` is not a unary operator or if it's
             an unary operator but doesn't have the same operand as this one.
         
         """
-        super(UnaryOperator, self).check_equivalence(node)
+        super(UnaryOperation, self).check_equivalence(node)
         assert node.operand == self.operand, \
                'Operands of unary operations %s and %s are not equivalent' % \
                (node, self)
@@ -84,7 +84,7 @@ class UnaryOperator(Operator):
         return "<%s %s>" % (self.__class__.__name__, operand)
 
 
-class BinaryOperator(Operator):
+class BinaryOperation(Operation):
     """
     Base class for binary logical operators.
     
@@ -157,12 +157,12 @@ class BinaryOperator(Operator):
         equivalent.
         
         :param node: The other operator which may be equivalent to this one.
-        :type node: BinaryOperator
+        :type node: BinaryOperation
         :raises AssertionError: If ``node`` is not a binary operator or if it's
             an binary operator but doesn't have the same operands as this one.
         
         """
-        super(BinaryOperator, self).check_equivalence(node)
+        super(BinaryOperation, self).check_equivalence(node)
         same_operands = (
             (node.master_operand == self.master_operand and
              node.slave_operand == self.slave_operand)
@@ -197,7 +197,7 @@ class BinaryOperator(Operator):
 #{ Unary operators
 
 
-class Not(UnaryOperator):
+class Not(UnaryOperation):
     """
     The logical negation (``~``).
     
@@ -229,7 +229,7 @@ class Not(UnaryOperator):
 #{ Binary operators
 
 
-class _ConnectiveOperator(BinaryOperator):
+class _ConnectiveOperation(BinaryOperation):
     """
     Logic connective to turn the left-hand and right-hand operands into
     boolean operations, so we can manipulate their truth value easily.
@@ -245,10 +245,10 @@ class _ConnectiveOperator(BinaryOperator):
         """
         left_operand.check_logical_support()
         right_operand.check_logical_support()
-        super(_ConnectiveOperator, self).__init__(left_operand, right_operand)
+        super(_ConnectiveOperation, self).__init__(left_operand, right_operand)
 
 
-class And(_ConnectiveOperator):
+class And(_ConnectiveOperation):
     """
     The logical conjunction (``AND``).
     
@@ -270,7 +270,7 @@ class And(_ConnectiveOperator):
         return self.master_operand(context) and self.slave_operand(context)
 
 
-class Or(_ConnectiveOperator):
+class Or(_ConnectiveOperation):
     """
     The logical inclusive disjunction (``OR``).
     
@@ -293,7 +293,7 @@ class Or(_ConnectiveOperator):
         return self.master_operand(context) or self.slave_operand(context)
 
 
-class Xor(_ConnectiveOperator):
+class Xor(_ConnectiveOperation):
     """
     The logical exclusive disjunction (``XOR``).
     
@@ -316,7 +316,7 @@ class Xor(_ConnectiveOperator):
         return self.master_operand(context) ^ self.slave_operand(context)
 
 
-class Equal(BinaryOperator):
+class Equal(BinaryOperation):
     """
     The equality operator (``==``).
     
@@ -361,7 +361,7 @@ class NotEqual(Equal):
         return not super(NotEqual, self).__call__(context)
 
 
-class _InequalityOperator(BinaryOperator):
+class _InequalityOperation(BinaryOperation):
     """
     Handle inequalities (``<``, ``>``) and switch the operation if the operands
     are rearranged.
@@ -387,7 +387,7 @@ class _InequalityOperator(BinaryOperator):
         to be calculated on a per evaluation basis.
         
         """
-        super(_InequalityOperator, self).__init__(left_operand, right_operand)
+        super(_InequalityOperation, self).__init__(left_operand, right_operand)
         
         self.master_operand.check_operation("inequality")
         
@@ -418,7 +418,7 @@ class _InequalityOperator(BinaryOperator):
         return self.master_operand.less_than(value, context)
 
 
-class LessThan(_InequalityOperator):
+class LessThan(_InequalityOperation):
     """
     The "less than" operator (``<``).
     
@@ -430,7 +430,7 @@ class LessThan(_InequalityOperator):
         super(LessThan, self).__init__(left_operand, right_operand, "<")
 
 
-class GreaterThan(_InequalityOperator):
+class GreaterThan(_InequalityOperation):
     """
     The "greater than" operator (``>``).
     
@@ -469,7 +469,7 @@ class GreaterEqual(LessThan):
         return not super(GreaterEqual, self).__call__(context)
 
 
-class _SetOperator(BinaryOperator):
+class _SetOperation(BinaryOperation):
     """
     Base class for set-related operators.
     
@@ -482,7 +482,7 @@ class _SetOperator(BinaryOperator):
             doesn't support membership operations.
         
         """
-        super(_SetOperator, self).__init__(left_operand, right_operand)
+        super(_SetOperation, self).__init__(left_operand, right_operand)
         self.master_operand.check_operation("membership")
     
     def organize_operands(self, left_operand, right_operand):
@@ -490,7 +490,7 @@ class _SetOperator(BinaryOperator):
         return (right_operand, left_operand)
 
 
-class BelongsTo(_SetOperator):
+class BelongsTo(_SetOperation):
     """
     The "belongs to" operator (``∈``).
     
@@ -503,7 +503,7 @@ class BelongsTo(_SetOperator):
         return self.master_operand.belongs_to(value, context)
 
 
-class IsSubset(_SetOperator):
+class IsSubset(_SetOperation):
     """
     The "is a subset of" operator (``⊂``).
     
