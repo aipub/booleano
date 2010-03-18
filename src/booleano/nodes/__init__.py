@@ -16,16 +16,13 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
-Boolean operation nodes and utilities.
+Operation nodes.
 
-In other words, this package contains the elements of the parse trees.
-
-Once parsed, the binary expressions are turned into the relevant operation
-using the classes provided by this package.
+They represent the parse tree when a boolean expression has been parsed.
 
 """
 
-from booleano.exc import InvalidOperationError
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 
 __all__ = ("OperationNode", "OPERATIONS")
@@ -42,162 +39,55 @@ OPERATIONS = set((
 
 class OperationNode(object):
     """
-    Base class for the individual elements available in a boolean operation
-    (i.e., operands and operations).
-    
-    It can also be seen as the base class for each node in the parse trees.
+    Base class for the operation nodes.
     
     """
     
-    def __call__(self, context):
-        """
-        Evaluate the operation, by passing the ``context`` to the inner
-        operands/operators.
-        
-        :param context: The evaluation context.
-        :type context: object
-        :return: The logical value of the operation node.
-        :rtype: bool
-        
-        """
-        raise NotImplementedError()
+    __metaclass__ = ABCMeta
     
-    def check_logical_support(self):
+    @abstractproperty
+    def is_leaf(self):   #pragma: no cover
         """
-        Make sure this node has and can return its logical value.
-        
-        :raises booleano.exc.InvalidOperationError: If the node is an
-            **operand** which doesn't support boolean operations.
-        
-        All the operators have logical values.
-        
-        """
-        from booleano.nodes.operands import Operand
-        if isinstance(self, Operand):
-            self.check_operation("boolean")
-    
-    def is_leaf(self):
-        """
-        Check if this is a leaf node.
+        Report whether this is a leaf node.
         
         :rtype: bool
         
-        Leaf nodes are those that don't contain other nodes (operands or
-        operators): :class:`String`, :class:`Number`, :class:`Variable` and
-        :class:`PlaceholderVariable`.
+        Leaf nodes are those which don't contain other nodes.
         
         """
-        from booleano.nodes.operands import Set, PlaceholderFunction, Function
-        from booleano.nodes.operations import Operation
-        return not isinstance(self,
-                              (Operation, Set, PlaceholderFunction, Function))
+        pass
     
+    @property
     def is_branch(self):
         """
-        Check if this is a branch node.
+        Report whether this is a branch node.
         
         :rtype: bool
         
-        Branch nodes are those that contain other nodes (operands or operators):
-        All the operators, plus :class:`Set`, :class:`Function` and
-        :class:`PlaceholderFunction`.
+        Branch nodes are those which contain other nodes.
         
         """
-        return not self.is_leaf()
+        return not self.is_leaf
     
-    def check_equivalence(self, node):
+    @abstractmethod
+    def is_equivalent(self, node):
         """
-        Make sure ``node`` and this node are equivalent.
+        Report whether ``node`` and this node are equivalent.
         
         :param node: The other node which may be equivalent to this one.
         :type node: :class:`OperationNode`
-        :raises AssertionError: If both nodes have different classes.
-        
-        Operands and operations must extend this method to check for other
-        attributes specific to such nodes.
+        :rtype: :class:`bool`
         
         """
-        error_msg = 'Nodes "%s" and "%s" are not equivalent'
-        # TODO: AssertionError exceptions must not be raised!
-        assert isinstance(node, self.__class__), error_msg % (repr(node),
-                                                              repr(self))
-    
-    def __nonzero__(self):
-        """
-        Cancel the pythonic truth evaluation by raising an exception.
-        
-        :raises InvalidOperationError: To cancel the pythonic truth evaluation.
-        
-        This is disabled in order to prevent users from mistakenly assuming 
-        they can evaluate operation nodes à la Python, which could lead to
-        serious problems because they'd always evaluate to ``True``.
-        
-        Operation nodes must be evaluated passing the context explicitly.
-        
-        """
-        raise InvalidOperationError("Operation nodes do not support Pythonic "
-                                    "truth evaluation")
+        return type(self) == type(node)
     
     def __eq__(self, other):
-        """
-        Check if the ``other`` node is equivalent to this one.
-        
-        :return: Whether they are equivalent.
-        :rtype: bool
-        
-        """
-        try:
-            self.check_equivalence(other)
-            return True
-        except AssertionError:
-            return False
+        return self.is_equivalent(other)
     
     def __ne__(self, other):
-        """
-        Check if the ``other`` node is not equivalent to this one.
-        
-        :return: Whether they are not equivalent.
-        :rtype: bool
-        
-        """
-        try:
-            self.check_equivalence(other)
-            return False
-        except AssertionError:
-            return True
+        return not self.is_equivalent(other)
     
-    def __str__(self):
-        """
-        Return the ASCII representation of this node.
-        
-        :raises NotImplementedError: If the Unicode representation is not
-            yet implemented.
-        
-        If it contains non-English characters, they'll get converted into ASCII
-        into ugly things -- It's best to use the Unicode representation
-        directly.
-        
-        """
-        as_unicode = self.__unicode__()
-        return str(as_unicode.encode("utf-8"))
-    
-    def __unicode__(self):
-        """
-        Return the Unicode representation for this node.
-        
-        :raises NotImplementedError: If the Unicode representation is not
-            yet implemented.
-        
-        """
-        raise NotImplementedError("Node %s doesn't have an Unicode "
-                                  "representation" % type(self))
-    
-    def __repr__(self):
-        """
-        Raise a NotImplementedError to force descendants to set the 
-        representation explicitly.
-        
-        """
-        raise NotImplementedError("Node %s doesn't have an "
-                                  "representation" % type(self))
+    @abstractmethod
+    def __repr__(self):   #pragma: no cover
+        pass
 
