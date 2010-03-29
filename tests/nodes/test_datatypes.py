@@ -21,7 +21,7 @@ Test suite for the datatypes.
 We basically want to test abstract functionality.
 
 """
-from nose.tools import ok_, assert_raises
+from nose.tools import ok_, assert_false, assert_raises
 
 from booleano.nodes.datatypes import Datatype, Boolean, Number, String, Set
 
@@ -41,3 +41,25 @@ def test_instantiation():
     assert_raises(TypeError, String)
     assert_raises(TypeError, Set)
 
+
+def test_boolean_callable():
+    """Booleans can be called directly to get the logical value."""
+    positive_bool = MockBoolean(True)
+    negative_bool = MockBoolean(False)
+    ok_(positive_bool(None))
+    assert_false(negative_bool(None))
+
+
+#{ Test utilities
+
+
+class MockBoolean(Boolean):
+    
+    def __init__(self, result):
+        self.result = result
+    
+    def get_as_boolean(self, context):
+        return self.result
+
+
+#}

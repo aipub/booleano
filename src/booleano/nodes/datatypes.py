@@ -54,6 +54,10 @@ class Boolean(Datatype):
         
         """
         pass
+    
+    def __call__(self, context):
+        """Alias for :meth:`get_as_boolean`."""
+        return self.get_as_boolean(context)
 
 
 class Number(Datatype):
