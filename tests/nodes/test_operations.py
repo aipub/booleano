@@ -442,7 +442,7 @@ class TestNonConnectiveBinaryOperations(object):
         eq_(l_op, operation.master_operand)
         eq_(r_op, operation.slave_operand)
     
-    def test_constructor_with_variable_before_constant(self):
+    def test_constructor_with_constant_before_variable(self):
         """
         The order must change when the first argument is a constant and the
         other is a variable.
