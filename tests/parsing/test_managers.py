@@ -29,9 +29,10 @@ from booleano.nodes.operations import Equal, LessEqual
 from booleano.nodes.operands import String, Number, PlaceholderVariable
 from booleano.exc import GrammarError
 
-from tests import (BoolVar, TrafficLightVar, PedestriansCrossingRoad,
-    DriversAwaitingGreenLightVar, PermissiveFunction, TrafficViolationFunc,
-    LoggingHandlerFixture)
+from tests.utils import LoggingHandlerFixture
+from tests.utils.mock_operands import (BoolVar, TrafficLightVar,
+    PedestriansCrossingRoad, DriversAwaitingGreenLightVar, PermissiveFunction,
+    TrafficViolationFunc)
 
 
 class TestBaseManager(object):

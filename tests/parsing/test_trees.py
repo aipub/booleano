@@ -27,8 +27,9 @@ from booleano.nodes.operations import And
 from booleano.nodes.operands import String, PlaceholderVariable
 from booleano.exc import InvalidOperationError
 
-from tests import (TrafficLightVar, PedestriansCrossingRoad, BoolVar,
-                   DriversAwaitingGreenLightVar, AntiConverter)
+from tests.utils.mock_converters import AntiConverter
+from tests.utils.mock_operands import (TrafficLightVar,
+    PedestriansCrossingRoad, BoolVar, DriversAwaitingGreenLightVar)
 
 
 class TestEvaluableTrees(object):

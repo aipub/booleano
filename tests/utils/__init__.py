@@ -26,6 +26,44 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written authorization.
 """
-Test suite for Booleano.
+Utilities for Booleano's test suite.
 
 """
+
+from logging import Handler, getLogger
+
+
+
+#{ Miscellaneous stuff
+
+
+class MockLoggingHandler(Handler):
+    """Mock logging handler to check for expected logs."""
+    
+    def __init__(self, *args, **kwargs):
+        self.reset()
+        Handler.__init__(self, *args, **kwargs)
+
+    def emit(self, record):
+        self.messages[record.levelname.lower()].append(record.getMessage())
+    
+    def reset(self):
+        self.messages = {
+            'debug': [],
+            'info': [],
+            'warning': [],
+            'error': [],
+            'critical': [],
+        }
+
+
+class LoggingHandlerFixture(object):
+    """Manager of the :class:`MockLoggingHandler`s."""
+    
+    def __init__(self):
+        self.logger = getLogger("booleano")
+        self.handler = MockLoggingHandler()
+        self.logger.addHandler(self.handler)
+    
+    def undo(self):
+        self.logger.removeHandler(self.handler)

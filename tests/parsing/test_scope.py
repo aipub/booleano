@@ -26,8 +26,9 @@ from booleano.parser.scope import Bind, SymbolTable, Namespace, _Identifier
 from booleano.nodes.operands import String, Number
 from booleano.exc import ScopeError
 
-from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
-                   BoolVar, LoggingHandlerFixture)
+from tests.utils import LoggingHandlerFixture
+from tests.utils.mock_operands import (TrafficLightVar, TrafficViolationFunc,
+    BoolVar)
 
 
 class TestIdentifiers(object):

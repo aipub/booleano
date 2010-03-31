@@ -32,9 +32,10 @@ from booleano.nodes.operands import (String, Number, Set,
 from booleano.parser.testutils import BaseGrammarTest
 from booleano.exc import ScopeError, BadExpressionError
 
-from tests import (StringConverter, BoolVar, TrafficLightVar, 
-                   PedestriansCrossingRoad, DriversAwaitingGreenLightVar,
-                   PermissiveFunction, TrafficViolationFunc)
+from tests.utils.mock_converters import StringConverter
+from tests.utils.mock_operands import (BoolVar, TrafficLightVar, 
+    PedestriansCrossingRoad, DriversAwaitingGreenLightVar, PermissiveFunction,
+    TrafficViolationFunc)
 
 
 class TestDefaultGrammar(BaseGrammarTest):

@@ -38,7 +38,7 @@ from booleano.nodes.operands import (String, Number, Set, PlaceholderVariable,
     PlaceholderFunction)
 from booleano.exc import ConversionError
 
-from tests import AntiConverter
+from tests.utils.mock_converters import AntiConverter
 
 
 #{ The tests themselves

@@ -37,8 +37,8 @@ from booleano.nodes.operands import (Operand, String, Number, Set, Variable,
 from booleano.exc import (InvalidOperationError, BadOperandError, BadCallError,
                           BadFunctionError)
 
-from tests import (TrafficLightVar, PermissiveFunction, TrafficViolationFunc,
-                   BoolVar)
+from tests.utils.mock_operands import (TrafficLightVar, PermissiveFunction,
+                                       TrafficViolationFunc, BoolVar)
 
 
 class TestOperand(object):
