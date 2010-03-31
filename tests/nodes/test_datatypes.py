@@ -23,23 +23,24 @@ We basically want to test abstract functionality.
 """
 from nose.tools import ok_, assert_false, assert_raises
 
-from booleano.nodes.datatypes import Datatype, Boolean, Number, String, Set
+from booleano.nodes.datatypes import (Datatype, BooleanType, NumberType,
+                                      StringType, SetType)
 
 
 def test_inheritance():
     """All the datatypes are descendant of Datatype."""
-    ok_(issubclass(Boolean, Datatype))
-    ok_(issubclass(Number, Datatype))
-    ok_(issubclass(String, Datatype))
-    ok_(issubclass(Set, Datatype))
+    ok_(issubclass(BooleanType, Datatype))
+    ok_(issubclass(NumberType, Datatype))
+    ok_(issubclass(StringType, Datatype))
+    ok_(issubclass(SetType, Datatype))
 
 
 def test_instantiation():
     """Datatypes cannot be instantiated directly -- they're all abstract."""
-    assert_raises(TypeError, Boolean)
-    assert_raises(TypeError, Number)
-    assert_raises(TypeError, String)
-    assert_raises(TypeError, Set)
+    assert_raises(TypeError, BooleanType)
+    assert_raises(TypeError, NumberType)
+    assert_raises(TypeError, StringType)
+    assert_raises(TypeError, SetType)
 
 
 def test_boolean_callable():
@@ -53,7 +54,7 @@ def test_boolean_callable():
 #{ Test utilities
 
 
-class MockBoolean(Boolean):
+class MockBoolean(BooleanType):
     
     def __init__(self, result):
         self.result = result

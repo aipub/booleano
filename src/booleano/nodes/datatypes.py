@@ -25,7 +25,7 @@ Booleano and the actual Python values.
 
 from abc import ABCMeta, abstractmethod
 
-__all__ = ("Datatype", "Boolean", "Number", "String", "Set")
+__all__ = ("Datatype", "BooleanType", "NumberType", "StringType", "SetType")
 
 
 class Datatype(object):
@@ -37,7 +37,7 @@ class Datatype(object):
     __metaclass__ = ABCMeta
 
 
-class Boolean(Datatype):
+class BooleanType(Datatype):
     """
     Interface for logical values.
     
@@ -60,7 +60,7 @@ class Boolean(Datatype):
         return self.get_as_boolean(context)
 
 
-class Number(Datatype):
+class NumberType(Datatype):
     """
     Interface for numeric values.
     
@@ -79,7 +79,7 @@ class Number(Datatype):
         pass
 
 
-class String(Datatype):
+class StringType(Datatype):
     """
     Interface for character strings.
     
@@ -98,7 +98,7 @@ class String(Datatype):
         pass
 
 
-class Set(Datatype):
+class SetType(Datatype):
     """
     Interface for sets.
     
