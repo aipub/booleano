@@ -45,8 +45,6 @@ def test_different_nodes():
     """Nodes from different classes are not marked as equivalent."""
     node1 = LeafNode()
     node2 = BranchNode()
-    assert_false(node1.is_equivalent(node2))
-    assert_false(node2.is_equivalent(node1))
     assert_false(node1 == node2)
     assert_false(node2 == node1)
     ok_(node1 != node2)
@@ -57,12 +55,8 @@ def test_equivalent_nodes():
     """Nodes from the same classes are marked as equivalent."""
     node1 = LeafNode()
     node2 = LeafNode()
-    ok_(node1.is_equivalent(node2))
-    ok_(node2.is_equivalent(node1))
     ok_(node1 == node2)
     ok_(node2 == node1)
-    assert_false(node1 != node2)
-    assert_false(node2 != node1)
 
 
 #{ Mock and useless nodes
@@ -70,8 +64,8 @@ def test_equivalent_nodes():
 
 class MockNodeBase(OperationNode):
     
-    def is_equivalent(self, node):
-        return super(MockNodeBase, self).is_equivalent(node)
+    def __eq__(self, other):
+        return super(MockNodeBase, self).__eq__(other)
     
     def __repr__(self):
         return "%s()" % self.__class__.__name__

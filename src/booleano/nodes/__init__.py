@@ -70,22 +70,19 @@ class OperationNode(object):
         return not self.is_leaf
     
     @abstractmethod
-    def is_equivalent(self, node):
+    def __eq__(self, other):
         """
-        Report whether ``node`` and this node are equivalent.
+        Report whether ``other`` is a node and is equivalent with this one.
         
         :param node: The other node which may be equivalent to this one.
         :type node: :class:`OperationNode`
         :rtype: :class:`bool`
         
         """
-        return type(self) == type(node)
-    
-    def __eq__(self, other):
-        return self.is_equivalent(other)
+        return type(self) == type(other)
     
     def __ne__(self, other):
-        return not self.is_equivalent(other)
+        return not self.__eq__(other)
     
     @abstractmethod
     def __repr__(self):   #pragma: no cover
