@@ -25,7 +25,30 @@ Booleano and the actual Python values.
 
 from abc import ABCMeta, abstractmethod
 
-__all__ = ("Datatype", "BooleanType", "NumberType", "StringType", "SetType")
+__all__ = ["Datatype", "BooleanType", "NumberType", "StringType", "SetType"]
+
+
+class _DatatypeMeta(ABCMeta):
+    """
+    Metaclass for Booleano datatypes.
+    
+    It sets the class attribute :attr:`__booleano_base_types__` on the datatype
+    implementation classes, to the Booleano datatypes being implemented.
+    
+    """
+    
+    def __new__(cls, name, bases, ns):
+        datatype = super(_DatatypeMeta, cls).__new__(cls, name, bases, ns)
+        
+        if "__booleano_base_types__" not in ns:
+            # Calculating the Booleano datatypes among the base classes:
+            base_types = []
+            for base_type in datatype.__mro__[1:]:
+                if issubclass(base_type, Datatype) and base_type != Datatype:
+                    base_types.append(base_type)
+            datatype.__booleano_base_types__ = base_types
+        
+        return datatype
 
 
 class Datatype(object):
@@ -34,7 +57,9 @@ class Datatype(object):
     
     """
     
-    __metaclass__ = ABCMeta
+    __metaclass__ = _DatatypeMeta
+    
+    __booleano_base_types__ = None
 
 
 class BooleanType(Datatype):
@@ -98,7 +123,7 @@ class StringType(Datatype):
         pass
 
 
-class SetType(Datatype):
+class SetType(NumberType):
     """
     Interface for sets.
     
