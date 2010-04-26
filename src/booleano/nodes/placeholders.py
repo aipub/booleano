@@ -23,11 +23,11 @@ A placeholder operand is an object whose evaluation is not done by Booleano
 parser won't verify its existence.
 
 """
-from booleano.nodes import OPERATIONS
-from booleano.nodes.operands import Operand
-from booleano.exc import BadCallError, InvalidOperationError
 
-__all__ = ("PlaceholderVariable", "PlaceholderFunction")
+from booleano.exc import BadCallError
+from booleano.nodes.operands import Operand
+
+__all__ = ["PlaceholderVariable", "PlaceholderFunction"]
 
 
 class PlaceholderInstance(Operand):
@@ -38,8 +38,6 @@ class PlaceholderInstance(Operand):
     converter to verify if the instance is used correctly.
     
     """
-    
-    operations = OPERATIONS
     
     def __init__(self, name, namespace_parts=None):
         """
@@ -54,36 +52,14 @@ class PlaceholderInstance(Operand):
         self.name = name.lower()
         self.namespace_parts = tuple(namespace_parts or ())
     
-    def check_equivalence(self, node):
-        """
-        Check that placeholder ``node`` is equivalent to this one.
-        
-        :raises AssertionError: If ``node`` is not a placeholder or if it's
-            a placeholder but its name is not equal to current one's.
-        
-        """
-        super(PlaceholderInstance, self).check_equivalence(node)
-        assert (self.name == node.name and
-                self.namespace_parts == node.namespace_parts), \
-               'Placeholders "%s" and "%s" are not equivalent' % (self, node)
-    
-    def no_evaluation(self, *args, **kwargs):
-        """
-        Raise an InvalidOperationError exception.
-        
-        This method should be called when trying to perform an evaluation on
-        a placeholder.
-        
-        """
-        raise InvalidOperationError("Placeholders cannot be evaluated!")
-    
-    # All the evaluation-related operation raise an InvalidOperationError
-    to_python = __call__ = equals = less_than = greater_than = \
-    belongs_to = is_subset = no_evaluation
-    
-    def _namespace_to_unicode(self):
-        """Return the namespace as a single Unicode string."""
-        return u":".join(self.namespace_parts)
+    def __eq__(self, other):
+        equivalent = False
+        if super(PlaceholderInstance, self).__eq__(other):
+            equivalent = (
+                self.name == other.name and
+                self.namespace_parts == other.namespace_parts
+                )
+        return equivalent
     
     def _namespace_to_ascii(self):
         """Return the namespace as a single ASCII string."""
@@ -97,13 +73,7 @@ class PlaceholderVariable(PlaceholderInstance):
     
     """
     
-    def __unicode__(self):
-        """Return the Unicode representation for this placeholder variable."""
-        msg = 'Placeholder variable "%s"' % self.name
-        if self.namespace_parts:
-            ns = self._namespace_to_unicode()
-            msg = "%s at %s" % (msg, ns)
-        return msg
+    is_leaf = True
     
     def __repr__(self):
         """Return the representation for this placeholder variable."""
@@ -119,6 +89,8 @@ class PlaceholderFunction(PlaceholderInstance):
     Placeholder for a function call.
     
     """
+    
+    is_leaf = False
     
     def __init__(self, function_name, namespace_parts=None, *arguments):
         """
@@ -141,29 +113,11 @@ class PlaceholderFunction(PlaceholderInstance):
         super(PlaceholderFunction, self).__init__(function_name,
                                                   namespace_parts)
     
-    def check_equivalence(self, node):
-        """
-        Check that placeholder function ``node`` is equivalent to the current
-        placeholder function.
-        
-        :raises AssertionError: If ``node`` is not a placeholder function, or
-            if it's a placeholder function but represents a different function.
-        
-        """
-        super(PlaceholderFunction, self).check_equivalence(node)
-        assert self.arguments == node.arguments, \
-               u'Placeholder functions "%s" and "%s" were called with ' \
-               'different arguments' % (self, node)
-    
-    def __unicode__(self):
-        """Return the Unicode representation for this placeholder function."""
-        args = [unicode(arg) for arg in self.arguments]
-        args = ", ".join(args)
-        msg = 'Placeholder function call "%s"(%s)' % (self.name, args)
-        if self.namespace_parts:
-            ns = self._namespace_to_unicode()
-            msg = "%s at %s" % (msg, ns)
-        return msg
+    def __eq__(self, other):
+        equivalent = False
+        if super(PlaceholderFunction, self).__eq__(other):
+            equivalent = self.arguments == other.arguments
+        return equivalent
     
     def __repr__(self):
         """Return the representation for this placeholder function."""

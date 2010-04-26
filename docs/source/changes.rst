@@ -6,6 +6,9 @@ Change log
 Version 1.0 Alpha 2 (unreleased)
 ================================
 
+- Placeholders are no longer operands. Now they are just nodes. They've been
+  moved to :mod:`booleano.nodes.placeholders`.
+
 - Changed licensing terms:
 
   - Booleano is now available under the terms of the *GNU GPL Version 3* or

@@ -20,12 +20,13 @@ Converters for Booleano parse tree structures (the convertible, not the
 evaluable ones).
 
 """
-from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual,
-    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
-from booleano.nodes.operands import (String, Number, Set, PlaceholderVariable,
-    PlaceholderFunction)
-from booleano.nodes.operations import UnaryOperation
+
 from booleano.exc import ConversionError
+from booleano.nodes.operands import String, Number, Set
+from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual,
+    LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
+    UnaryOperation)
+from booleano.nodes.placeholders import PlaceholderVariable, PlaceholderFunction
 
 __all__ = ("BaseConverter", )
 
