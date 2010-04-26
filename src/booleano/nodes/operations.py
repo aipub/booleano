@@ -17,6 +17,34 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
 Built-in operations.
+    
+.. note:: **Membership operations aren't supported on strings**
+
+    Although both sets and strings are item collections, the former is 
+    unordered and the later is ordered. If they were supported, there would
+    some ambiguities to sort out, because users would expect the following
+    operation results:
+    
+    - ``"ao" ⊂ "hola"`` is false: If strings were also sets, then the 
+      resulting operation would be ``{"a", "o"} ⊂ {"h", "o", "l", "a"}``,
+      which is true.
+    - ``"la" ∈ "hola"`` is true: If strings were also sets, then the 
+      resulting operation would be ``{"l", "a"} ∈ {"h", "o", "l", "a"}``, 
+      which would be an *invalid operation* because the first operand must 
+      be an item, not a set. But if we make an exception and take the first 
+      operand as an item, the resulting operation would be 
+      ``"la" ∈ {"h", "o", "l", "a"}``, which is not true.
+    
+    The solution to the problems above would involve some magic which
+    contradicts the definition of a set: Take the second operand as an 
+    *ordered collection*. But it'd just cause more trouble, because both
+    operations would be equivalent!
+    
+    Also, there would be other issues to take into account (or not), like
+    case-sensitivity.
+    
+    Therefore, if this functionality is needed, developers should create
+    functions to handle it.
 
 """
 
