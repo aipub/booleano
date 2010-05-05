@@ -24,8 +24,7 @@ from booleano.exc import InvalidOperationError
 from booleano.nodes import OperationNode
 from booleano.nodes.datatypes import NumberType, SetType, StringType
 
-__all__ = ("String", "Number", "Set", "Variable", "Function",
-           "PlaceholderVariable", "PlaceholderFunction")
+__all__ = ["String", "Number", "Set"]
 
 
 class Operand(OperationNode):
@@ -178,6 +177,3 @@ class Set(Constant, SetType):
 
 #}
 
-
-# Importing the operands so they can be available from this namespace:
-#from booleano.nodes.operands.classes import Variable, Function

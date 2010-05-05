@@ -8,6 +8,8 @@ Version 1.0 Alpha 2 (unreleased)
 
 - Placeholders are no longer operands. Now they are just nodes. They've been
   moved to :mod:`booleano.nodes.placeholders`.
+- Functions are no longer operands. Now they are just nodes. The base class has
+  been moved to :class:`booleano.nodes.Function`.
 
 - Changed licensing terms:
 

@@ -20,12 +20,16 @@ Unit tests for the base class of the nodes.
 
 """
 
-from nose.tools import ok_, assert_false, assert_raises
+from nose.tools import assert_false, assert_raises, eq_, ok_, raises
 
-from booleano.nodes import OperationNode
+from booleano.exc import BadCallError, BadFunctionError
+from booleano.nodes import OperationNode, Function
+from booleano.nodes.datatypes import Datatype
+
+from tests.utils.mock_operands import BranchNode, LeafNode, PermissiveFunction
 
 
-#{ Tests
+#{ Tests for the base OperationNode class
 
 
 def test_abstractness():
@@ -59,26 +63,201 @@ def test_equivalent_nodes():
     ok_(node2 == node1)
 
 
-#{ Mock and useless nodes
+#{ Tests for the functions
 
 
-class MockNodeBase(OperationNode):
+class TestFunctionMeta(object):
+    """Tests for the metaclass of the user-defined function nodes."""
     
-    def __eq__(self, other):
-        return super(MockNodeBase, self).__eq__(other)
+    def test_arity(self):
+        """
+        The arity and all the arguments for a function must be calculated
+        right after it's been defined.
+        
+        """
+        # Nullary function:
+        class NullaryFunction(Function):
+            bypass_operation_check = True
+        eq_(NullaryFunction.arity, 0)
+        eq_(NullaryFunction.all_args, ())
+        
+        # Unary function:
+        class UnaryFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("arg1", )
+        eq_(UnaryFunction.arity, 1)
+        eq_(UnaryFunction.all_args, ("arg1", ))
+        
+        # Unary function, with its argument optional:
+        class OptionalUnaryFunction(Function):
+            bypass_operation_check = True
+            optional_arguments = {'oarg1': LeafNode()}
+        eq_(OptionalUnaryFunction.arity, 1)
+        eq_(OptionalUnaryFunction.all_args, ("oarg1", ))
+        
+        # Binary function:
+        class BinaryFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("arg1", )
+            optional_arguments = {'oarg1': LeafNode()}
+        eq_(BinaryFunction.arity, 2)
+        eq_(BinaryFunction.all_args, ("arg1", "oarg1"))
     
-    def __repr__(self):
-        return "%s()" % self.__class__.__name__
-
-
-class LeafNode(MockNodeBase):
+    @raises(BadFunctionError)
+    def test_duplicate_arguments(self):
+        """An optional argument shouldn't share its name with a required one"""
+        class FunctionWithDuplicateArguments(Function):
+            required_arguments = ("arg1", )
+            optional_arguments = {'arg1': None}
     
-    is_leaf = True
-
-
-class BranchNode(MockNodeBase):
+    @raises(BadFunctionError)
+    def test_duplicate_required_arguments(self):
+        """Two required arguments must not share the same name."""
+        class FunctionWithDuplicateArguments(Function):
+            required_arguments = ("arg1", "arg1")
     
-    is_leaf = False
+    @raises(BadFunctionError)
+    def test_non_node_default_arguments(self):
+        """Default values for the optional arguments must be operation nodes."""
+        class FunctionWithNonOperands(Function):
+            bypass_operation_check = True
+            optional_arguments = {'arg': 1}
+
+
+class TestFunction(object):
+    """Tests for the base class of user-defined function nodes."""
+    
+    def test_node_type(self):
+        """Functions are branch nodes."""
+        func = PermissiveFunction(LeafNode())
+        ok_(func.is_branch)
+        assert_false(func.is_leaf)
+    
+    def test_constructor_with_minimum_arguments(self):
+        func = PermissiveFunction(LeafNode("baz"))
+        args = {
+            'arg0': LeafNode("baz"),
+            'oarg0': LeafNode("foo"),
+            'oarg1': BranchNode("bar"),
+        }
+        eq_(func.arguments, args)
+    
+    def test_constructor_with_one_optional_argument(self):
+        func = PermissiveFunction(LeafNode("this-is-arg0"),
+                                  LeafNode("this-is-oarg0"))
+        args = {
+            'arg0': LeafNode("this-is-arg0"),
+            'oarg0': LeafNode("this-is-oarg0"),
+            'oarg1': BranchNode("bar"),
+        }
+        eq_(func.arguments, args)
+    
+    def test_constructor_with_all_arguments(self):
+        func = PermissiveFunction(
+            BranchNode("this-is-arg0"),
+            LeafNode("this-is-oarg0"),
+            BranchNode("this-is-oarg1"),
+        )
+        args = {
+            'arg0': BranchNode("this-is-arg0"),
+            'oarg0': LeafNode("this-is-oarg0"),
+            'oarg1': BranchNode("this-is-oarg1"),
+        }
+        eq_(func.arguments, args)
+    
+    @raises(BadCallError)
+    def test_constructor_with_few_arguments(self):
+        PermissiveFunction()
+    
+    @raises(BadCallError)
+    def test_constructor_with_many_arguments(self):
+        PermissiveFunction(
+            LeafNode(0),
+            LeafNode(1),
+            LeafNode(2),
+            LeafNode(3),
+            LeafNode(4),
+            LeafNode(5),
+            LeafNode(6),
+            LeafNode(7),
+            LeafNode(8),
+            LeafNode(9),
+        )
+    
+    def test_constructor_accepts_operands(self):
+        """Only operands are valid function arguments."""
+        PermissiveFunction(LeafNode(), BranchNode())
+        assert_raises(BadCallError, PermissiveFunction, None)
+        assert_raises(BadCallError, PermissiveFunction, 2)
+        assert_raises(BadCallError, PermissiveFunction, Datatype())
+    
+    def test_no_argument_validation_by_default(self):
+        """
+        Arguments must be explicitly validated by the function.
+        
+        This is, their .check_arguments() method must be overriden.
+        
+        """
+        class MockFunction(Function):
+            bypass_operation_check = True
+            __eq__ = lambda other: False
+        assert_raises(NotImplementedError, MockFunction)
+    
+    def test_equivalence(self):
+        """
+        Two functions are equivalent not only if they share the same class,
+        but also if their arguments are equivalent.
+        
+        """
+        class FooFunction(Function):
+            bypass_operation_check = True
+            required_arguments = ("abc", )
+            optional_arguments = {"xyz": LeafNode("123")}
+            
+            def __eq__(self, other):
+                return super(FooFunction, self).__eq__(other)
+            
+            def check_arguments(self):
+                pass
+        
+        func1 = FooFunction(LeafNode("whatever"))
+        func2 = FooFunction(LeafNode("whatever"))
+        func3 = PermissiveFunction(BranchNode("baz"))
+        func4 = PermissiveFunction(LeafNode("foo"))
+        func5 = FooFunction(LeafNode("something"))
+        
+        ok_(func1 == func1)
+        ok_(func1 == func2)
+        assert_false(func1 == func3)
+        assert_false(func1 == func4)
+        assert_false(func1 == func5)
+        ok_(func2 == func1)
+        ok_(func2 == func2)
+        assert_false(func2 == func3)
+        assert_false(func2 == func4)
+        assert_false(func2 == func5)
+        assert_false(func3 == func1)
+        assert_false(func3 == func2)
+        ok_(func3 == func3)
+        assert_false(func3 == func4)
+        assert_false(func3 == func5)
+        assert_false(func4 == func1)
+        assert_false(func4 == func2)
+        assert_false(func4 == func3)
+        ok_(func4 == func4)
+        assert_false(func4 == func5)
+        assert_false(func5 == func1)
+        assert_false(func5 == func2)
+        assert_false(func5 == func3)
+        assert_false(func5 == func4)
+        ok_(func5 == func5)
+    
+    def test_representation(self):
+        func = PermissiveFunction(LeafNode("foo"), BranchNode(u"fú"))
+        expected = "<Anonymous function call [PermissiveFunction] " \
+                   "arg0=LeafNode('foo'), oarg0=BranchNode(u'f\\xfa'), " \
+                   "oarg1=BranchNode('bar')>"
+        eq_(repr(func), expected)
 
 
 #}

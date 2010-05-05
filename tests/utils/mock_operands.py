@@ -19,67 +19,78 @@
 Mock operands.
 
 """
-from booleano.nodes.operands import String, Number, Set, Variable, Function
-from booleano.exc import InvalidOperationError, BadCallError
+
+from booleano.exc import BadCallError
+from booleano.nodes import OperationNode, Function
+from booleano.nodes.datatypes import BooleanType, SetType, StringType
+from booleano.nodes.operands import String
+
+
+class MockNodeBase(OperationNode):
+    """Base class for mock nodes."""
+    
+    def __init__(self, value=None):
+        self.value = value
+        super(MockNodeBase, self).__init__()
+    
+    def __eq__(self, other):
+        equals = False
+        if super(MockNodeBase, self).__eq__(other):
+            equals = self.value == other.value
+        return equals
+    
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.value)
+
+
+class LeafNode(MockNodeBase):
+    """Mock leaf node."""
+    is_leaf = True
+
+
+class BranchNode(MockNodeBase):
+    """Mock branch node."""
+    is_leaf = False
 
 
 #{ Mock variables
 
 
-class BoolVar(Variable):
+class BoolVar(OperationNode, BooleanType):
     """
     Mock variable which represents the boolean value stored in a context item
     called ``bool``.
     
     """
-    operations = set(("boolean", "equality"))
     
     def __init__(self):
         self.evaluated = False
         super(BoolVar, self).__init__()
     
-    def to_python(self, context):
+    def get_as_boolean(self, context):
         """Return the value of the ``bool`` context item"""
         self.evaluated = True
         return context['bool']
-    
-    def equals(self, value, context):
-        """Does ``value`` equal this boolean variable?"""
-        self.evaluated = True
-        return context['bool'] == value
-    
-    def __call__(self, context):
-        """Does the value of context item ``bool`` evaluate to True?"""
-        self.evaluated = True
-        return bool(context['bool'])
 
 
-class TrafficLightVar(Variable):
+class TrafficLightVar(OperationNode, BooleanType, StringType):
     """
     Variable that represents a traffic light.
     
     """
     
-    operations = set(("equality", "boolean"))
-    
     valid_colors = ("red", "amber", "green")
     
-    def to_python(self, context):
+    def get_as_string(self, context):
         """Return the string that represents the current light color"""
         return context['traffic_light']
     
-    def __call__(self, context):
+    def get_as_boolean(self, context):
         """Is the traffic light working?"""
         return bool(context['traffic_light'])
-    
-    def equals(self, value, context):
-        """Does the traffic light's color equal to ``value``?"""
-        if value not in self.valid_colors:
-            raise InvalidOperationError("Traffic lights can't be %s" % value)
-        return value == context['traffic_light']
 
 
-class VariableSet(Variable):
+class VariableSet(OperationNode, BooleanType, SetType):
     """
     Base class for a variable which finds its value in one of the context.
     
@@ -88,37 +99,15 @@ class VariableSet(Variable):
     
     """
     
-    operations = set(("equality", "inequality", "boolean", "membership"))
+    def get_as_boolean(self, context):
+        return bool(context[self.people_set])
     
-    def to_python(self, context):
+    def get_as_number(self, value, context):
+        return len(context[self.people_set])
+    
+    def get_as_set(self, context):
         set_ = set(context[self.people_set])
         return set_
-    
-    def __call__(self, context):
-        set_ = set(context[self.people_set])
-        return bool(set_)
-    
-    def equals(self, value, context):
-        set_ = set(context[self.people_set])
-        value = set(value)
-        return value == set_
-    
-    def less_than(self, value, context):
-        set_ = context[self.people_set]
-        return len(set_) < value
-    
-    def greater_than(self, value, context):
-        set_ = context[self.people_set]
-        return len(set_) > value
-    
-    def belongs_to(self, value, context):
-        set_ = context[self.people_set]
-        return value in set_
-    
-    def is_subset(self, value, context):
-        value = set(value)
-        set_ = set(context[self.people_set])
-        return value.issubset(set_)
 
 
 class PedestriansCrossingRoad(VariableSet):
@@ -140,37 +129,33 @@ class DriversAwaitingGreenLightVar(VariableSet):
 #{ Mock functions
 
 
-class PermissiveFunction(Function):
+class PermissiveFunction(Function, BooleanType):
     """
     A mock function operator which accepts any type of arguments.
     
     """
     
-    operations = set(["boolean"])
-    
     required_arguments = ("arg0", )
     
-    optional_arguments = {'oarg0': Set(), 'oarg1': Number(1)}
+    optional_arguments = {'oarg0': LeafNode("foo"), 'oarg1': BranchNode("bar")}
     
     def check_arguments(self):
         """Do nothing -- Allow any kind of arguments."""
         pass
     
-    def to_python(self, context):
-        return self.arguments
-    
-    def __call__(self, context):
+    def get_as_boolean(self, context):
         return True
+    
+    def __eq__(self, other):
+        return super(PermissiveFunction, self).__eq__(other)
 
 
-class TrafficViolationFunc(Function):
+class TrafficViolationFunc(Function, BooleanType):
     """
     Function operator that checks if there are drivers/pedestrians crossing
     the crossroad when their respective traffic light is red.
     
     """
-    
-    operations = set(["boolean"])
     
     required_arguments = ("light", )
     
@@ -180,14 +165,14 @@ class TrafficViolationFunc(Function):
         if light not in ("pedestrians", "drivers"):
             raise BadCallError("Only pedestrians and drivers have lights")
     
-    def to_python(self, context):
-        return self.arguments
-    
-    def __call__(self, context):
+    def get_as_boolean(self, context):
         if self.arguments['light'] == "pedestrians":
             return context['pedestrians_light'] == "red" and \
                    len(context['people_crossing'])
         # It's the drivers' light.
         return context['drivers_light'] == "red" and \
                len(context['cars_crossing'])
+    
+    def __eq__(self, other):
+        return super(PermissiveFunction, self).__eq__(other)
 
