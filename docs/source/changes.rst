@@ -6,6 +6,8 @@ Change log
 Version 1.0 Alpha 2 (unreleased)
 ================================
 
+- Removed the :data:`booleano.nodes.OPERATIONS` constant because nodes must now
+  extend the corresponding datatype.
 - Placeholders are no longer operands. Now they are just nodes. They've been
   moved to :mod:`booleano.nodes.placeholders`.
 - Functions are no longer operands. Now they are just nodes. The base class has

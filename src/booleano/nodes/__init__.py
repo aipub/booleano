@@ -28,16 +28,7 @@ from booleano.nodes.datatypes import Datatype
 from booleano.exc import BadCallError, BadFunctionError
 
 
-__all__ = ["Function", "OperationNode", "OPERATIONS"]
-
-
-#: The known/supported operations.
-OPERATIONS = set((
-    "equality",           # ==, !=
-    "inequality",         # >, <, >=, <=
-    "boolean",            # Logical values
-    "membership",         # Set operations (i.e., ∈ and ⊂)
-))
+__all__ = ["Function", "OperationNode"]
 
 
 class OperationNode(object):
