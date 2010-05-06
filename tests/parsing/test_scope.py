@@ -23,7 +23,7 @@ Scope handling tests.
 from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 
 from booleano.parser.scope import Bind, SymbolTable, Namespace, _Identifier
-from booleano.nodes.operands import String, Number
+from booleano.nodes.constants import String, Number
 from booleano.exc import ScopeError
 
 from tests.utils import LoggingHandlerFixture

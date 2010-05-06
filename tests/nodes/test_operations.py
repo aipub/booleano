@@ -25,7 +25,7 @@ from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 from booleano.nodes.operations import (Operation, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
     IsSubset)
-from booleano.nodes.operands import String, Number, Set
+from booleano.nodes.constants import String, Number, Set
 from booleano.exc import InvalidOperationError
 
 from tests.utils.mock_nodes import (BoolVar, DriversAwaitingGreenLightVar,

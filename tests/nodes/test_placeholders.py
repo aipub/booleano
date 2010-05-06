@@ -22,7 +22,7 @@ Test for placeholder nodes.
 from nose.tools import eq_, ok_, assert_false, assert_raises
 
 from booleano.exc import BadCallError
-from booleano.nodes.operands import String, Number
+from booleano.nodes.constants import String, Number
 from booleano.nodes.placeholders import PlaceholderVariable, PlaceholderFunction
 
 

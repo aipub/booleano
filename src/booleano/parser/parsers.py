@@ -30,7 +30,7 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString,
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
     GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
-from booleano.nodes.operands import (String, Number,
+from booleano.nodes.constants import (String, Number,
     Set, Function, PlaceholderVariable, PlaceholderFunction)
 from booleano.exc import BadExpressionError
 

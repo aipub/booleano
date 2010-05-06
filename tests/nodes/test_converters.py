@@ -24,7 +24,7 @@ from nose.tools import eq_, assert_raises, raises
 from booleano.nodes.converters import BaseConverter
 from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
-from booleano.nodes.operands import (String, Number, Set, PlaceholderVariable,
+from booleano.nodes.constants import (String, Number, Set, PlaceholderVariable,
     PlaceholderFunction)
 from booleano.exc import ConversionError
 

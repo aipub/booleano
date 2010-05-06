@@ -24,7 +24,7 @@ from booleano.exc import BadCallError
 from booleano.nodes import Function, OperationNode
 from booleano.nodes.datatypes import (BooleanType, NumberType, SetType,
                                       StringType)
-from booleano.nodes.operands import String
+from booleano.nodes.constants import String
 
 
 __all__ = ["BranchNode", "BoolVar", "DriversAwaitingGreenLightVar", "LeafNode",

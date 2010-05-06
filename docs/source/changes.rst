@@ -14,6 +14,7 @@ Version 1.0 Alpha 2 (unreleased)
   :class:`booleano.nodes.operands.classes.Variable`, is gone as well as
   the entire module. `Bug #569188
   <https://bugs.launchpad.net/booleano/+bug/569188>`_.
+- Renamed :mod:`booleano.nodes.operands` to :mod:`booleano.nodes.constants`.
 
 - Changed licensing terms:
 

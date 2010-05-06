@@ -25,7 +25,7 @@ parser won't verify its existence.
 """
 
 from booleano.exc import BadCallError
-from booleano.nodes.operands import Operand
+from booleano.nodes.constants import Operand
 
 __all__ = ["PlaceholderVariable", "PlaceholderFunction"]
 

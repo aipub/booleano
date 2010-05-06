@@ -24,7 +24,7 @@ from nose.tools import eq_, ok_, assert_false
 
 from booleano.exc import InvalidOperationError
 from booleano.nodes.datatypes import NumberType, SetType, StringType
-from booleano.nodes.operands import Constant, String, Number, Set
+from booleano.nodes.constants import Constant, String, Number, Set
 
 
 #{ Constants

@@ -189,7 +189,7 @@ class Function(OperationNode):
     defined as::
     
         from booleano.nodes import Function
-        from booleano.nodes.operands import String, Number
+        from booleano.nodes.constants import String, Number
         
         class MyFunction(Function):
             

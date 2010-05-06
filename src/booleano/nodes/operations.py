@@ -76,7 +76,7 @@ class UnaryOperation(Operation):
         storing it.
         
         :param operand: The operand handled by this operator.
-        :type operand: :class:`booleano.nodes.operands.Operand`
+        :type operand: :class:`booleano.nodes.constants.Operand`
         
         """
         self.operand = operand
@@ -136,9 +136,9 @@ class BinaryOperation(Operation):
         ``left_operand`` and ``right_operand``.
         
         :param left_operand: The left-hand operand handled by this operator.
-        :type left_operand: :class:`booleano.nodes.operands.Operand`
+        :type left_operand: :class:`booleano.nodes.constants.Operand`
         :param right_operand: The right-hand operand handled by this operator.
-        :type right_operand: :class:`booleano.nodes.operands.Operand`
+        :type right_operand: :class:`booleano.nodes.constants.Operand`
         
         """
         master, slave = self.organize_operands(left_operand, right_operand)
@@ -151,9 +151,9 @@ class BinaryOperation(Operation):
         ``right_operand`` operands.
         
         :param left_operand: The left-hand operand handled by this operator.
-        :type left_operand: :class:`booleano.nodes.operands.Operand`
+        :type left_operand: :class:`booleano.nodes.constants.Operand`
         :param right_operand: The right-hand operand handled by this operator.
-        :type right_operand: :class:`booleano.nodes.operands.Operand`
+        :type right_operand: :class:`booleano.nodes.constants.Operand`
         :return: A pair where the first item is the master operand and the
             second one is the slave.
         :rtype: tuple
@@ -357,9 +357,9 @@ class Equal(BinaryOperation):
         """
         
         :param left_operand: The left-hand operand handled by this operator.
-        :type left_operand: :class:`booleano.nodes.operands.Operand`
+        :type left_operand: :class:`booleano.nodes.constants.Operand`
         :param right_operand: The right-hand operand handled by this operator.
-        :type right_operand: :class:`booleano.nodes.operands.Operand`
+        :type right_operand: :class:`booleano.nodes.constants.Operand`
         :raises booleano.exc.InvalidOperationError: If the master operand
             between ``left_operand`` or ``right_operand`` doesn't support
             equality operations.

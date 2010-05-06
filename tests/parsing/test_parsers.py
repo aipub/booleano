@@ -27,7 +27,7 @@ from booleano.parser.scope import Namespace
 from booleano.parser.parsers import Parser
 from booleano.nodes.operations import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset)
-from booleano.nodes.operands import (String, Number, Set,
+from booleano.nodes.constants import (String, Number, Set,
     PlaceholderVariable, PlaceholderFunction)
 from booleano.parser.testutils import BaseGrammarTest
 from booleano.exc import ScopeError, BadExpressionError

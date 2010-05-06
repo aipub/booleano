@@ -26,7 +26,7 @@ from booleano.parser import (SymbolTable, Bind, Grammar, ParseManager,
                              EvaluableParseManager, ConvertibleParseManager)
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.nodes.operations import Equal, LessEqual
-from booleano.nodes.operands import String, Number, PlaceholderVariable
+from booleano.nodes.constants import String, Number, PlaceholderVariable
 from booleano.exc import GrammarError
 
 from tests.utils import LoggingHandlerFixture
