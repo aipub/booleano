@@ -28,8 +28,8 @@ from booleano.nodes.operations import (Operation, Not, And, Or, Xor, Equal,
 from booleano.nodes.operands import String, Number, Set, Variable
 from booleano.exc import InvalidOperationError
 
-from tests.utils.mock_operands import (TrafficLightVar, PedestriansCrossingRoad,
-                                       DriversAwaitingGreenLightVar, BoolVar)
+from tests.utils.mock_nodes import (TrafficLightVar, PedestriansCrossingRoad,
+                                    DriversAwaitingGreenLightVar, BoolVar)
 
 
 class TestOperation(object):

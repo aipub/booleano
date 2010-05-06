@@ -33,7 +33,7 @@ from booleano.parser.testutils import BaseGrammarTest
 from booleano.exc import ScopeError, BadExpressionError
 
 from tests.utils.mock_converters import StringConverter
-from tests.utils.mock_operands import (BoolVar, TrafficLightVar, 
+from tests.utils.mock_nodes import (BoolVar, TrafficLightVar, 
     PedestriansCrossingRoad, DriversAwaitingGreenLightVar, PermissiveFunction,
     TrafficViolationFunc)
 

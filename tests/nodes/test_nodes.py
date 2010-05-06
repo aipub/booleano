@@ -26,7 +26,7 @@ from booleano.exc import BadCallError, BadFunctionError
 from booleano.nodes import OperationNode, Function
 from booleano.nodes.datatypes import Datatype
 
-from tests.utils.mock_operands import BranchNode, LeafNode, PermissiveFunction
+from tests.utils.mock_nodes import BranchNode, LeafNode, PermissiveFunction
 
 
 #{ Tests for the base OperationNode class

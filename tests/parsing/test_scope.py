@@ -27,7 +27,7 @@ from booleano.nodes.operands import String, Number
 from booleano.exc import ScopeError
 
 from tests.utils import LoggingHandlerFixture
-from tests.utils.mock_operands import (TrafficLightVar, TrafficViolationFunc,
+from tests.utils.mock_nodes import (TrafficLightVar, TrafficViolationFunc,
     BoolVar)
 
 

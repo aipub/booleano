@@ -28,7 +28,7 @@ from booleano.nodes.operands import String, PlaceholderVariable
 from booleano.exc import InvalidOperationError
 
 from tests.utils.mock_converters import AntiConverter
-from tests.utils.mock_operands import (TrafficLightVar,
+from tests.utils.mock_nodes import (TrafficLightVar,
     PedestriansCrossingRoad, BoolVar, DriversAwaitingGreenLightVar)
 
 

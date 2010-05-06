@@ -30,7 +30,7 @@ from booleano.nodes.operands import String, Number, PlaceholderVariable
 from booleano.exc import GrammarError
 
 from tests.utils import LoggingHandlerFixture
-from tests.utils.mock_operands import (BoolVar, TrafficLightVar,
+from tests.utils.mock_nodes import (BoolVar, TrafficLightVar,
     PedestriansCrossingRoad, DriversAwaitingGreenLightVar, PermissiveFunction,
     TrafficViolationFunc)
 
