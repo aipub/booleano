@@ -20,87 +20,11 @@ Tests for unbounded operands.
 
 """
 
-from nose.tools import eq_, ok_, assert_false, assert_raises, raises
+from nose.tools import eq_, ok_, assert_false
 
-from booleano.exc import InvalidOperationError, BadOperandError
+from booleano.exc import InvalidOperationError
 from booleano.nodes.datatypes import NumberType, SetType, StringType
 from booleano.nodes.operands import Constant, String, Number, Set
-
-
-#{ Variables
-
-
-class TestVariable(object):
-    """Tests for variable operands."""
-    
-    def test_node_type(self):
-        """Variables are leaf nodes."""
-        var = BoolVar()
-        ok_(var.is_leaf())
-        assert_false(var.is_branch())
-    
-    def test_checking_supported_operations(self):
-        class GreetingVariable(Variable):
-            operations = set(["equality"])
-            
-            def to_python(self, context):
-                pass
-            
-            def equals(self, value, context):
-                pass
-    
-    @raises(BadOperandError)
-    def test_checking_unsupported_operations(self):
-        class GreetingVariable(Variable):
-            operations = set(["equality"])
-            
-            def to_python(self, context):
-                pass
-    
-    def test_checking_logical_support(self):
-        class GreetingVariable(Variable):
-            operations = set(["equality"])
-            def to_python(self, context):
-                pass
-            def equals(self, value, context):
-                pass
-        
-        var1 = BoolVar()
-        var2 = GreetingVariable()
-        # Checking logical support:
-        var1.check_logical_support()
-        assert_raises(InvalidOperationError, var2.check_logical_support)
-    
-    def test_equivalence(self):
-        """Two variables are equivalent if they share the same class."""
-        var1 = TrafficLightVar()
-        var2 = TrafficLightVar()
-        var3 = BoolVar()
-        
-        var1.check_equivalence(var2)
-        var2.check_equivalence(var1)
-        
-        assert_raises(AssertionError, var1.check_equivalence, var3)
-        assert_raises(AssertionError, var2.check_equivalence, var3)
-        assert_raises(AssertionError, var3.check_equivalence, var1)
-        assert_raises(AssertionError, var3.check_equivalence, var1)
-        
-        ok_(var1 == var2)
-        ok_(var2 == var1)
-        ok_(var1 != var3)
-        ok_(var2 != var3)
-        ok_(var3 != var1)
-        ok_(var3 != var2)
-    
-    def test_string_representation(self):
-        var = TrafficLightVar()
-        as_unicode = unicode(var)
-        eq_("Anonymous variable [TrafficLightVar]", as_unicode)
-        eq_(str(var), as_unicode)
-    
-    def test_representation(self):
-        var = TrafficLightVar()
-        eq_(repr(var), "<Anonymous variable [TrafficLightVar]>")
 
 
 #{ Constants

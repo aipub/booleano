@@ -49,7 +49,6 @@ Built-in operations.
 """
 
 from booleano.nodes import OperationNode
-from booleano.nodes.operands import Variable
 
 __all__ = ("Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan",
            "GreaterThan", "LessEqual", "GreaterEqual", "BelongsTo", "IsSubset")

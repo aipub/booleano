@@ -25,11 +25,11 @@ from nose.tools import eq_, ok_, assert_false, assert_raises, raises
 from booleano.nodes.operations import (Operation, Not, And, Or, Xor, Equal,
     NotEqual, LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo,
     IsSubset)
-from booleano.nodes.operands import String, Number, Set, Variable
+from booleano.nodes.operands import String, Number, Set
 from booleano.exc import InvalidOperationError
 
-from tests.utils.mock_nodes import (TrafficLightVar, PedestriansCrossingRoad,
-                                    DriversAwaitingGreenLightVar, BoolVar)
+from tests.utils.mock_nodes import (BoolVar, DriversAwaitingGreenLightVar,
+    NumVar, PedestriansCrossingRoad, TrafficLightVar)
 
 
 class TestOperation(object):
@@ -902,30 +902,3 @@ class TestIsSubset(object):
         }
         assert_false(operation(context))
 
-
-#{ Mock objects
-
-
-class NumVar(Variable):
-    """
-    Mock variable which represents a numeric value stored in a context item
-    called ``num``.
-    
-    """
-    
-    operations = set(["equality", "inequality"])
-    
-    def to_python(self, context):
-        return context['num']
-    
-    def equals(self, value, context):
-        return context['num'] == value
-    
-    def less_than(self, value, context):
-        return context['num'] < value
-    
-    def greater_than(self, value, context):
-        return context['num'] > value
-
-
-#}

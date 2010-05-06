@@ -22,13 +22,14 @@ Mock operation nodes.
 
 from booleano.exc import BadCallError
 from booleano.nodes import Function, OperationNode
-from booleano.nodes.datatypes import BooleanType, SetType, StringType
+from booleano.nodes.datatypes import (BooleanType, NumberType, SetType,
+                                      StringType)
 from booleano.nodes.operands import String
 
 
 __all__ = ["BranchNode", "BoolVar", "DriversAwaitingGreenLightVar", "LeafNode",
-           "PedestriansCrossingRoad", "PermissiveFunction", "TrafficLightVar",
-           "TrafficViolationFunc", "VariableSet"]
+           "NumVar", "PedestriansCrossingRoad", "PermissiveFunction",
+           "TrafficLightVar", "TrafficViolationFunc", "VariableSet"]
 
 
 class MockNodeBase(OperationNode):
@@ -68,6 +69,8 @@ class BoolVar(OperationNode, BooleanType):
     
     """
     
+    is_leaf = True
+    
     def __init__(self):
         self.evaluated = False
         super(BoolVar, self).__init__()
@@ -76,6 +79,23 @@ class BoolVar(OperationNode, BooleanType):
         """Return the value of the ``bool`` context item"""
         self.evaluated = True
         return context['bool']
+    
+    def __eq__(self, other):
+        return super(BoolVar, self).__eq__(other)
+    
+    def __repr__(self):
+        return "bool"
+
+
+class NumVar(OperationNode, NumberType):
+    """
+    Mock variable which represents a numeric value stored in a context item
+    called ``num``.
+    
+    """
+    
+    def get_as_number(self, context):
+        return context['num']
 
 
 class TrafficLightVar(OperationNode, BooleanType, StringType):
