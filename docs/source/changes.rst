@@ -10,6 +10,10 @@ Version 1.0 Alpha 2 (unreleased)
   moved to :mod:`booleano.nodes.placeholders`.
 - Functions are no longer operands. Now they are just nodes. The base class has
   been moved to :class:`booleano.nodes.Function`.
+- The base class for developer defined variables,
+  :class:`booleano.nodes.operands.classes.Variable`, is gone as well as
+  the entire module. `Bug #569188
+  <https://bugs.launchpad.net/booleano/+bug/569188>`_.
 
 - Changed licensing terms:
 
