@@ -53,7 +53,7 @@ setup(name="booleano",
       packages=find_packages("src"),
       zip_safe=False,
       tests_require = ["coverage >= 3.0", "nose >= 0.11.0"],
-      install_requires=["pyparsing >= 1.5.2; < 2.0"],
+      install_requires=["pyparsing >= 1.5.2, < 2.0"],
       test_suite="nose.collector",
       )
 
