@@ -123,7 +123,10 @@ class StringType(Datatype):
         pass
 
 
-class SetType(NumberType):
+# It's tempting to make sets a kind of numbers, so that inequality operations
+# work out-of-the-box, but sometimes it may not be the right thing. It's best
+# to leave it up to the user.
+class SetType(Datatype):
     """
     Interface for sets.
     
