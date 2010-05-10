@@ -57,18 +57,7 @@ class BadCallError(InvalidOperationError):
     pass
 
 
-class BadOperandError(BooleanoException):
-    """
-    Exception raised when an operand is defined incorrectly.
-    
-    Because it's aimed at developers, its message doesn't have to be
-    translatable.
-    
-    """
-    pass
-
-
-class BadFunctionError(BadOperandError):
+class BadFunctionError(BooleanoException):
     """
     Exception raised when a function is defined incorrectly.
     
