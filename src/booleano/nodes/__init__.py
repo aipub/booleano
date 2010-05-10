@@ -104,15 +104,19 @@ class _FunctionMeta(Datatype.__metaclass__, OperationNode.__metaclass__):
         is an operand.
         
         """
+        super(_FunctionMeta, cls).__init__(name, bases, ns)
+        
         # A few short-cuts:
-        req_args = ns.get("required_arguments", cls.required_arguments)
-        opt_args = ns.get("optional_arguments", cls.optional_arguments)
+        req_args = cls.required_arguments
+        opt_args = cls.optional_arguments
         rargs_set = set(req_args)
         oargs_set = set(opt_args.keys())
+        
         # Checking that are no duplicate entries:
         if len(rargs_set) != len(req_args) or rargs_set & oargs_set:
             raise BadFunctionError('Function "%s" has duplicate arguments'
                                    % name)
+        
         # Checking that the default values for the optional arguments are all
         # operands:
         for (key, value) in opt_args.items():
@@ -120,12 +124,20 @@ class _FunctionMeta(Datatype.__metaclass__, OperationNode.__metaclass__):
                 raise BadFunctionError('Default value for argument "%s" in '
                                        'function %s is not a operation node' %
                                        (key, name))
+        
         # Merging all the arguments into a single list for convenience:
         cls.all_args = tuple(rargs_set | oargs_set)
+        
+        # Checking that the argument datatypes are within the domain of the
+        # arguments:
+        unknown_arg_types = set(cls.argument_types.keys()) - set(cls.all_args)
+        if unknown_arg_types:
+            raise BadFunctionError("Function %r defined the datatypes for the "
+                                   "following unknown arguments: %s" %
+                                   (name, tuple(unknown_arg_types)))
+        
         # Finding the arity:
         cls.arity = len(cls.all_args)
-        # Calling the parent constructor:
-        super(_FunctionMeta, cls).__init__(name, bases, ns)
 
 
 class Function(OperationNode):
@@ -199,6 +211,17 @@ class Function(OperationNode):
     
     """
     
+    argument_types = {}
+    """
+    The Booleano dadatypes each argument must implement.
+    
+    :type: :class:`dict`
+    
+    This is a dictionary whose keys are the argument names and the items
+    are their respective expected datatype.
+    
+    """
+    
     arity = 0
     """
     The arity of the function (i.e., the sum of the amount of the required
@@ -255,16 +278,13 @@ class Function(OperationNode):
         :raises booleano.exc.BadCallError: If at least one of the arguments are
             incorrect.
         
-        **This method must be overridden in subclasses**.
-        
-        The arguments dictionary will be available in the :attr:`arguments`
-        attribute. If any of them is wrong, this method must raise a
-        :class:`BadCallError` exception.
-        
         """
-        raise NotImplementedError("Functions must validate the arguments")
+        for (argument_name, expected_type) in self.argument_types.items():
+            argument = self.arguments[argument_name]
+            if not isinstance(argument, expected_type):
+                raise BadCallError("Argument %r does not implement the %s "
+                                   "datatype" % (argument, expected_type))
     
-    @abstractmethod
     def __eq__(self, other):
         """
         Make sure function ``node`` and this function are equivalent.

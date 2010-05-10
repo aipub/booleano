@@ -24,9 +24,10 @@ from nose.tools import assert_false, assert_raises, eq_, ok_, raises
 
 from booleano.exc import BadCallError, BadFunctionError
 from booleano.nodes import OperationNode, Function
-from booleano.nodes.datatypes import Datatype
+from booleano.nodes.datatypes import Datatype, BooleanType, NumberType
 
-from tests.utils.mock_nodes import BranchNode, LeafNode, PermissiveFunction
+from tests.utils.mock_nodes import (BoolVar, BranchNode, LeafNode, NumVar,
+    PermissiveFunction)
 
 
 #{ Tests for the base OperationNode class
@@ -77,27 +78,24 @@ class TestFunctionMeta(object):
         """
         # Nullary function:
         class NullaryFunction(Function):
-            bypass_operation_check = True
+            pass
         eq_(NullaryFunction.arity, 0)
         eq_(NullaryFunction.all_args, ())
         
         # Unary function:
         class UnaryFunction(Function):
-            bypass_operation_check = True
             required_arguments = ("arg1", )
         eq_(UnaryFunction.arity, 1)
         eq_(UnaryFunction.all_args, ("arg1", ))
         
         # Unary function, with its argument optional:
         class OptionalUnaryFunction(Function):
-            bypass_operation_check = True
             optional_arguments = {'oarg1': LeafNode()}
         eq_(OptionalUnaryFunction.arity, 1)
         eq_(OptionalUnaryFunction.all_args, ("oarg1", ))
         
         # Binary function:
         class BinaryFunction(Function):
-            bypass_operation_check = True
             required_arguments = ("arg1", )
             optional_arguments = {'oarg1': LeafNode()}
         eq_(BinaryFunction.arity, 2)
@@ -120,8 +118,31 @@ class TestFunctionMeta(object):
     def test_non_node_default_arguments(self):
         """Default values for the optional arguments must be operation nodes."""
         class FunctionWithNonOperands(Function):
-            bypass_operation_check = True
             optional_arguments = {'arg': 1}
+    
+    def test_argument_types_for_all_known_arguments(self):
+        """Argument types can only be set for known arguments"""
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = {'arg1': BooleanType, 'arg2': NumberType}
+    
+    def test_argument_types_for_some_known_arguments(self):
+        """Argument types may be set for some (not all) known arguments"""
+        class StronglyTypedFunction1(Function):
+            required_arguments = ("arg1", )
+            argument_types = {'arg1': BooleanType}
+            
+        class StronglyTypedFunction2(Function):
+            required_arguments = ("arg1", )
+            optional_arguments = {'arg2': BoolVar()}
+            argument_types = {'arg1': BooleanType, 'arg2': BooleanType}
+    
+    @raises(BadFunctionError)
+    def test_argument_types_for_unknown_arguments(self):
+        """Argument types may not be set for unknown arguments"""
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = {'arg3': BooleanType}
 
 
 class TestFunction(object):
@@ -191,17 +212,30 @@ class TestFunction(object):
         assert_raises(BadCallError, PermissiveFunction, 2)
         assert_raises(BadCallError, PermissiveFunction, Datatype())
     
-    def test_no_argument_validation_by_default(self):
-        """
-        Arguments must be explicitly validated by the function.
+    def test_valid_argument_type(self):
+        """Only arguments that implement the expected datatype are accepted."""
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = {'arg1': BooleanType, 'arg2': NumberType}
         
-        This is, their .check_arguments() method must be overriden.
+        StronglyTypedFunction(BoolVar(), NumVar())
+        # Now arguments with the wrong types:
+        assert_raises(BadCallError, StronglyTypedFunction, BoolVar(), BoolVar())
+        assert_raises(BadCallError, StronglyTypedFunction, NumVar(), NumVar())
+        assert_raises(BadCallError, StronglyTypedFunction, NumVar(), BoolVar())
+    
+    def test_no_expected_datatype(self):
+        """
+        All the arguments are accepted if there's no expected type for them.
         
         """
-        class MockFunction(Function):
-            bypass_operation_check = True
-            __eq__ = lambda other: False
-        assert_raises(NotImplementedError, MockFunction)
+        class WeaklyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+        
+        WeaklyTypedFunction(BoolVar(), NumVar())
+        WeaklyTypedFunction(BoolVar(), BoolVar())
+        WeaklyTypedFunction(NumVar(), NumVar())
+        WeaklyTypedFunction(NumVar(), BoolVar())
     
     def test_equivalence(self):
         """
@@ -210,7 +244,6 @@ class TestFunction(object):
         
         """
         class FooFunction(Function):
-            bypass_operation_check = True
             required_arguments = ("abc", )
             optional_arguments = {"xyz": LeafNode("123")}
             
