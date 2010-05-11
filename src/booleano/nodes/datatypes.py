@@ -24,6 +24,7 @@ Booleano and the actual Python values.
 """
 
 from abc import ABCMeta, abstractmethod
+from inspect import getmro
 
 __all__ = ["Datatype", "BooleanType", "NumberType", "StringType", "SetType"]
 
@@ -43,7 +44,7 @@ class _DatatypeMeta(ABCMeta):
         if "__booleano_base_types__" not in ns:
             # Calculating the Booleano datatypes among the base classes:
             base_types = []
-            for base_type in datatype.__mro__[1:]:
+            for base_type in getmro(datatype)[1:]:
                 if issubclass(base_type, Datatype) and base_type != Datatype:
                     base_types.append(base_type)
             datatype.__booleano_base_types__ = base_types
