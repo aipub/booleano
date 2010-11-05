@@ -26,8 +26,9 @@ from booleano.exc import BadCallError, BadFunctionError
 from booleano.nodes import OperationNode, Function
 from booleano.nodes.datatypes import Datatype, BooleanType, NumberType
 
+from tests.nodes import assert_node_equivalence
 from tests.utils.mock_nodes import (BoolVar, BranchNode, LeafNode, NumVar,
-    PermissiveFunction)
+    PermissiveFunction, TrafficLightVar)
 
 
 #{ Tests for the base OperationNode class
@@ -120,11 +121,19 @@ class TestFunctionMeta(object):
         class FunctionWithNonOperands(Function):
             optional_arguments = {'arg': 1}
     
+    #{ Argument types
+    
     def test_argument_types_for_all_known_arguments(self):
         """Argument types can only be set for known arguments"""
         class StronglyTypedFunction(Function):
             required_arguments = ("arg1", "arg2")
             argument_types = {'arg1': BooleanType, 'arg2': NumberType}
+    
+    def test_homogeneous_argument_types(self):
+        """The argument types can be set once if they're all the same"""
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = BooleanType
     
     def test_argument_types_for_some_known_arguments(self):
         """Argument types may be set for some (not all) known arguments"""
@@ -143,6 +152,41 @@ class TestFunctionMeta(object):
         class StronglyTypedFunction(Function):
             required_arguments = ("arg1", "arg2")
             argument_types = {'arg3': BooleanType}
+    
+    @raises(BadFunctionError)
+    def test_invalid_argument_types(self):
+        """Argument types must be either a mapping or a datatype"""
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = object()
+    
+    #{ Commutativity
+    
+    def test_non_commutative_by_default(self):
+        """Functions are non-commutative by default."""
+        class MyFunction(Function):
+            pass
+        
+        assert_false(MyFunction.is_commutative)
+    
+    @raises(BadFunctionError)
+    def test_no_argument_types_in_commutative_functions(self):
+        """The types of the arguments in a commutative function must be set."""
+        class MyFunction(Function):
+            is_commutative = True
+    
+    @raises(BadFunctionError)
+    def test_different_argument_types_in_commutative_functions(self):
+        """
+        The types of the arguments in a commutative function must be the same.
+        
+        """
+        class MyFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = {'arg1': BooleanType, 'arg2': NumberType}
+            is_commutative = True
+    
+    #}
 
 
 class TestFunction(object):
@@ -203,7 +247,7 @@ class TestFunction(object):
             LeafNode(7),
             LeafNode(8),
             LeafNode(9),
-        )
+            )
     
     def test_constructor_accepts_operands(self):
         """Only operands are valid function arguments."""
@@ -224,6 +268,22 @@ class TestFunction(object):
         assert_raises(BadCallError, StronglyTypedFunction, NumVar(), NumVar())
         assert_raises(BadCallError, StronglyTypedFunction, NumVar(), BoolVar())
     
+    def test_homogeneouos_argument_types(self):
+        """
+        The argument types can be set just once if it's the same for all the
+        arguments.
+        
+        """
+        class StronglyTypedFunction(Function):
+            required_arguments = ("arg1", "arg2")
+            argument_types = BooleanType
+        
+        StronglyTypedFunction(BoolVar(), BoolVar())
+        # Now arguments with the wrong types:
+        assert_raises(BadCallError, StronglyTypedFunction, NumVar(), BoolVar())
+        assert_raises(BadCallError, StronglyTypedFunction, BoolVar(), NumVar())
+        assert_raises(BadCallError, StronglyTypedFunction, NumVar(), NumVar())
+    
     def test_no_expected_datatype(self):
         """
         All the arguments are accepted if there's no expected type for them.
@@ -239,51 +299,34 @@ class TestFunction(object):
     
     def test_equivalence(self):
         """
-        Two functions are equivalent not only if they share the same class,
+        Two function calls are equivalent not only if they share the same class,
         but also if their arguments are equivalent.
         
         """
         class FooFunction(Function):
             required_arguments = ("abc", )
             optional_arguments = {"xyz": LeafNode("123")}
-            
-            def __eq__(self, other):
-                return super(FooFunction, self).__eq__(other)
-            
-            def check_arguments(self):
-                pass
+        
+        class CommutativeFunction(Function):
+            required_arguments = range(2)
+            argument_types = BooleanType
+            is_commutative = True
         
         func1 = FooFunction(LeafNode("whatever"))
         func2 = FooFunction(LeafNode("whatever"))
         func3 = PermissiveFunction(BranchNode("baz"))
         func4 = PermissiveFunction(LeafNode("foo"))
         func5 = FooFunction(LeafNode("something"))
+        func6 = CommutativeFunction(BoolVar(), TrafficLightVar())
+        func7 = CommutativeFunction(TrafficLightVar(), BoolVar())
         
-        ok_(func1 == func1)
-        ok_(func1 == func2)
-        assert_false(func1 == func3)
-        assert_false(func1 == func4)
-        assert_false(func1 == func5)
-        ok_(func2 == func1)
-        ok_(func2 == func2)
-        assert_false(func2 == func3)
-        assert_false(func2 == func4)
-        assert_false(func2 == func5)
-        assert_false(func3 == func1)
-        assert_false(func3 == func2)
-        ok_(func3 == func3)
-        assert_false(func3 == func4)
-        assert_false(func3 == func5)
-        assert_false(func4 == func1)
-        assert_false(func4 == func2)
-        assert_false(func4 == func3)
-        ok_(func4 == func4)
-        assert_false(func4 == func5)
-        assert_false(func5 == func1)
-        assert_false(func5 == func2)
-        assert_false(func5 == func3)
-        assert_false(func5 == func4)
-        ok_(func5 == func5)
+        assert_node_equivalence(
+            [func1, func2],
+            [func3],
+            [func4],
+            [func5],
+            [func6, func7],
+            )
     
     def test_representation(self):
         func = PermissiveFunction(LeafNode("foo"), BranchNode(u"fú"))

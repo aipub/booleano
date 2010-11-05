@@ -21,12 +21,29 @@ Booleano datatypes (not to be confused with *Python datatypes*).
 They are an interface between the value users intend to represent through
 Booleano and the actual Python values.
 
+TODO: Rename "__booleano_base_types__" to "__booleano_supertypes__".
+
 """
 
 from abc import ABCMeta, abstractmethod
 from inspect import getmro
 
-__all__ = ["Datatype", "BooleanType", "NumberType", "StringType", "SetType"]
+
+__all__ = ["get_supertype", "Datatype", "BooleanType", "NumberType",
+           "StringType", "SetType"]
+
+
+# TODO:
+def get_supertype(*datatypes):
+    """
+    Return the supertype of the ``datatypes``.
+    
+    :return: The supertype class, or ``None`` if there's no common ancestor
+        among the ``datatypes`` or there's more than one supertype.
+    :rtype: :class:`Datatype`
+    
+    """
+    pass
 
 
 class _DatatypeMeta(ABCMeta):
@@ -41,8 +58,8 @@ class _DatatypeMeta(ABCMeta):
     def __new__(cls, name, bases, ns):
         datatype = super(_DatatypeMeta, cls).__new__(cls, name, bases, ns)
         
+        # Calculating the Booleano datatypes among the base classes:
         if "__booleano_base_types__" not in ns:
-            # Calculating the Booleano datatypes among the base classes:
             base_types = []
             for base_type in getmro(datatype)[1:]:
                 if issubclass(base_type, Datatype) and base_type != Datatype:

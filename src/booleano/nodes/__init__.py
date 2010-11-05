@@ -23,6 +23,7 @@ They represent the parse tree when a boolean expression has been parsed.
 """
 
 from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import Mapping
 
 from booleano.nodes.datatypes import Datatype
 from booleano.exc import BadCallError, BadFunctionError
@@ -127,17 +128,25 @@ class _FunctionMeta(Datatype.__metaclass__, OperationNode.__metaclass__):
         
         # Merging all the arguments into a single list for convenience:
         cls.all_args = tuple(rargs_set | oargs_set)
+        cls.arity = len(cls.all_args)
         
         # Checking that the argument datatypes are within the domain of the
         # arguments:
-        unknown_arg_types = set(cls.argument_types.keys()) - set(cls.all_args)
-        if unknown_arg_types:
-            raise BadFunctionError("Function %r defined the datatypes for the "
-                                   "following unknown arguments: %s" %
-                                   (name, tuple(unknown_arg_types)))
+        if isinstance(cls.argument_types, Mapping):
+            unknown_args = set(cls.argument_types.keys()) - set(cls.all_args)
+            if unknown_args:
+                raise BadFunctionError("Function %r defined the datatypes for "
+                                       "the following unknown arguments: %s" %
+                                       (name, tuple(unknown_args)))
+            
+            if cls.is_commutative and len(set(cls.argument_types.values())) != 1:
+                raise BadFunctionError("Function %r is commutative but its "
+                                       "argument types are heterogeneous or "
+                                       "unknown" % name)
         
-        # Finding the arity:
-        cls.arity = len(cls.all_args)
+        elif not issubclass(cls.argument_types, Datatype):
+            raise BadFunctionError("Invalid argument types for function %r: "
+                                   "%r" % (name, cls.argument_types))
 
 
 class Function(OperationNode):
@@ -213,12 +222,24 @@ class Function(OperationNode):
     
     argument_types = {}
     """
-    The Booleano dadatypes each argument must implement.
+    The Booleano datatypes each argument must implement.
     
     :type: :class:`dict`
     
     This is a dictionary whose keys are the argument names and the items
     are their respective expected datatype.
+    
+    """
+    
+    is_commutative = False
+    """
+    Whether the order of the arguments change the result of the function.
+    
+    :type: :class:`bool`
+    
+    If ``True``, the order of the arguments *never* affects the result (i.e.,
+    the function is *commutative*). ``False`` means the order of the arguments
+    *may* change the result and therefore the function is *non-commutative*.
     
     """
     
@@ -229,7 +250,7 @@ class Function(OperationNode):
     
     :type: int
     
-    This is set automatically when the class is defined.
+    **This is set automatically when the class is defined.**
     
     """
     
@@ -239,7 +260,7 @@ class Function(OperationNode):
     
     :type: tuple
     
-    This is set automatically when the class is defined.
+    **This is set automatically when the class is defined.**
     
     """
     
@@ -252,22 +273,26 @@ class Function(OperationNode):
         
         """
         super(Function, self).__init__()
+        
         # Checking the amount of arguments received:
         argn = len(arguments)
         if argn < len(self.required_arguments):
             raise BadCallError("Too few arguments")
         if argn > self.arity:
             raise BadCallError("Too many arguments")
+        
         # Checking that all the arguments are operands:
         for argument in arguments:
             if not isinstance(argument, OperationNode):
                 raise BadCallError("Argument %r is not an operation node" %
                                    argument)
+        
         # Storing their values:
         self.arguments = self.optional_arguments.copy()
         for arg_pos in range(len(arguments)):
             arg_name = self.all_args[arg_pos]
             self.arguments[arg_name] = arguments[arg_pos]
+        
         # Finally, check that all the parameters are correct:
         self.check_arguments()
     
@@ -279,33 +304,40 @@ class Function(OperationNode):
             incorrect.
         
         """
-        for (argument_name, expected_type) in self.argument_types.items():
-            argument = self.arguments[argument_name]
-            if not isinstance(argument, expected_type):
-                raise BadCallError("Argument %r does not implement the %s "
-                                   "datatype" % (argument, expected_type))
+        if isinstance(self.argument_types, Mapping):
+            # The argument types were set individually:
+            for (argument_name, expected_type) in self.argument_types.items():
+                argument = self.arguments[argument_name]
+                self.__check_argument_type(argument, expected_type)
+        
+        else:
+            # All the arguments must implement the same datatype:
+            for argument in self.arguments.values():
+                self.__check_argument_type(argument, self.argument_types)
+    
+    def __check_argument_type(self, argument, expected_type):
+        if not isinstance(argument, expected_type):
+            raise BadCallError("Argument %r does not implement the %s "
+                               "datatype" % (argument, expected_type))
     
     def __eq__(self, other):
-        """
-        Make sure function ``node`` and this function are equivalent.
-        
-        :param node: The other function which may be equivalent to this one.
-        :type node: Function
-        :raises AssertionError: If ``node`` is not a function or if it's a
-            function but doesn't have the same arguments as this one OR doesn't
-            have the same names as this one.
-        
-        """
         equals = False
+        
+        # If the functions are the same, check whether their arguments are the
+        # same as well:
         if super(Function, self).__eq__(other):
-            equals = other.arguments == self.arguments
+            # In commutative functions, the order of the arguments don't affect
+            # the result:
+            if self.is_commutative:
+                other_arguments = other.arguments.values()
+                self_arguments = self.arguments.values()
+                equals = set(other_arguments) == set(self_arguments)
+            else:
+                equals = other.arguments == self.arguments
+        
         return equals
     
     def __repr__(self):
-        """
-        Represent this function, including its arguments.
-        
-        """
         args = ['%s=%s' % (k, repr(v)) for (k, v) in self.arguments.items()]
         args = ", ".join(args)
         

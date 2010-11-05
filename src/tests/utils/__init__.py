@@ -23,8 +23,7 @@ Utilities for Booleano's test suite.
 from logging import Handler, getLogger
 
 
-
-#{ Miscellaneous stuff
+__all__ = ["MockLoggingHandler", "LoggingHandlerFixture"]
 
 
 class MockLoggingHandler(Handler):

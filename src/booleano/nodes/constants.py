@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 """
-Booleano operands.
+Booleano constants.
 
 """
 
@@ -24,21 +24,14 @@ from booleano.exc import InvalidOperationError
 from booleano.nodes import OperationNode
 from booleano.nodes.datatypes import NumberType, SetType, StringType
 
-__all__ = ["String", "Number", "Set"]
+
+__all__ = ["Constant", "String", "Number", "Set"]
 
 
-class Operand(OperationNode):
-    """
-    Base class for operands.
-    
-    """
-    pass
+#{ Built-in constants
 
 
-#{ Built-in operands
-
-
-class Constant(Operand):
+class Constant(OperationNode):
     """
     Base class for constant operands.
     

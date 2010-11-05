@@ -94,8 +94,16 @@ class NumVar(OperationNode, NumberType):
     
     """
     
+    is_leaf = True
+    
     def get_as_number(self, context):
         return context['num']
+    
+    def __eq__(self, other):
+        return super(NumVar, self).__eq__(other)
+    
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 class TrafficLightVar(OperationNode, BooleanType, StringType):
@@ -103,6 +111,8 @@ class TrafficLightVar(OperationNode, BooleanType, StringType):
     Variable that represents a traffic light.
     
     """
+    
+    is_leaf = True
     
     valid_colors = ("red", "amber", "green")
     
@@ -113,9 +123,15 @@ class TrafficLightVar(OperationNode, BooleanType, StringType):
     def get_as_boolean(self, context):
         """Is the traffic light working?"""
         return bool(context['traffic_light'])
+    
+    def __eq__(self, other):
+        return super(TrafficLightVar, self).__eq__(other)
+    
+    def __repr__(self):
+        return "TrafficLightVar"
 
 
-class VariableSet(OperationNode, BooleanType, SetType):
+class VariableSet(OperationNode, BooleanType, NumberType, SetType):
     """
     Base class for a variable which finds its value in one of the context.
     
@@ -124,15 +140,23 @@ class VariableSet(OperationNode, BooleanType, SetType):
     
     """
     
+    is_leaf = False
+    
     def get_as_boolean(self, context):
         return bool(context[self.people_set])
     
-    def get_as_number(self, value, context):
+    def get_as_number(self, context):
         return len(context[self.people_set])
     
     def get_as_set(self, context):
         set_ = set(context[self.people_set])
         return set_
+    
+    def __eq__(self, other):
+        return super(VariableSet, self).__eq__(other)
+    
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 class PedestriansCrossingRoad(VariableSet):

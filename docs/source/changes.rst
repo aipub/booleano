@@ -11,7 +11,11 @@ Version 1.0 Alpha 2 (unreleased)
 - Placeholders are no longer operands. Now they are just nodes. They've been
   moved to :mod:`booleano.nodes.placeholders`.
 - Functions are no longer operands. Now they are just nodes. The base class has
-  been moved to :class:`booleano.nodes.Function`.
+  been moved to :class:`booleano.nodes.Function` and it's the base
+  class of all the operations.
+- The base class for operations, :class:`booleano.nodes.operations.Operation`,
+  is gone. Now operations are sub-classes of
+  :class:`booleano.nodes.Function`.
 - The base class for developer defined variables,
   :class:`booleano.nodes.operands.classes.Variable`, is gone as well as
   the entire module. `Bug #569188
