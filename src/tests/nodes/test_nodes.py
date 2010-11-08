@@ -32,6 +32,7 @@ from tests.utils.mock_nodes import (BoolVar, BranchNode, LeafNode, NumVar,
 
 
 #{ Tests for the base OperationNode class
+# TODO: Move individual test functions into a TestCase.
 
 
 def test_abstractness():
@@ -63,6 +64,12 @@ def test_equivalent_nodes():
     node2 = LeafNode()
     ok_(node1 == node2)
     ok_(node2 == node1)
+
+
+def test_hash():
+    """By default, the hash of a node is the hash of its class."""
+    node = LeafNode()
+    eq_(hash(node), hash(LeafNode))
 
 
 #{ Tests for the functions
@@ -334,6 +341,23 @@ class TestFunction(object):
                    "arg0=LeafNode('foo'), oarg0=BranchNode(u'f\\xfa'), " \
                    "oarg1=BranchNode('bar')>"
         eq_(repr(func), expected)
+    
+    def test_hash_nullary(self):
+        """The hash of a nullary function is the hash of the function class."""
+        func = TrafficLightVar()
+        eq_(hash(func), hash(TrafficLightVar))
+    
+    def test_hash_with_arguments(self):
+        """The hash of a function also uses the hash of the arguments."""
+        arg1 = LeafNode("foo")
+        arg2 = BranchNode(u"fú")
+        arg3 = LeafNode("bar")
+        func = PermissiveFunction(arg1, arg2, arg3)
+        
+        args_hash = hash(arg1) + hash(arg2) + hash(arg3)
+        expected_hash = hash(PermissiveFunction) + args_hash
+        
+        eq_(hash(func), expected_hash)
 
 
 #}

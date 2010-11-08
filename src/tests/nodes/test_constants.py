@@ -53,6 +53,15 @@ class TestConstant(object):
         ok_(constant3 == constant1)
         assert_false(constant3 == constant2)
         ok_(constant3 == constant3)
+    
+    def test_hash(self):
+        """
+        The hash of a constant is the hash of the Python value it represents.
+        
+        """
+        value = object()
+        constant = MockConstant(value)
+        eq_(hash(value), hash(constant))
 
 
 class TestString(object):

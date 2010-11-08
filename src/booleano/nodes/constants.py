@@ -63,6 +63,11 @@ class Constant(OperationNode):
         if super(Constant, self).__eq__(other):
             equivalent = other._constant_value == self._constant_value
         return equivalent
+    
+    def __hash__(self):
+        """Return the hash of the value represented."""
+        hash_ = hash(self._constant_value)
+        return hash_
 
 
 class String(Constant, StringType):

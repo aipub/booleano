@@ -24,6 +24,7 @@ They represent the parse tree when a boolean expression has been parsed.
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import Mapping
+from sys import maxint
 
 from booleano.nodes.datatypes import Datatype
 from booleano.exc import BadCallError, BadFunctionError
@@ -82,6 +83,11 @@ class OperationNode(object):
     @abstractmethod
     def __repr__(self):   #pragma: no cover
         pass
+    
+    def __hash__(self):
+        """Return the hash of the current class."""
+        hash_ = hash(self.__class__)
+        return hash_
 
 
 #{ Booleano functions
@@ -326,8 +332,8 @@ class Function(OperationNode):
         # If the functions are the same, check whether their arguments are the
         # same as well:
         if super(Function, self).__eq__(other):
-            # In commutative functions, the order of the arguments don't affect
-            # the result:
+            # In commutative functions, the order of the arguments doesn't
+            # affect the result:
             if self.is_commutative:
                 other_arguments = other.arguments.values()
                 self_arguments = self.arguments.values()
@@ -343,6 +349,15 @@ class Function(OperationNode):
         
         return "<Anonymous function call [%s] %s>" % (self.__class__.__name__,
                                                       args)
+    
+    def __hash__(self):
+        """Return the sum of the arguments' and function's hashes."""
+        class_hash = hash(self.__class__)
+        args_hash = sum(map(hash, self.arguments.values()))
+        
+        hash_ = (class_hash + args_hash) % maxint
+        
+        return hash_
 
 
 #}
