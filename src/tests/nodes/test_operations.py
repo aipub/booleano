@@ -91,9 +91,9 @@ class TestAnd(object):
         op5 = Or(DriversAwaitingGreenLightVar(), BoolVar())
         
         assert_node_equivalence(
-            [op1, op2],
-            [op3, op4],
-            [op5],
+            (op1, op2),
+            (op3, op4),
+            (op5, ),
             )
 
 
@@ -142,9 +142,9 @@ class TestOr(object):
         op5 = And(DriversAwaitingGreenLightVar(), BoolVar())
         
         assert_node_equivalence(
-            [op1, op2],
-            [op3, op4],
-            [op5],
+            (op1, op2),
+            (op3, op4),
+            (op5, ),
             )
 
 
@@ -180,9 +180,9 @@ class TestXor(object):
         op5 = Or(DriversAwaitingGreenLightVar(), BoolVar())
         
         assert_node_equivalence(
-            [op1, op2],
-            [op3, op4],
-            [op5],
+            (op1, op2),
+            (op3, op4),
+            (op5, ),
             )
 
 

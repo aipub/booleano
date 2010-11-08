@@ -328,11 +328,11 @@ class TestFunction(object):
         func7 = CommutativeFunction(TrafficLightVar(), BoolVar())
         
         assert_node_equivalence(
-            [func1, func2],
-            [func3],
-            [func4],
-            [func5],
-            [func6, func7],
+            (func1, func2),
+            (func3, ),
+            (func4, ),
+            (func5, ),
+            (func6, func7),
             )
     
     def test_representation(self):
