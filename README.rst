@@ -15,6 +15,8 @@ On the other hand, the library exposes a pythonic API for filters written
 in pure Python. These filters are particularly useful to build reusable
 conditions from objects provided by a third party library.
 
+This is fork of `https://code.launchpad.net/booleano`_. 
+
 Links
 -----
 
