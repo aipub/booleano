@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2009 by Gustavo Narea <http://gustavonarea.net/>.
+# Copyright (c) 2009-2010 by Gustavo Narea <http://gustavonarea.net/>.
+# 2012 Alexander Ponimaskin <ponimaskin@gmail.com>
 #
 # This file is part of Booleano <http://code.gustavonarea.net/booleano/>.
 #
@@ -15,16 +16,10 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# ABOVE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-# IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# Except as contained in this notice, the name(s) of the above copyright
-# holders shall not be used in advertising or otherwise to promote the sale,
-# use or other dealings in this Software without prior written authorization.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
+
+
 """
 Generic Pyparsing-based parser implementation.
 
@@ -39,10 +34,12 @@ from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
-    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number,
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number, Date
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
+
 from booleano.exc import BadExpressionError
 
+from PyICU import DateFormat, Locale, DateFormatSymbols
 
 __all__ = ("EvaluableParser", "ConvertibleParser")
 
@@ -58,7 +55,7 @@ class Parser(object):
     
     parse_tree_class = None
     
-    def __init__(self, grammar):
+    def __init__(self, grammar, locale='en_US'):
         """
         
         :param grammar: The grammar used by the parser.
@@ -67,6 +64,7 @@ class Parser(object):
         """
         self._parser = None
         self._grammar = grammar
+        self.locale = Locale.createFromName(locale)
     
     def __call__(self, expression):
         """
@@ -204,10 +202,58 @@ class Parser(object):
         function.setParseAction(self.make_function)
         
         operand << (function | variable | self.define_number() | \
-                    self.define_string() | set_)
+                    self.define_string() | self.define_date() | set_)
         
         return operand
     
+    def define_date(self):
+        """
+        Return the syntax defenition for date
+        """
+        days_zero_prefix = " ".join([("%02d" % x) for x in xrange(1, 10)])
+        days_no_prefix = " ".join([("%d" % x) for x in xrange(1, 32)])
+
+        #for en speaking users
+        day_en_short = oneOf("st nd rd th")
+        day = ((oneOf(days_zero_prefix) ^ oneOf(days_no_prefix) ).setResultsName("day")
+               + Optional(Suppress(day_en_short)) ).setName("day")
+        # months, in numbers
+        months_zero_prefix = oneOf(" ".join([("%02d" % x) for x in xrange(1, 10)]))
+        months_no_prefix = oneOf(" ".join([("%d" % x) for x in xrange(1, 13)]))
+        symbols = DateFormatSymbols(self.locale)
+        monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
+        monthdict.update(dict((m[1].replace('.',''), m[0]) \
+                                  for m in enumerate(symbols.getShortMonths(), 1)))
+        monthdict.update(dict((m[1], m[0]) \
+                                  for m in enumerate(symbols.getMonths(), 1)))
+
+        months_local_strings = oneOf(monthdict.keys(), caseless=True)
+
+        month_digits = (months_zero_prefix.setName("month_zp").setResultsName("month") |
+                        months_no_prefix.setName("month_np").setResultsName("month"))
+
+        year = Word(nums,min=2,max=4).setResultsName("year")
+
+        # choice of separators between date items; if two occur, they should match
+        sep_literals = oneOf(". - /") ^ White() #ws separator does not work
+        sec_lit = matchPreviousLiteral(sep_literals)
+
+        # optional comma
+        comma = Literal(",") | White()
+
+        # EBNF resulting
+        # mabe add aditional date formats
+        date_normal = day + Suppress(sep_literals) + month_digits + Suppress(sec_lit) + year
+        date_rev = year + Suppress(sep_literals) + month_digits + Suppress(sec_lit) + day
+        date_usa = month_digits + Suppress(sep_literals) + day + Suppress(sec_lit) + year
+        date_ws = day + months_local_strings.setResultsName("month") + year
+        date_us_comma =  months_local_strings.setResultsName("month") + day + Optional(comma) + year
+
+        # final BNF
+        date = date_normal ^ date_usa ^ date_rev ^ date_ws ^ date_us_comma
+        date.setParseAction(self.make_date)
+        return date
+
     def define_string(self):
         """
         Return the syntax definition for a string.
@@ -285,7 +331,10 @@ class Parser(object):
         return identifier
     
     #{ Pyparsing post-parse actions
-    
+    def make_date(self, tokens):
+        """Make a Date constant using the token passed."""
+        return Date(tokens)
+
     def make_string(self, tokens):
         """Make a String constant using the token passed."""
         return String(tokens[0])
