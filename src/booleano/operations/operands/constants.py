@@ -93,6 +93,36 @@ class Constant(Operand):
                u'Constants %s and %s represent different values' % (self,
                                                                     node)
 
+class Date(Constant, DateType):
+    """
+    Constant date.
+    
+    """
+    
+    is_leaf = True
+    
+    def __init__(self, tokens):
+        """
+        
+        :param string: The Python string to be represented by this Booleano
+            string.
+        :type string: :class:`basestring`
+        
+        ``string`` will be converted to :class:`unicode`, so it doesn't
+        have to be a :class:`basestring` initially.
+        
+        """
+        print tokens
+        dat = date(tokens[0], tokens[1],tokens[2])
+        super(Date, self).__init__(dat)
+    
+    def get_as_string(self, context):
+        return self._constant_value
+    
+    def __repr__(self):
+        return '<Date "%s">' % self._constant_value.encode("utf-8")
+
+
 
 class String(Constant):
     u"""
