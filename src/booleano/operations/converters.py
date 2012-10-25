@@ -32,7 +32,7 @@ evaluable ones).
 """
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,
-    String, Number, Set, PlaceholderVariable, PlaceholderFunction)
+    String, Date, Number, Set, PlaceholderVariable, PlaceholderFunction)
 from booleano.operations.operators import UnaryOperator
 from booleano.exc import ConversionError
 
@@ -65,6 +65,7 @@ class BaseConverter(object):
         # Operand converters:
         String: "convert_string",
         Number: "convert_number",
+        Date: "convert_date",
         Set: "convert_set",
         PlaceholderVariable: "convert_variable",
         PlaceholderFunction: "convert_function",

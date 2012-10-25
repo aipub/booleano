@@ -40,7 +40,7 @@ from booleano.exc import InvalidOperationError
 
 __all__ = (
     # Operands:
-    "String", "Number", "Set", "Variable", "Function", "PlaceholderVariable",
+    "String", "Number", "Set" "Date", "Variable", "Function", "PlaceholderVariable",
     "PlaceholderFunction",
     # Operators:
     "Not", "And", "Or", "Xor", "Equal", "NotEqual", "LessThan", "GreaterThan",
@@ -237,7 +237,7 @@ class OperationNode(object):
 
 # Importing the built-in operands and operators so they can be available from
 # this namespace:
-from booleano.operations.operands import (String, Number, Set, Variable,
+from booleano.operations.operands import (String, Number, Set, Variable, Date,
     Function, PlaceholderVariable, PlaceholderFunction, Operand)
 from booleano.operations.operators import (Not, And, Or, Xor, Equal, NotEqual,
     LessThan, GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset,

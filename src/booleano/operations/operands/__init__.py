@@ -34,7 +34,7 @@ Booleano operands.
 from booleano.operations import OPERATIONS, OperationNode
 from booleano.exc import InvalidOperationError, BadOperandError
 
-__all__ = ("String", "Number", "Set", "Variable", "Function",
+__all__ = ("String", "Number", "Date", "Set", "Variable", "Function",
            "PlaceholderVariable", "PlaceholderFunction")
 
 
@@ -237,7 +237,7 @@ class Operand(OperationNode):
 
 
 # Importing the built-in operands so they can be available from this namespace:
-from booleano.operations.operands.constants import String, Number, Set
+from booleano.operations.operands.constants import String, Number, Set, Date
 from booleano.operations.operands.classes import Variable, Function
 from booleano.operations.operands.placeholders import (PlaceholderVariable,
                                                        PlaceholderFunction)

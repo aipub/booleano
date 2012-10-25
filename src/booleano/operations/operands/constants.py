@@ -31,8 +31,9 @@ Constant operands.
 """
 from booleano.operations.operands import Operand
 from booleano.exc import InvalidOperationError
+from datetime import date
 
-__all__ = ["String", "Number", "Set"]
+__all__ = ["String", "Number", "Set", "Date"]
 
 
 class Constant(Operand):
@@ -93,34 +94,39 @@ class Constant(Operand):
                u'Constants %s and %s represent different values' % (self,
                                                                     node)
 
-class Date(Constant, DateType):
+class Date(Constant):
     """
     Constant date.
     
     """
     
-    is_leaf = True
+    operations = Constant.operations | set(["inequality"])
     
-    def __init__(self, tokens):
-        """
-        
-        :param string: The Python string to be represented by this Booleano
-            string.
-        :type string: :class:`basestring`
-        
-        ``string`` will be converted to :class:`unicode`, so it doesn't
-        have to be a :class:`basestring` initially.
-        
-        """
-        print tokens
-        dat = date(tokens[0], tokens[1],tokens[2])
+    def __init__(self, yr, mn, dt):
+        dat = date(yr, mn, dt)
         super(Date, self).__init__(dat)
+
+    def equals(self, value, context):
+        return super(Date, self).equals(self._to_date(value), context)
     
-    def get_as_string(self, context):
-        return self._constant_value
+    def greater_than(self, value, context):
+        return self.constant_value > self._to_date(value)
     
+    def less_than(self, value, context):
+        return self.constant_value < self._to_date(value)
+    
+    def _to_date(self, value):
+        try:
+            return datetime.date(value)
+        except ValueError:
+            raise InvalidOperationError('"%s" is not a date' % value)
+    
+    def __unicode__(self):
+        return unicode(self.constant_value)
+    
+   
     def __repr__(self):
-        return '<Date "%s">' % self._constant_value.encode("utf-8")
+        return '<Date "%s">' % self._constant_value.isoFormat()
 
 
 

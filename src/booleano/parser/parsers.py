@@ -30,16 +30,16 @@ import re
 from pyparsing import (Suppress, CaselessLiteral, Word, quotedString, alphas,
     nums, operatorPrecedence, opAssoc, Forward, ParseException, removeQuotes,
     Optional, OneOrMore, Combine, StringStart, StringEnd, ZeroOrMore, Group,
-    Regex, Literal, delimitedList, ParserElement)
+    Regex, Literal, delimitedList, ParserElement, oneOf, White, matchPreviousLiteral)
 
 from booleano.parser.trees import EvaluableParseTree, ConvertibleParseTree
 from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
-    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number, Date
+    GreaterThan, LessEqual, GreaterEqual, BelongsTo, IsSubset, String, Number, Date,
     Set, Variable, Function, PlaceholderVariable, PlaceholderFunction)
 
 from booleano.exc import BadExpressionError
 
-from PyICU import DateFormat, Locale, DateFormatSymbols
+from PyICU import Locale, DateFormatSymbols
 
 __all__ = ("EvaluableParser", "ConvertibleParser")
 
@@ -201,8 +201,8 @@ class Parser(object):
         function.setName("function")
         function.setParseAction(self.make_function)
         
-        operand << (function | variable | self.define_number() | \
-                    self.define_string() | self.define_date() | set_)
+        operand << (self.define_date() |function | variable | self.define_number() | \
+                    self.define_string() |  set_)
         
         return operand
     
@@ -210,6 +210,7 @@ class Parser(object):
         """
         Return the syntax defenition for date
         """
+        print 'asdf'
         days_zero_prefix = " ".join([("%02d" % x) for x in xrange(1, 10)])
         days_no_prefix = " ".join([("%d" % x) for x in xrange(1, 32)])
 
@@ -221,13 +222,12 @@ class Parser(object):
         months_zero_prefix = oneOf(" ".join([("%02d" % x) for x in xrange(1, 10)]))
         months_no_prefix = oneOf(" ".join([("%d" % x) for x in xrange(1, 13)]))
         symbols = DateFormatSymbols(self.locale)
-        monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
-        monthdict.update(dict((m[1].replace('.',''), m[0]) \
+        self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
+        self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
                                   for m in enumerate(symbols.getShortMonths(), 1)))
-        monthdict.update(dict((m[1], m[0]) \
+        self.monthdict.update(dict((m[1], m[0]) \
                                   for m in enumerate(symbols.getMonths(), 1)))
-
-        months_local_strings = oneOf(monthdict.keys(), caseless=True)
+        months_local_strings = oneOf(self.monthdict.keys(), caseless=True)
 
         month_digits = (months_zero_prefix.setName("month_zp").setResultsName("month") |
                         months_no_prefix.setName("month_np").setResultsName("month"))
@@ -249,9 +249,14 @@ class Parser(object):
         date_ws = day + months_local_strings.setResultsName("month") + year
         date_us_comma =  months_local_strings.setResultsName("month") + day + Optional(comma) + year
 
+
         # final BNF
+#        date = Forward()
         date = date_normal ^ date_usa ^ date_rev ^ date_ws ^ date_us_comma
+        date.setName("date")
         date.setParseAction(self.make_date)
+
+      #  print  'before return'
         return date
 
     def define_string(self):
@@ -333,7 +338,7 @@ class Parser(object):
     #{ Pyparsing post-parse actions
     def make_date(self, tokens):
         """Make a Date constant using the token passed."""
-        return Date(tokens)
+        return Date(int(tokens[2]), int(self.monthdict.get(tokens[1], tokens[1])), int(tokens[0]))
 
     def make_string(self, tokens):
         """Make a String constant using the token passed."""

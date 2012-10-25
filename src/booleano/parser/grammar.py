@@ -96,6 +96,7 @@ class Grammar(object):
         "operation",
         "string",
         "number",
+        "date",
     ])
     """The known/valid generators."""
     
