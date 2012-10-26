@@ -39,7 +39,7 @@ from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
 
 from booleano.exc import BadExpressionError
 
-from PyICU import Locale, DateFormatSymbols
+from icu import Locale, DateFormatSymbols
 
 __all__ = ("EvaluableParser", "ConvertibleParser")
 
@@ -62,7 +62,6 @@ class Parser(object):
         :type grammar: :class:`booleano.parser.Grammar`
         
         """
-        print 'init called'
         self._parser = None
         self._grammar = grammar
         self.locale = Locale.createFromName(locale)
