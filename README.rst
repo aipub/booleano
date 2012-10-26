@@ -15,7 +15,11 @@ On the other hand, the library exposes a pythonic API for filters written
 in pure Python. These filters are particularly useful to build reusable
 conditions from objects provided by a third party library.
 
-This is fork of `https://code.launchpad.net/booleano`_. 
+This is fork of `https://code.launchpad.net/booleano`
+Code im main branch does not work, so i create my branch from 1.0a1 version, that is usable.
+Date parsing example for pyparsing taken from `http://pcscholl.de/2009/09/24/better-later-than-never-the-pyparsing-based-date-parser/`
+Default locale is en_US, you must specify locale when calling ParseManager.parse method.
+Months long and short names are from PyICU, which is dependency now.
 
 Links
 -----

@@ -55,17 +55,27 @@ class Parser(object):
     
     parse_tree_class = None
     
-    def __init__(self, grammar, locale='en_US'):
+    def __init__(self, grammar, locale):
         """
         
         :param grammar: The grammar used by the parser.
         :type grammar: :class:`booleano.parser.Grammar`
         
         """
+        print 'init called'
         self._parser = None
         self._grammar = grammar
         self.locale = Locale.createFromName(locale)
-    
+
+        # fill dictionary of months only once for each locale
+        symbols = DateFormatSymbols(self.locale)
+        self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
+        self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
+                                  for m in enumerate(symbols.getShortMonths(), 1)))
+        self.monthdict.update(dict((m[1], m[0]) \
+                                  for m in enumerate(symbols.getMonths(), 1)))
+
+
     def __call__(self, expression):
         """
         Parse ``expression`` and return its parse tree.
@@ -210,23 +220,17 @@ class Parser(object):
         """
         Return the syntax defenition for date
         """
-        print 'asdf'
         days_zero_prefix = " ".join([("%02d" % x) for x in xrange(1, 10)])
         days_no_prefix = " ".join([("%d" % x) for x in xrange(1, 32)])
 
-        #for en speaking users
-        day_en_short = oneOf("st nd rd th")
-        day = ((oneOf(days_zero_prefix) ^ oneOf(days_no_prefix) ).setResultsName("day")
-               + Optional(Suppress(day_en_short)) ).setName("day")
+        day = (oneOf(days_zero_prefix) ^ oneOf(days_no_prefix) ).setResultsName("day")
+        if self.locale.getDisplayName().find('English') >=0:
+            day_en_short = oneOf("st nd rd th")
+            day += Optional(Suppress(day_en_short))
+        day.setName("day")
         # months, in numbers
         months_zero_prefix = oneOf(" ".join([("%02d" % x) for x in xrange(1, 10)]))
         months_no_prefix = oneOf(" ".join([("%d" % x) for x in xrange(1, 13)]))
-        symbols = DateFormatSymbols(self.locale)
-        self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
-        self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
-                                  for m in enumerate(symbols.getShortMonths(), 1)))
-        self.monthdict.update(dict((m[1], m[0]) \
-                                  for m in enumerate(symbols.getMonths(), 1)))
         months_local_strings = oneOf(self.monthdict.keys(), caseless=True)
 
         month_digits = (months_zero_prefix.setName("month_zp").setResultsName("month") |
@@ -245,18 +249,18 @@ class Parser(object):
         # mabe add aditional date formats
         date_normal = day + Suppress(sep_literals) + month_digits + Suppress(sec_lit) + year
         date_rev = year + Suppress(sep_literals) + month_digits + Suppress(sec_lit) + day
-        date_usa = month_digits + Suppress(sep_literals) + day + Suppress(sec_lit) + year
         date_ws = day + months_local_strings.setResultsName("month") + year
+        date_usa = month_digits + Suppress(sep_literals) + day + Suppress(sec_lit) + year
         date_us_comma =  months_local_strings.setResultsName("month") + day + Optional(comma) + year
-
-
-        # final BNF
-#        date = Forward()
+        
+        # of course we can take date dormats from ICU,
+        # just like DateFormat.createDateInstance(DateFormat.LONG, Locale)
+        # but then we need to parse them too
+        # so i'll simplify task 
         date = date_normal ^ date_usa ^ date_rev ^ date_ws ^ date_us_comma
+        
         date.setName("date")
         date.setParseAction(self.make_date)
-
-      #  print  'before return'
         return date
 
     def define_string(self):
@@ -338,7 +342,9 @@ class Parser(object):
     #{ Pyparsing post-parse actions
     def make_date(self, tokens):
         """Make a Date constant using the token passed."""
-        return Date(int(tokens[2]), int(self.monthdict.get(tokens[1], tokens[1])), int(tokens[0]))
+        return Date(int(tokens['year']),
+                    int(self.monthdict.get(tokens['month'], tokens['month'])),
+                    int(tokens['day']))
 
     def make_string(self, tokens):
         """Make a String constant using the token passed."""
@@ -430,7 +436,7 @@ class EvaluableParser(Parser):
     
     parse_tree_class = EvaluableParseTree
     
-    def __init__(self, grammar, namespace):
+    def __init__(self, grammar, namespace, locale):
         """
         
         :param grammar: The grammar used by the parser.
@@ -441,7 +447,7 @@ class EvaluableParser(Parser):
         
         """
         self._namespace = namespace
-        super(EvaluableParser, self).__init__(grammar)
+        super(EvaluableParser, self).__init__(grammar, locale)
     
     def make_variable(self, tokens):
         """

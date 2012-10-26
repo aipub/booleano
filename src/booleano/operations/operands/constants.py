@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2009 by Gustavo Narea <http://gustavonarea.net/>.
+# 2012 Alexander Ponimaskin <ponimaskin@gmail.com>
 #
 # This file is part of Booleano <http://code.gustavonarea.net/booleano/>.
 #

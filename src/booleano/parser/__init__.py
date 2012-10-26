@@ -137,6 +137,9 @@ class ParseManager(object):
         on the generic grammar.
         
         """
+        
+        if not locale: locale = 'en_US'
+
         if locale not in self._parsers:
             self.add_parser(locale, self._generic_grammar)
             LOGGER.info("Generated parser for unknown grammar %s", repr(locale))
@@ -226,8 +229,7 @@ class EvaluableParseManager(ParseManager):
         
         """
         namespace = self._symbol_table.get_namespace(locale)
-        parser = EvaluableParser(grammar, namespace)
-        return parser
+        parser = EvaluableParser(grammar, namespace, locale=locale)
 
 
 class ConvertibleParseManager(ParseManager):
@@ -249,10 +251,9 @@ class ConvertibleParseManager(ParseManager):
         :return: The convertible parser built from ``grammar``.
         :rtype: ConvertibleParser
         
-        Here the ``locale`` is not used.
         
         """
-        parser = ConvertibleParser(grammar)
+        parser = ConvertibleParser(grammar, locale)
         return parser
 
 
