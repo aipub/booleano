@@ -104,7 +104,13 @@ class Date(Constant):
     operations = Constant.operations | set(["inequality"])
     
     def __init__(self, yr, mn, dt):
+        if yr / 100 == 0:
+            if yr > 70:
+                yr += 1900
+            else:
+                yr += 2000
         dat = date(yr, mn, dt)
+
         super(Date, self).__init__(dat)
 
     def equals(self, value, context):
