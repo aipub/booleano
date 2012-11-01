@@ -222,7 +222,11 @@ class Number(Constant):
         be an :class:`string <basestring>` initially.
         
         """
-        number = float(number)
+        if isinstance(number, str) or isinstance(number, unicode):
+            if '.' in number:
+                number = float(number)
+            else:
+                number = int(number)
         super(Number, self).__init__(number)
     
     def equals(self, value, context):
