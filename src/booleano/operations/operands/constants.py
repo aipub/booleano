@@ -32,7 +32,7 @@ Constant operands.
 """
 from booleano.operations.operands import Operand
 from booleano.exc import InvalidOperationError
-from datetime import date
+from datetime import datetime
 
 __all__ = ["String", "Number", "Set", "Date"]
 
@@ -109,7 +109,7 @@ class Date(Constant):
                 yr += 1900
             else:
                 yr += 2000
-        dat = date(yr, mn, dt)
+        dat = datetime(yr, mn, dt)
 
         super(Date, self).__init__(dat)
 
@@ -124,13 +124,12 @@ class Date(Constant):
     
     def _to_date(self, value):
         try:
-            return datetime.date(value)
+            return datetime(value)
         except ValueError:
             raise InvalidOperationError('"%s" is not a date' % value)
     
     def __unicode__(self):
         return unicode(self.constant_value)
-    
    
     def __repr__(self):
         return '<Date "%s">' % self._constant_value.isoFormat()
