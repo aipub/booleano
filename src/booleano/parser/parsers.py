@@ -39,7 +39,7 @@ from booleano.operations import (Not, And, Or, Xor, Equal, NotEqual, LessThan,
 
 from booleano.exc import BadExpressionError
 
-from icu import Locale, DateFormatSymbols
+from babel.core import Locale
 
 __all__ = ("EvaluableParser", "ConvertibleParser")
 
@@ -65,14 +65,27 @@ class Parser(object):
         self._parser = None
         self._grammar = grammar
         self.locale = Locale.createFromName(locale)
+        self.locale = Locale(locale)
 
         # fill dictionary of months only once for each locale
-        symbols = DateFormatSymbols(self.locale)
-        self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
-        self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
-                                  for m in enumerate(symbols.getShortMonths(), 1)))
-        self.monthdict.update(dict((m[1], m[0]) \
-                                  for m in enumerate(symbols.getMonths(), 1)))
+        #symbols = DateFormatSymbols(self.locale)
+        def rev_d(d, modif=lambda x: x):
+            rev = {}
+            for k,v in d.iteritems():
+                rev.update({modif(v): k})
+            return rev
+        
+        self.monthdict = rev_d(a.months["stand-alone"]["abbreviated"])
+        self.monthdict.update(rev_d(a.months["stand-alone"]["abbreviated"],
+                                    lambda x: x.replace('.', '')))
+        self.monthdict.update(rev_d(a.months["stand-alone"]["wide"]))
+        self.monthdict.update(rev_d(a.months["stand-alone"]["wide"],
+                                    lambda x: x.lower()))
+        # self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
+        # self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
+        #                           for m in enumerate(symbols.getShortMonths(), 1)))
+        # self.monthdict.update(dict((m[1], m[0]) \
+        #                           for m in enumerate(symbols.getMonths(), 1)))
 
 
     def __call__(self, expression):
