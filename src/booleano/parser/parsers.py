@@ -65,7 +65,6 @@ class Parser(object):
         self._parser = None
         self._grammar = grammar
         self.locale = Locale(locale)
-
         # fill dictionary of months only once for each locale
         #symbols = DateFormatSymbols(self.locale)
         def rev_d(d, modif=lambda x: x):
@@ -74,12 +73,20 @@ class Parser(object):
                 rev.update({modif(v): k})
             return rev
         
-        self.monthdict = rev_d(self.locale.months["stand-alone"]["abbreviated"])
-        self.monthdict.update(rev_d(self.locale.months["stand-alone"]["abbreviated"],
-                                    lambda x: x.replace('.', '')))
+        self.monthdict = rev_d(self.locale.months["format"]["abbreviated"])
+
+        if self.locale.months["format"]["abbreviated"][1].endswith("."):
+            self.monthdict.update(rev_d(self.locale.months["format"]["abbreviated"],
+                                        lambda x:  x.replace('.', '')))
+        else:
+            print "ends"
+            self.monthdict.update(rev_d(self.locale.months["format"]["abbreviated"],
+                                        lambda x:  x + '.'))
         self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"]))
         self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"],
                                     lambda x: x.lower()))
+        print self.locale.english_name
+        print self.monthdict
         # self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
         # self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
         #                           for m in enumerate(symbols.getShortMonths(), 1)))
@@ -235,7 +242,7 @@ class Parser(object):
         days_no_prefix = " ".join([("%d" % x) for x in xrange(1, 32)])
 
         day = (oneOf(days_zero_prefix) ^ oneOf(days_no_prefix) ).setResultsName("day")
-        if self.locale.english_name.find('English') >=0:
+        if self.locale.english_name and self.locale.english_name.find('English') >=0:
             day_en_short = oneOf("st nd rd th")
             day += Optional(Suppress(day_en_short))
         day.setName("day")
