@@ -64,7 +64,6 @@ class Parser(object):
         """
         self._parser = None
         self._grammar = grammar
-        self.locale = Locale.createFromName(locale)
         self.locale = Locale(locale)
 
         # fill dictionary of months only once for each locale
