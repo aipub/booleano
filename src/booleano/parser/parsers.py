@@ -79,14 +79,11 @@ class Parser(object):
             self.monthdict.update(rev_d(self.locale.months["format"]["abbreviated"],
                                         lambda x:  x.replace('.', '')))
         else:
-            print "ends"
             self.monthdict.update(rev_d(self.locale.months["format"]["abbreviated"],
                                         lambda x:  x + '.'))
         self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"]))
         self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"],
                                     lambda x: x.lower()))
-        print self.locale.english_name
-        print self.monthdict
         # self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
         # self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
         #                           for m in enumerate(symbols.getShortMonths(), 1)))
