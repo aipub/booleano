@@ -74,11 +74,11 @@ class Parser(object):
                 rev.update({modif(v): k})
             return rev
         
-        self.monthdict = rev_d(a.months["stand-alone"]["abbreviated"])
-        self.monthdict.update(rev_d(a.months["stand-alone"]["abbreviated"],
+        self.monthdict = rev_d(self.locale.months["stand-alone"]["abbreviated"])
+        self.monthdict.update(rev_d(self.locale.months["stand-alone"]["abbreviated"],
                                     lambda x: x.replace('.', '')))
-        self.monthdict.update(rev_d(a.months["stand-alone"]["wide"]))
-        self.monthdict.update(rev_d(a.months["stand-alone"]["wide"],
+        self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"]))
+        self.monthdict.update(rev_d(self.locale.months["stand-alone"]["wide"],
                                     lambda x: x.lower()))
         # self.monthdict = dict((m[1], m[0]) for m in enumerate(symbols.getShortMonths(), 1))
         # self.monthdict.update(dict((m[1].replace('.',''), m[0]) \
