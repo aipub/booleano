@@ -235,7 +235,7 @@ class Parser(object):
         days_no_prefix = " ".join([("%d" % x) for x in xrange(1, 32)])
 
         day = (oneOf(days_zero_prefix) ^ oneOf(days_no_prefix) ).setResultsName("day")
-        if self.locale.getDisplayName().find('English') >=0:
+        if self.locale.english_name.find('English') >=0:
             day_en_short = oneOf("st nd rd th")
             day += Optional(Suppress(day_en_short))
         day.setName("day")
