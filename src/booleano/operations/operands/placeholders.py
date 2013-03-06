@@ -61,7 +61,7 @@ class PlaceholderInstance(Operand):
         :type namespace_parts: tuple
         
         """
-        self.name = name.lower()
+        self.name = name #.lower()
         self.namespace_parts = tuple(namespace_parts or ())
     
     def check_equivalence(self, node):
